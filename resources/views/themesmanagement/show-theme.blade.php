@@ -1,8 +1,10 @@
+@php
+$theme = $currentTheme; //NOTE The current theme is overwritten by the profile theme
+@endphp
+
 @extends('layouts.app')
 
-@section('template_title')
-    {{ trans('themes.showHeadTitle') . ' ' . $theme->name }}
-@endsection
+@section('template_title'){{ trans('themes.showHeadTitle') . ' ' . $theme->name }}@endsection
 
 @section('template_fastload_css')
 
@@ -74,7 +76,7 @@
                         <li class="list-group-item"><strong>Id</strong> <span>{{ $theme->id }}</span></li>
 
                         @if($theme->link != null)
-                            <li class="list-group-item"><strong>{{ trans('themes.showLink') }}</strong> <span> <a href="{{$theme->link}}" target="_blank" data-toggle="tooltip" title="Go to Link">{{$theme->link}}</a></span></li>
+                            <li class="list-group-item"><strong>{{ trans('themes.showLink') }}</strong> <span> <a href="{{$theme->link}}" target="_blank" data-bs-toggle="tooltip" title="Go to Link">{{$theme->link}}</a></span></li>
                         @endif
 
                         @if($theme->notes != null)
@@ -107,7 +109,7 @@
                         </div>
                         {!! Form::open(array('url' => 'themes/' . $theme->id, 'class' => 'col-sm-6 mb-2')) !!}
                             {!! Form::hidden('_method', 'DELETE') !!}
-                            {!! Form::button('<i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> Delete<span class="hidden-sm"> this</span><span class="hidden-sm"> Theme</span>', array('class' => 'btn btn-danger btn-block btn-flat','type' => 'button', 'data-toggle' => 'modal', 'data-target' => '#confirmDelete', 'data-title' => trans('themes.confirmDeleteHdr'), 'data-message' => trans('themes.confirmDelete'))) !!}
+                            {!! Form::button('<i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> Delete<span class="hidden-sm"> this</span><span class="hidden-sm"> Theme</span>', array('id' => 'theme-delete-confirm', 'class' => 'btn btn-danger btn-block btn-flat','type' => 'button', 'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-delete-modal', 'data-title' => trans('themes.confirmDeleteHdr'), 'data-initiator-id' => 'theme-delete-confirm', 'data-message' => trans('themes.confirmDelete'))) !!}
                         {!! Form::close() !!}
                     </div>
                 </div>

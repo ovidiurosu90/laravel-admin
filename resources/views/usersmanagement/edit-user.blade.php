@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    {!! trans('usersmanagement.editing-user', ['name' => $user->name]) !!}
-@endsection
+@section('template_title'){!! trans('usersmanagement.editing-user', ['name' => $user->name]) !!}@endsection
 
 @section('template_linked_css')
     <style type="text/css">
@@ -23,11 +21,11 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             {!! trans('usersmanagement.editing-user', ['name' => $user->name]) !!}
                             <div class="pull-right">
-                                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-right" data-toggle="tooltip" data-placement="top" title="{{ trans('usersmanagement.tooltips.back-users') }}">
+                                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('usersmanagement.tooltips.back-users') }}">
                                     <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                     {!! trans('usersmanagement.buttons.back-to-users') !!}
                                 </a>
-                                <a href="{{ url('/users/' . $user->id) }}" class="btn btn-light btn-sm float-right" data-toggle="tooltip" data-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
+                                <a href="{{ url('/users/' . $user->id) }}" class="btn btn-light btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
                                     <i class="fa fa-fw fa-reply" aria-hidden="true"></i>
                                     {!! trans('usersmanagement.buttons.back-to-user') !!}
                                 </a>
@@ -39,7 +37,7 @@
 
                             {!! csrf_field() !!}
 
-                            <div class="form-group has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
                                 {!! Form::label('name', trans('forms.create_user_label_username'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -58,7 +56,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('first_name') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('first_name') ? ' has-error ' : '' }}">
                                 {!! Form::label('first_name', trans('forms.create_user_label_firstname'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -77,7 +75,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('last_name') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('last_name') ? ' has-error ' : '' }}">
                                 {!! Form::label('last_name', trans('forms.create_user_label_lastname'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -96,7 +94,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('email') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('email') ? ' has-error ' : '' }}">
                                 {!! Form::label('email', trans('forms.create_user_label_email'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -115,13 +113,13 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('role') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('role') ? ' has-error ' : '' }}">
 
                                 {!! Form::label('role', trans('forms.create_user_label_role'), array('class' => 'col-md-3 control-label')); !!}
 
                                 <div class="col-md-9">
                                     <div class="input-group">
-                                        <select class="custom-select form-control" name="role" id="role">
+                                        <select class="form-select form-select" name="role" id="role">
                                             <option value="">{{ trans('forms.create_user_ph_role') }}</option>
                                             @if ($roles)
                                                 @foreach($roles as $role)
@@ -144,13 +142,13 @@
                             </div>
 
                             <div class="pw-change-container">
-                                <div class="form-group has-feedback row {{ $errors->has('password') ? ' has-error ' : '' }}">
+                                <div class="mb-3 has-feedback row {{ $errors->has('password') ? ' has-error ' : '' }}">
 
                                     {!! Form::label('password', trans('forms.create_user_label_password'), array('class' => 'col-md-3 control-label')); !!}
 
                                     <div class="col-md-9">
                                         <div class="input-group">
-                                            {!! Form::password('password', array('id' => 'password', 'class' => 'form-control ', 'placeholder' => trans('forms.create_user_ph_password'))) !!}
+                                            {!! Form::password('password', array('id' => 'password', 'class' => 'form-control ', 'placeholder' => trans('forms.create_user_ph_password'), 'disabled' => 'disabled')) !!}
                                             <div class="input-group-append">
                                                 <label class="input-group-text" for="password">
                                                     <i class="fa fa-fw {{ trans('forms.create_user_icon_password') }}" aria-hidden="true"></i>
@@ -164,13 +162,13 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="form-group has-feedback row {{ $errors->has('password_confirmation') ? ' has-error ' : '' }}">
+                                <div class="mb-3 has-feedback row {{ $errors->has('password_confirmation') ? ' has-error ' : '' }}">
 
                                     {!! Form::label('password_confirmation', trans('forms.create_user_label_pw_confirmation'), array('class' => 'col-md-3 control-label')); !!}
 
                                     <div class="col-md-9">
                                         <div class="input-group">
-                                            {!! Form::password('password_confirmation', array('id' => 'password_confirmation', 'class' => 'form-control', 'placeholder' => trans('forms.create_user_ph_pw_confirmation'))) !!}
+                                            {!! Form::password('password_confirmation', array('id' => 'password_confirmation', 'class' => 'form-control', 'placeholder' => trans('forms.create_user_ph_pw_confirmation'), 'disabled' => 'disabled')) !!}
                                             <div class="input-group-append">
                                                 <label class="input-group-text" for="password_confirmation">
                                                     <i class="fa fa-fw {{ trans('forms.create_user_icon_pw_confirmation') }}" aria-hidden="true"></i>
@@ -187,13 +185,13 @@
                             </div>
                             <div class="row">
                                 <div class="col-12 col-sm-6 mb-2">
-                                    <a href="#" class="btn btn-outline-secondary btn-block btn-change-pw mt-3" title="{{ trans('forms.change-pw')}} ">
+                                    <a href="javascript:void(0);" class="btn btn-outline-secondary btn-block btn-change-pw mt-3" title="{{ trans('forms.change-pw')}} ">
                                         <i class="fa fa-fw fa-lock" aria-hidden="true"></i>
                                         <span></span> {!! trans('forms.change-pw') !!}
                                     </a>
                                 </div>
                                 <div class="col-12 col-sm-6">
-                                    {!! Form::button(trans('forms.save-changes'), array('class' => 'btn btn-success btn-block margin-bottom-1 mt-3 mb-2 btn-save','type' => 'button', 'data-toggle' => 'modal', 'data-target' => '#confirmSave', 'data-title' => trans('modals.edit_user__modal_text_confirm_title'), 'data-message' => trans('modals.edit_user__modal_text_confirm_message'))) !!}
+                                    {!! Form::button(trans('forms.save-changes'), array('id' => 'user-save-confirm', 'class' => 'btn btn-success btn-block margin-bottom-1 mt-3 mb-2 btn-save','type' => 'button', 'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-save-modal', 'data-initiator-id' => 'user-save-confirm', 'data-title' => trans('modals.edit_user__modal_text_confirm_title'), 'data-message' => trans('modals.edit_user__modal_text_confirm_message'))) !!}
                                 </div>
                             </div>
                         {!! Form::close() !!}
@@ -210,7 +208,22 @@
 @endsection
 
 @section('footer_scripts')
-  @include('scripts.delete-modal-script')
-  @include('scripts.save-modal-script')
-  @include('scripts.check-changed')
+    <script type="module">
+        $('#user-save-confirm').ready(function()
+        {
+            var addInitiatorIdToConfirmSaveModal = function(eventData)
+            {
+                var initiatorId = $(eventData.target).attr('id');
+                $('#confirm-save-modal').data('initiator-id', initiatorId);
+            };
+
+            $('#user-save-confirm').click(addInitiatorIdToConfirmSaveModal);
+        });
+    </script>
+
+    @include('scripts.delete-modal-script')
+    @include('scripts.save-modal-script')
+    @include('scripts.check-changed')
+
 @endsection
+

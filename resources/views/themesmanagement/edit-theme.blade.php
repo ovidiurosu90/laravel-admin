@@ -1,8 +1,10 @@
+@php
+$theme = $currentTheme; //NOTE The current theme is overwritten by the profile theme
+@endphp
+
 @extends('layouts.app')
 
-@section('template_title')
-    {{ trans('themes.themeTitle', ['name' => $theme->name]) }}
-@endsection
+@section('template_title'){{ trans('themes.themeTitle', ['name' => $theme->name]) }}@endsection
 
 @section('template_fastload_css')
 
@@ -32,15 +34,15 @@
             <div class="col-12 col-xl-10 offset-xl-1">
                 <div class="card">
                     <div class="card-header">
-                        <div class="float-left">
+                        <div class="float-start">
                             <strong>{{ trans('themes.editTitle') }}</strong> {{ $theme->name }}
                         </div>
-                        <div class="float-right">
-                            <a href="{{ url('/themes/' . $theme->id) }}" class="btn btn-light btn-sm float-right" data-toggle="tooltip" data-placement="top" title="{{ trans('themes.backToThemeTt') }}">
+                        <div class="float-end">
+                            <a href="{{ url('/themes/' . $theme->id) }}" class="btn btn-light btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('themes.backToThemeTt') }}">
                                 <i class="fa fa-fw fa-mail-reply" aria-hidden="true"></i>
                                 {!! trans('themes.backToThemeBtn') !!}
                             </a>
-                            <a href="{{ url('/themes/') }}" class="btn btn-light btn-sm float-right" data-toggle="tooltip" data-placement="left" title="{{ trans('themes.backToThemesTt') }}">
+                            <a href="{{ url('/themes/') }}" class="btn btn-light btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('themes.backToThemesTt') }}">
                                 <i class="fa fa-fw fa-mail-reply" aria-hidden="true"></i>
                                 {!! trans('themes.backToThemesBtn') !!}
                             </a>
@@ -53,7 +55,7 @@
 
                         <div class="card-body">
 
-                            <div class="form-group has-feedback row {{ $errors->has('status') ? ' has-error ' : '' }} @if($theme->id == 1) disabled @endif ">
+                            <div class="mb-3 has-feedback row {{ $errors->has('status') ? ' has-error ' : '' }} @if($theme->id == 1) disabled @endif ">
                                 {!! Form::label('status', trans('themes.statusLabel'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <label class="switch {{ $themeActive['checked'] }}" for="status">
@@ -71,7 +73,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
                                 {!! Form::label('name', trans('themes.nameLabel'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -90,7 +92,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('link') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('link') ? ' has-error ' : '' }}">
                                 {!! Form::label('link', trans('themes.linkLabel'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -109,7 +111,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('notes') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('notes') ? ' has-error ' : '' }}">
                                 {!! Form::label('notes', trans('themes.notesLabel') , array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -133,7 +135,7 @@
                         <div class="card-footer">
                             <div class="row">
                                 <div class="col-sm-6">
-                                    {!! Form::button('<i class="fa fa-fw fa-save" aria-hidden="true"></i> ' . trans('themes.editSave'), array('class' => 'btn btn-success btn-block mb-0 btn-save','type' => 'button', 'data-toggle' => 'modal', 'data-target' => '#confirmSave', 'data-title' => trans('modals.edit_user__modal_text_confirm_title'), 'data-message' => trans('modals.edit_user__modal_text_confirm_message'))) !!}
+                                    {!! Form::button('<i class="fa fa-fw fa-save" aria-hidden="true"></i> ' . trans('themes.editSave'), array('id' => 'theme-save-confirm', 'class' => 'btn btn-success btn-block mb-0 btn-save','type' => 'button', 'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-save-modal', 'data-initiator-id' => 'theme-save-confirm', 'data-title' => trans('modals.edit_user__modal_text_confirm_title'), 'data-message' => trans('modals.edit_user__modal_text_confirm_message'))) !!}
                                 </div>
                             </div>
                         </div>
@@ -151,6 +153,18 @@
 @endsection
 
 @section('footer_scripts')
+    <script type="module">
+        $('#theme-save-confirm').ready(function()
+        {
+            var addInitiatorIdToConfirmSaveModal = function(eventData)
+            {
+                var initiatorId = $(eventData.target).attr('id');
+                $('#confirm-save-modal').data('initiator-id', initiatorId);
+            };
+
+            $('#theme-save-confirm').click(addInitiatorIdToConfirmSaveModal);
+        });
+    </script>
 
     @include('scripts.delete-modal-script')
     @include('scripts.save-modal-script')

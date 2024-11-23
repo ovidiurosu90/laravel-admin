@@ -22,7 +22,10 @@ class DatabaseSeeder extends Seeder
         $this->call(ConnectRelationshipsSeeder::class);
         $this->call(ThemesTableSeeder::class);
         $this->call(UsersTableSeeder::class);
+        $this->call(BlockedTypeTableSeeder::class);
+        $this->call(BlockedItemsTableSeeder::class);
 
         Model::reguard();
     }
 }
+

@@ -13,7 +13,7 @@ class BlockedItemsTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run(): void
+    public function run()
     {
         /*
          * Blocked Types

@@ -1,9 +1,10 @@
 <script src="{{{ config('settings.dropZoneJsCDN') }}}"></script>
-<script type="text/javascript">
+<script type="module">
 
 Dropzone.autoDiscover = false;
 
-$(function() {
+$(function()
+{
    Dropzone.options.avatarDropzone = {
         paramName: 'file',
         maxFilesize: 1, // MB
@@ -50,6 +51,7 @@ $(function() {
                 html += 'Upload Failed...';
                 html += '</div>';
                 html += '</div>';
+                console.error(res);
                 $('.dz-message').html(html).show();
                 setTimeout(function() {
                     $('.dz-message').text('Drop files here to upload').show();

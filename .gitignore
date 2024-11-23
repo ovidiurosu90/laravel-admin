@@ -24,6 +24,7 @@ Thumbs.db
 /.fleet
 /.idea
 /.vscode
+*.swp
 
 ### Vagrant/Homestead Vendor Configs ###
 /.vagrant
@@ -35,8 +36,10 @@ Homestead.json
 composer.lock
 package-lock.json
 yarn.lock
+auth.json
 
 ### Assets ###
+/public/build/
 /node_modules
 /public/hot
 /public/storage

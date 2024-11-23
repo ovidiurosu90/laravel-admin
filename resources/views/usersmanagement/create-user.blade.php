@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    {!! trans('usersmanagement.create-new-user') !!}
-@endsection
+@section('template_title'){!! trans('usersmanagement.create-new-user') !!}@endsection
 
 @section('template_fastload_css')
 @endsection
@@ -17,7 +15,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             {!! trans('usersmanagement.create-new-user') !!}
                             <div class="pull-right">
-                                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-right" data-toggle="tooltip" data-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
+                                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
                                     <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                     {!! trans('usersmanagement.buttons.back-to-users') !!}
                                 </a>
@@ -30,7 +28,7 @@
 
                             {!! csrf_field() !!}
 
-                            <div class="form-group has-feedback row {{ $errors->has('email') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('email') ? ' has-error ' : '' }}">
                                 {!! Form::label('email', trans('forms.create_user_label_email'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -49,7 +47,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
                                 {!! Form::label('name', trans('forms.create_user_label_username'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -68,7 +66,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('first_name') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('first_name') ? ' has-error ' : '' }}">
                                 {!! Form::label('first_name', trans('forms.create_user_label_firstname'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -87,7 +85,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('last_name') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('last_name') ? ' has-error ' : '' }}">
                                 {!! Form::label('last_name', trans('forms.create_user_label_lastname'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -106,11 +104,11 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('role') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('role') ? ' has-error ' : '' }}">
                                 {!! Form::label('role', trans('forms.create_user_label_role'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
-                                        <select class="custom-select form-control" name="role" id="role">
+                                        <select class="form-select form-select" name="role" id="role">
                                             <option value="">{{ trans('forms.create_user_ph_role') }}</option>
                                             @if ($roles)
                                                 @foreach($roles as $role)
@@ -132,7 +130,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('password') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('password') ? ' has-error ' : '' }}">
                                 {!! Form::label('password', trans('forms.create_user_label_password'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -150,7 +148,7 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="form-group has-feedback row {{ $errors->has('password_confirmation') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('password_confirmation') ? ' has-error ' : '' }}">
                                 {!! Form::label('password_confirmation', trans('forms.create_user_label_pw_confirmation'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">

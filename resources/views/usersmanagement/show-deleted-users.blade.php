@@ -1,9 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    {!!trans('usersmanagement.show-deleted-users')!!}
-
-@endsection
+@section('template_title'){!!trans('usersmanagement.show-deleted-users')!!}@endsection
 
 @section('template_linked_css')
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
@@ -34,8 +31,8 @@
                             <span id="card_title">
                                 {!!trans('usersmanagement.show-deleted-users')!!}
                             </span>
-                            <div class="float-right">
-                                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-right" data-toggle="tooltip" data-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
+                            <div class="float-end">
+                                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
                                     <i class="fa fa-fw fa-mail-reply" aria-hidden="true"></i>
                                     {!! trans('usersmanagement.buttons.back-to-users') !!}
                                 </a>
@@ -108,19 +105,19 @@
                                                 <td class="hidden-xs">{{$user->deleted_at}}</td>
                                                 <td class="hidden-xs">{{$user->deleted_ip_address}}</td>
                                                 <td>
-                                                    {!! Form::model($user, array('action' => array('SoftDeletesController@update', $user->id), 'method' => 'PUT', 'data-toggle' => 'tooltip')) !!}
-                                                        {!! Form::button('<i class="fa fa-refresh" aria-hidden="true"></i>', array('class' => 'btn btn-success btn-block btn-sm', 'type' => 'submit', 'data-toggle' => 'tooltip', 'title' => 'Restore User')) !!}
+                                                    {!! Form::model($user, array('action' => array('SoftDeletesController@update', $user->id), 'method' => 'PUT', 'data-bs-toggle' => 'tooltip')) !!}
+                                                        {!! Form::button('<i class="fa fa-refresh" aria-hidden="true"></i>', array('class' => 'btn btn-success btn-block btn-sm', 'type' => 'submit', 'data-bs-toggle' => 'tooltip', 'title' => 'Restore User')) !!}
                                                     {!! Form::close() !!}
                                                 </td>
                                                 <td>
-                                                    <a class="btn btn-sm btn-info btn-block" href="{{ URL::to('users/deleted/' . $user->id) }}" data-toggle="tooltip" title="Show User">
+                                                    <a class="btn btn-sm btn-info btn-block" href="{{ URL::to('users/deleted/' . $user->id) }}" data-bs-toggle="tooltip" title="Show User">
                                                         <i class="fa fa-eye fa-fw" aria-hidden="true"></i>
                                                     </a>
                                                 </td>
                                                 <td>
-                                                    {!! Form::model($user, array('action' => array('SoftDeletesController@destroy', $user->id), 'method' => 'DELETE', 'class' => 'inline', 'data-toggle' => 'tooltip', 'title' => 'Destroy User Record')) !!}
+                                                    {!! Form::model($user, array('action' => array('SoftDeletesController@destroy', $user->id), 'method' => 'DELETE', 'class' => 'inline', 'data-bs-toggle' => 'tooltip', 'title' => 'Destroy User Record')) !!}
                                                         {!! Form::hidden('_method', 'DELETE') !!}
-                                                        {!! Form::button('<i class="fa fa-user-times" aria-hidden="true"></i>', array('class' => 'btn btn-danger btn-sm inline','type' => 'button', 'style' =>'width: 100%;' ,'data-toggle' => 'modal', 'data-target' => '#confirmDelete', 'data-title' => 'Delete User', 'data-message' => 'Are you sure you want to delete this user ?')) !!}
+                                                        {!! Form::button('<i class="fa fa-user-times" aria-hidden="true"></i>', array('id' => 'user-delete-confirm-' . $user->id, 'class' => 'btn btn-danger btn-sm inline','type' => 'button', 'style' =>'width: 100%;' ,'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-delete-modal', 'data-title' => 'Delete User', 'data-initiator-id' => 'user-delete-confirm-' . $user->id, 'data-message' => 'Are you sure you want to delete this user ?')) !!}
                                                     {!! Form::close() !!}
                                                 </td>
                                             </tr>
@@ -138,7 +135,9 @@
         </div>
     </div>
 
+    @include('modals.modal-save')
     @include('modals.modal-delete')
+
 
 @endsection
 
@@ -152,3 +151,4 @@
     @include('scripts.tooltips')
 
 @endsection
+

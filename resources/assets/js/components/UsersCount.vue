@@ -5,7 +5,7 @@
         <div class="card">
           <div class="card-header">Current Users Online</div>
           <div class="card-body">
-            <canvas id="myChart" height="100"></canvas>
+            <canvas id="myChart" height="100" />
           </div>
         </div>
       </div>

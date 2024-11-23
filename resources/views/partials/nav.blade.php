@@ -3,16 +3,16 @@
         <a class="navbar-brand" href="{{ url('/') }}">
             {!! config('app.name', trans('titles.app')) !!}
         </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
-            <span class="sr-only">{!! trans('titles.toggleNav') !!}</span>
+            <span class="visually-hidden">{!! trans('titles.toggleNav') !!}</span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             {{-- Left Side Of Navbar --}}
-            <ul class="navbar-nav mr-auto">
+            <ul class="navbar-nav me-auto">
                 @role('admin')
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {!! trans('titles.adminDropdownNav') !!}
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -60,9 +60,10 @@
                         </div>
                     </li>
                 @endrole
+                @include('myfinance2::partials.nav')
             </ul>
             {{-- Right Side Of Navbar --}}
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ms-auto">
                 {{-- Authentication Links --}}
                 @guest
                     <li><a class="nav-link" href="{{ route('login') }}">{{ trans('titles.login') }}</a></li>
@@ -71,7 +72,7 @@
                     @endif
                 @else
                     <li class="nav-item dropdown">
-                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                             @if ((Auth::User()->profile) && Auth::user()->profile->avatar_status == 1)
                                 <img src="{{ Auth::user()->profile->avatar }}" alt="{{ Auth::user()->name }}" class="user-avatar-nav">
                             @else

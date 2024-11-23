@@ -53,12 +53,12 @@
                             </span>
                             <div class="pull-right">
                                 @isset($typeDeleted)
-                                    <a href="{{ url('blocker-deleted') }}" class="btn btn-danger text-white btn-sm float-right" data-toggle="tooltip" data-placement="left" title="{{ trans('laravelblocker::laravelblocker.tooltips.back-blocked-deleted') }}">
+                                    <a href="{{ url('blocker-deleted') }}" class="btn btn-danger text-white btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('laravelblocker::laravelblocker.tooltips.back-blocked-deleted') }}">
                                         <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                         {!! trans('laravelblocker::laravelblocker.buttons.back-to-blocked-deleted') !!}
                                     </a>
                                 @else
-                                    <a href="{{ url('blocker') }}" class="btn btn-warning text-white btn-sm float-right" data-toggle="tooltip" data-placement="left" title="{{ trans('laravelblocker::laravelblocker.tooltips.back-blocked') }}">
+                                    <a href="{{ url('blocker') }}" class="btn btn-warning text-white btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('laravelblocker::laravelblocker.tooltips.back-blocked') }}">
                                         <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                         {!! trans('laravelblocker::laravelblocker.buttons.back-to-blocked') !!}
                                     </a>
@@ -70,41 +70,41 @@
                         <ul class="list-group">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 ID
-                                <span class="badge badge-pill">
+                                <span class="badge rounded-pill">
                                     {{ $item->id }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 TypeId
-                                <span class="badge badge-pill">
+                                <span class="badge rounded-pill">
                                     {{ $item->typeId }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Slug
-                                <span class="badge badge-pill">
+                                <span class="badge rounded-pill">
                                     {!! $item->blockedType->slug !!}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Value
-                                <span class="badge badge-pill">
+                                <span class="badge rounded-pill">
                                     {{ $item->value }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Note
-                                <span class="badge badge-pill">
+                                <span class="badge rounded-pill">
                                     {{ $item->note }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 UserId
-                                <span class="badge badge-pill">
+                                <span class="badge rounded-pill">
                                     @if ($item->userId)
                                         {!! $item->userId !!}
                                     @else
-                                        <span class="disabled">
+                                        <span class="text-bg-light">
                                             {!! trans('laravelblocker::laravelblocker.none') !!}
                                         </span>
                                     @endif
@@ -112,20 +112,20 @@
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Created At
-                                <span class="badge badge-pill">
+                                <span class="badge rounded-pill">
                                     {!! $item->created_at->format('m/d/Y H:ia') !!}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Updated At
-                                <span class="badge badge-pill">
+                                <span class="badge rounded-pill">
                                     {!! $item->updated_at->format('m/d/Y H:ia') !!}
                                 </span>
                             </li>
                             @if ($item->deleted_at)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     Deleted At
-                                    <span class="badge badge-pill">
+                                    <span class="badge rounded-pill">
                                         {!! $item->deleted_at->format('m/d/Y H:ia') !!}
                                     </span>
                                 </li>
@@ -136,7 +136,7 @@
                                 @isset($typeDeleted)
                                     @include('laravelblocker::forms.restore-item', ['restoreType' => 'full'])
                                 @else
-                                    <a class="btn btn-sm btn-info btn-block text-white" href="/blocker/{{ $item->id }}/edit" data-toggle="tooltip" title="{{ trans("laravelblocker::laravelblocker.tooltips.edit") }}">
+                                    <a class="btn btn-sm btn-info btn-block text-white" href="/blocker/{{ $item->id }}/edit" data-bs-toggle="tooltip" title="{{ trans("laravelblocker::laravelblocker.tooltips.edit") }}">
                                         {!! trans("laravelblocker::laravelblocker.buttons.edit-larger") !!}
                                     </a>
                                 @endisset
@@ -156,13 +156,13 @@
     </div>
 
     @include('laravelblocker::modals.confirm-modal',[
-        'formTrigger' => 'confirmRestore',
+        'formTrigger' => 'confirm-restore-modal',
         'modalClass' => 'success',
         'actionBtnIcon' => 'fa-check'
     ])
 
     @include('laravelblocker::modals.confirm-modal',[
-        'formTrigger' => 'confirmDelete',
+        'formTrigger' => 'confirm-delete-modal',
         'modalClass' => 'danger',
         'actionBtnIcon' => 'fa-trash-o'
     ])
@@ -173,8 +173,8 @@
     @if(config('laravelblocker.enablejQueryCDN'))
         <script type="text/javascript" src="{{ config('laravelblocker.JQueryCDN') }}"></script>
     @endif
-    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => '#confirmDelete'])
-    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => '#confirmRestore'])
+    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => 'confirm-delete-modal'])
+    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => 'confirm-restore-modal'])
     @if(config('laravelblocker.tooltipsEnabled'))
         @include('laravelblocker::scripts.tooltips')
     @endif

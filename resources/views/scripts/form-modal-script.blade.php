@@ -1,27 +1,46 @@
-<script type="text/javascript">
+<script type="module">
 
-	var modalId = $('#confirmForm');
+$(document).ready(function(){
 
-	modalId.on('show.bs.modal', function (e) {
+var $confirmFormModal = $('#confirm-form-modal');
 
-		var modalClass = $(e.relatedTarget).attr('data-modalClass') || '';
-		var submitText = $(e.relatedTarget).attr('data-submit');
-		var message = $(e.relatedTarget).attr('data-message');
-		var title = $(e.relatedTarget).attr('data-title');
-		var form = $(e.relatedTarget).closest('form');
-		var self = $(this);
+// $confirmFormModal.on('shown.bs.modal', function (e)
+document.getElementById('confirm-form-modal').addEventListener('shown.bs.modal', (e) =>
+{
+    var modalClass = $(e.relatedTarget).attr('data-modalClass') || '';
+    var submitText = $(e.relatedTarget).attr('data-submit');
+    var message = $(e.relatedTarget).attr('data-message');
+    var title = $(e.relatedTarget).attr('data-title');
+    // var form = $(e.relatedTarget).closest('form');
 
-		self.alterClass('modal-*', modalClass)
-		self.find('.modal-body p').text(message);
-		self.find('.modal-title').text(title);
+    $('#confirm-form-modal').alterClass('modal-*', modalClass);
+    $confirmFormModal.find('.modal-body p').text(message);
+    $confirmFormModal.find('.modal-title').text(title);
 
-		self.find('.modal-footer #confirm')
-			.text(submitText)
-			.data('form', form);
+    $confirmFormModal.find('.modal-footer #confirm')
+        .text(submitText);
+        // .data('form', form);
 
-	});
-	modalId.find('.modal-footer #confirm').on('click', function(){
-	  	$(this).data('form').submit();
-	});
+    $confirmFormModal.data('initiator-id', $(e.relatedTarget).attr('id'));
+});
+
+$confirmFormModal.find('.modal-footer #confirm').on('click', function()
+{
+    var initiatorId = $confirmFormModal.data('initiator-id');
+    if (!initiatorId) {
+        console.error('Initiator ID is missing!');
+        return;
+    }
+
+    var $parentForm = $('#' + $confirmFormModal.data('initiator-id')).closest('form');
+    if (!$parentForm) {
+        console.error('Parent Form not found!');
+        return;
+    }
+    $parentForm.submit();
+});
+
+});
 
 </script>
+

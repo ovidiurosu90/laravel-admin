@@ -134,3 +134,8 @@ Route::group(['middleware' => ['auth', 'activated', 'role:admin', 'activity', 't
 });
 
 Route::redirect('/php', '/phpinfo', 301);
+
+// Reset password
+Route::get('reset-password/{token}', [App\Http\Controllers\Auth\NewPasswordController::class, 'create'])->name('password.reset');
+Route::post('reset-password', [App\Http\Controllers\Auth\NewPasswordController::class, 'store'])->name('password.store');
+

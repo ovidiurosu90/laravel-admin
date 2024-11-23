@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    {!! trans('usersmanagement.showing-all-users') !!}
-@endsection
+@section('template_title'){!! trans('usersmanagement.showing-all-users') !!}@endsection
 
 @section('template_linked_css')
     @if(config('usersmanagement.enabledDatatablesJs'))
@@ -39,13 +37,13 @@
                             </span>
 
                             <div class="btn-group pull-right btn-group-xs">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fa fa-ellipsis-v fa-fw" aria-hidden="true"></i>
-                                    <span class="sr-only">
+                                    <span class="visually-hidden">
                                         {!! trans('usersmanagement.users-menu-alt') !!}
                                     </span>
                                 </button>
-                                <div class="dropdown-menu dropdown-menu-right">
+                                <div class="dropdown-menu dropdown-menu-end">
                                     <a class="dropdown-item" href="/users/create">
                                         <i class="fa fa-fw fa-user-plus" aria-hidden="true"></i>
                                         {!! trans('usersmanagement.buttons.create-new') !!}
@@ -110,18 +108,18 @@
                                             <td class="hidden-sm hidden-xs hidden-md">{{$user->created_at}}</td>
                                             <td class="hidden-sm hidden-xs hidden-md">{{$user->updated_at}}</td>
                                             <td>
-                                                {!! Form::open(array('url' => 'users/' . $user->id, 'class' => '', 'data-toggle' => 'tooltip', 'title' => 'Delete')) !!}
+                                                {!! Form::open(array('url' => 'users/' . $user->id, 'class' => '', 'data-bs-toggle' => 'tooltip', 'title' => 'Delete')) !!}
                                                     {!! Form::hidden('_method', 'DELETE') !!}
-                                                    {!! Form::button(trans('usersmanagement.buttons.delete'), array('class' => 'btn btn-danger btn-sm','type' => 'button', 'style' =>'width: 100%;' ,'data-toggle' => 'modal', 'data-target' => '#confirmDelete', 'data-title' => 'Delete User', 'data-message' => 'Are you sure you want to delete this user ?')) !!}
+                                                    {!! Form::button(trans('usersmanagement.buttons.delete'), array('id' => 'user-delete-confirm-' . $user->id, 'class' => 'btn btn-danger btn-sm','type' => 'button', 'style' =>'width: 100%;' ,'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-delete-modal', 'data-title' => 'Delete User', 'data-initiator-id' => 'user-delete-confirm-' . $user->id, 'data-message' => 'Are you sure you want to delete this user ?')) !!}
                                                 {!! Form::close() !!}
                                             </td>
                                             <td>
-                                                <a class="btn btn-sm btn-success btn-block" href="{{ URL::to('users/' . $user->id) }}" data-toggle="tooltip" title="Show">
+                                                <a class="btn btn-sm btn-success btn-block" href="{{ URL::to('users/' . $user->id) }}" data-bs-toggle="tooltip" title="Show">
                                                     {!! trans('usersmanagement.buttons.show') !!}
                                                 </a>
                                             </td>
                                             <td>
-                                                <a class="btn btn-sm btn-info btn-block" href="{{ URL::to('users/' . $user->id . '/edit') }}" data-toggle="tooltip" title="Edit">
+                                                <a class="btn btn-sm btn-info btn-block" href="{{ URL::to('users/' . $user->id . '/edit') }}" data-bs-toggle="tooltip" title="Edit">
                                                     {!! trans('usersmanagement.buttons.edit') !!}
                                                 </a>
                                             </td>
@@ -147,6 +145,7 @@
     </div>
 
     @include('modals.modal-delete')
+    @include('modals.modal-save')
 
 @endsection
 

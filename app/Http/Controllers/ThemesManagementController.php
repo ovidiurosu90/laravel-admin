@@ -82,7 +82,9 @@ class ThemesManagementController extends Controller
      */
     public function show(Theme $theme)
     {
-        return view('themesmanagement.show-theme')->with($this->getThemeData($theme));
+        $themeData = $this->getThemeData($theme);
+        return view('themesmanagement.show-theme')->with($themeData)
+            ->with('currentTheme', $themeData['theme']); //NOTE The current theme is overwritten by the profile theme
     }
 
     /**
@@ -93,7 +95,9 @@ class ThemesManagementController extends Controller
      */
     public function edit(Theme $theme)
     {
-        return view('themesmanagement.edit-theme')->with($this->getThemeData($theme));
+        $themeData = $this->getThemeData($theme);
+        return view('themesmanagement.edit-theme')->with($themeData)
+            ->with('currentTheme', $themeData['theme']); //NOTE The current theme is overwritten by the profile theme
     }
 
     /**

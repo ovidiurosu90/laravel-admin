@@ -79,7 +79,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Europe/Amsterdam',
 
     /*
     |--------------------------------------------------------------------------
@@ -206,6 +206,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         ComposerServiceProvider::class,
         MacroServiceProvider::class,
+
+        ovidiuro\myfinance2\MyFinance2ServiceProvider::class,
     ],
 
     /*

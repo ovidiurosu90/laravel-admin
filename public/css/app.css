@@ -170,8 +170,14 @@ code,
 kbd,
 pre,
 samp {
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono,
-        Courier New, monospace;
+    font-family:
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        Liberation Mono,
+        Courier New,
+        monospace;
     font-size: 1em;
 }
 pre {
@@ -1737,7 +1743,9 @@ pre code {
     background-clip: padding-box;
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
     .form-control {
@@ -1946,7 +1954,8 @@ textarea.form-control.is-valid {
 .was-validated .custom-select:valid {
     border-color: #28a745;
     padding-right: calc(0.75em + 2.3125rem);
-    background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E")
+    background:
+        url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E")
             no-repeat right 0.75rem center/8px 10px,
         url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3E%3C/svg%3E")
             #fff no-repeat center right 1.75rem / calc(0.8em + 0.375rem)
@@ -2053,7 +2062,8 @@ textarea.form-control.is-invalid {
 .was-validated .custom-select:invalid {
     border-color: #dc3545;
     padding-right: calc(0.75em + 2.3125rem);
-    background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E")
+    background:
+        url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E")
             no-repeat right 0.75rem center/8px 10px,
         url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3E%3Ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3E%3C/svg%3E")
             #fff no-repeat center right 1.75rem / calc(0.8em + 0.375rem)
@@ -2182,8 +2192,11 @@ textarea.form-control.is-invalid {
     font-size: 0.9rem;
     line-height: 1.6;
     border-radius: 0.25rem;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+        color 0.15s ease-in-out,
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
     .btn {
@@ -3394,8 +3407,11 @@ input[type="submit"].btn-block {
     height: calc(1rem - 4px);
     background-color: #adb5bd;
     border-radius: 0.5rem;
-    transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+        transform 0.15s ease-in-out,
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
     .custom-switch .custom-control-label:after {
@@ -3540,13 +3556,19 @@ input[type="submit"].btn-block {
     outline: none;
 }
 .custom-range:focus::-webkit-slider-thumb {
-    box-shadow: 0 0 0 1px #f5f8fa, 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    box-shadow:
+        0 0 0 1px #f5f8fa,
+        0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 .custom-range:focus::-moz-range-thumb {
-    box-shadow: 0 0 0 1px #f5f8fa, 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    box-shadow:
+        0 0 0 1px #f5f8fa,
+        0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 .custom-range:focus::-ms-thumb {
-    box-shadow: 0 0 0 1px #f5f8fa, 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    box-shadow:
+        0 0 0 1px #f5f8fa,
+        0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 .custom-range::-moz-focus-outer {
     border: 0;
@@ -3558,10 +3580,14 @@ input[type="submit"].btn-block {
     background-color: #007bff;
     border: 0;
     border-radius: 1rem;
-    -webkit-transition: background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    transition: background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    -webkit-transition:
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
+    transition:
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
     -webkit-appearance: none;
     appearance: none;
 }
@@ -3589,10 +3615,14 @@ input[type="submit"].btn-block {
     background-color: #007bff;
     border: 0;
     border-radius: 1rem;
-    -moz-transition: background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    transition: background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    -moz-transition:
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
+    transition:
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
     -moz-appearance: none;
     appearance: none;
 }
@@ -3623,10 +3653,14 @@ input[type="submit"].btn-block {
     background-color: #007bff;
     border: 0;
     border-radius: 1rem;
-    -ms-transition: background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    transition: background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    -ms-transition:
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
+    transition:
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
     appearance: none;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -3673,8 +3707,10 @@ input[type="submit"].btn-block {
 .custom-control-label:before,
 .custom-file-label,
 .custom-select {
-    transition: background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
     .custom-control-label:before,
@@ -4409,8 +4445,11 @@ input[type="submit"].btn-block {
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 0.25rem;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+        color 0.15s ease-in-out,
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
     .badge {
@@ -4545,6 +4584,13 @@ a.badge-dark:focus {
     outline: 0;
     box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
 }
+.badge-default {
+    --bs-bg-opacity: 1;
+    background-color: rgba(
+        var(--bs-secondary-rgb),
+        var(--bs-bg-opacity)
+    ) !important;
+}
 .jumbotron {
     padding: 2rem 1rem;
     margin-bottom: 2rem;
@@ -4583,6 +4629,13 @@ a.badge-dark:focus {
     right: 0;
     padding: 0.75rem 1.25rem;
     color: inherit;
+}
+.alert-dismissible .btn-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    padding: 1.25rem 1rem;
 }
 .alert-primary {
     color: #004085;
@@ -8579,8 +8632,14 @@ button.bg-dark:hover {
     }
 }
 .text-monospace {
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono,
-        Courier New, monospace !important;
+    font-family:
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        Liberation Mono,
+        Courier New,
+        monospace !important;
 }
 .text-justify {
     text-align: justify !important;
@@ -8855,22 +8914,25 @@ a.text-dark:hover {
  *  Font Awesome 4.7.0 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
  */
+/*
 @font-face {
     font-family: FontAwesome;
-    src: url(/fonts/vendor/font-awesome/fontawesome-webfont.eot?674f50d287a8c48dc19ba404d20fe713);
-    src: url(/fonts/vendor/font-awesome/fontawesome-webfont.eot?674f50d287a8c48dc19ba404d20fe713)
+    src: url(/fonts/fontawesome-webfont.eot);
+    src:
+        url(/fonts/fontawesome-webfont.eot)
             format("embedded-opentype"),
-        url(/fonts/vendor/font-awesome/fontawesome-webfont.woff2?af7ae505a9eed503f8b8e6982036873e)
+        url(/fonts/fontawesome-webfont.woff2)
             format("woff2"),
-        url(/fonts/vendor/font-awesome/fontawesome-webfont.woff?fee66e712a8a08eef5805a46892932ad)
+        url(/fonts/fontawesome-webfont.woff)
             format("woff"),
-        url(/fonts/vendor/font-awesome/fontawesome-webfont.ttf?b06871f281fee6b241d60582ae9369b9)
+        url(/fonts/fontawesome-webfont.ttf)
             format("truetype"),
-        url(/fonts/vendor/font-awesome/fontawesome-webfont.svg?912ec66d7572ff821749319396470bde)
+        url(/fonts/fontawesome-webfont.svg)
             format("svg");
     font-weight: 400;
     font-style: normal;
 }
+*/
 .fa {
     display: inline-block;
     font: normal normal normal 14px/1 FontAwesome;
@@ -12357,8 +12419,8 @@ a.text-dark:hover {
 .btn {
     transition: all 0.35s ease-in-out;
 }
-[data-toggle="buttons"] > div .btn input[type="radio"] {
-    position: absolute;
+[data-bs-toggle="buttons"] > div .btn input[type="radio"] {
+    /*position: absolute;*/
     clip: rect(0, 0, 0, 0);
     pointer-events: none;
 }
@@ -13823,8 +13885,8 @@ label:hover input[type="checkbox"] ~ i.fa,
 label:hover input[type="radio"] ~ i.fa {
     color: #7aa3cc;
 }
-div[data-toggle="buttons"] label.active,
-div[data-toggle="buttons"] label:active {
+div[data-bs-toggle="buttons"] label.active,
+div[data-bs-toggle="buttons"] label:active {
     -ms-box-shadow: none;
     -o-box-shadow: none;
     box-shadow: none;
@@ -13848,8 +13910,8 @@ div[data-toggle="buttons"] label:active {
     margin-left: 5.5em;
 }
 .user-avatar {
-    width: 80px;
-    height: 80px;
+    width: 86px;
+    height: 86px;
     margin: 2em auto;
     display: block;
 }
@@ -14217,4 +14279,9 @@ div[data-toggle="buttons"] label:active {
 }
 .account-admin-subnav li:last-child {
     border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.roles-card .badge {
+    color: #000 !important;
+    background-color: RGBA(248, 249, 250, var(--bs-bg-opacity, 1)) !important;
 }

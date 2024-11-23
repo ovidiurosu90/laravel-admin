@@ -5,15 +5,15 @@
             <div class="input-group mb-3">
                 {!! Form::text('user_search_box', NULL, ['id' => 'user_search_box', 'class' => 'form-control', 'placeholder' => trans('usersmanagement.search.search-users-ph'), 'aria-label' => trans('usersmanagement.search.search-users-ph'), 'required' => false]) !!}
                 <div class="input-group-append">
-                    <a href="#" class="input-group-addon btn btn-warning clear-search" data-toggle="tooltip" title="{{ trans('usersmanagement.tooltips.clear-search') }}" style="display:none;">
+                    <a href="#" class="input-group-addon btn btn-warning clear-search" data-bs-toggle="tooltip" title="{{ trans('usersmanagement.tooltips.clear-search') }}" style="display:none;">
                         <i class="fa fa-fw fa-times" aria-hidden="true"></i>
-                        <span class="sr-only">
+                        <span class="visually-hidden">
                             {!! trans('usersmanagement.tooltips.clear-search') !!}
                         </span>
                     </a>
-                    <a href="#" class="input-group-addon btn btn-secondary" id="search_trigger" data-toggle="tooltip" data-placement="bottom" title="{{ trans('usersmanagement.tooltips.submit-search') }}" >
+                    <a href="#" class="input-group-addon btn btn-secondary" id="search_trigger" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ trans('usersmanagement.tooltips.submit-search') }}" >
                         <i class="fa fa-search fa-fw" aria-hidden="true"></i>
-                        <span class="sr-only">
+                        <span class="visually-hidden">
                             {!!  trans('usersmanagement.tooltips.submit-search') !!}
                         </span>
                     </a>

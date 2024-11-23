@@ -52,7 +52,7 @@ module.exports = plugin(
       },
       {
         values: theme("transformOrigin"),
-      }
+      },
     );
 
     matchUtilities(
@@ -63,7 +63,7 @@ module.exports = plugin(
       },
       {
         values: theme("perspectiveValues"),
-      }
+      },
     );
 
     // `rotate-x`
@@ -76,7 +76,7 @@ module.exports = plugin(
       },
       {
         values: theme("rotate3d"),
-      }
+      },
     );
 
     // `-rotate-x` => rotate-x--*`
@@ -89,7 +89,7 @@ module.exports = plugin(
       },
       {
         values: theme("rotate3d"),
-      }
+      },
     );
 
     // `rotate-y`
@@ -102,7 +102,7 @@ module.exports = plugin(
       },
       {
         values: theme("rotate3d"),
-      }
+      },
     );
 
     // `-rotate-y` => rotate-y--*`
@@ -115,7 +115,7 @@ module.exports = plugin(
       },
       {
         values: theme("rotate3d"),
-      }
+      },
     );
 
     // `rotate-z`
@@ -128,7 +128,7 @@ module.exports = plugin(
       },
       {
         values: theme("rotate3d"),
-      }
+      },
     );
 
     // `-rotate-z` => rotate-z--*`
@@ -141,7 +141,7 @@ module.exports = plugin(
       },
       {
         values: theme("rotate3d"),
-      }
+      },
     );
   },
   {
@@ -185,5 +185,5 @@ module.exports = plugin(
         },
       }),
     },
-  }
+  },
 );

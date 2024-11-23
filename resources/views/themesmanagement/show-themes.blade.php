@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    Showing Themes
-@endsection
+@section('template_title'){{ 'Showing Themes' }}@endsection
 
 @section('template_linked_css')
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
@@ -38,7 +36,7 @@
 
                 <div class="table-responsive themes-table">
                     <table class="table table-striped table-sm data-table">
-                        <thead class="thead-dark">
+                        <thead>
                             <tr>
                                 {{-- <th>ID</th> --}}
                                 <th>{{ trans('themes.themesStatus') }}</th>
@@ -46,7 +44,6 @@
                                 <th>{{ trans('themes.themesName') }}</th>
                                 <th class="hidden-xs hidden-sm hidden-md">{{ trans('themes.themesLink') }}</th>
                                 <th>{{ trans('themes.themesActions') }}</th>
-                                <th></th>
                                 <th></th>
                                 <th></th>
                             </tr>
@@ -96,26 +93,26 @@
                                     </td>
                                     <td>{{$aTheme->name}}</td>
                                     <td class="hidden-xs hidden-sm hidden-md">
-                                        <a href="{{$aTheme->link}}" target="_blank" data-toggle="tooltip" title="Go to Link">
+                                        <a href="{{$aTheme->link}}" target="_blank" data-bs-toggle="tooltip" title="Go to Link">
                                             {{$aTheme->link}}
                                         </a>
                                     </td>
                                     <td>
-                                        <a class="btn btn-sm btn-success btn-block" href="{{ URL::to('themes/' . $aTheme->id) }}" data-toggle="tooltip" title="{{ trans('themes.themesBtnShow') }}">
+                                        <a class="btn btn-sm btn-success btn-block" href="{{ URL::to('themes/' . $aTheme->id) }}" data-bs-toggle="tooltip" title="{{ trans('themes.themesBtnShow') }}">
                                             <i class="fa fa-eye fa-fw" aria-hidden="true"></i>
-                                            <span class="sr-only">{{ trans('themes.themesBtnShow') }}</span>
+                                            <span class="visually-hidden">{{ trans('themes.themesBtnShow') }}</span>
                                         </a>
                                     </td>
                                     <td>
-                                        <a class="btn btn-sm btn-info btn-block" href="{{ URL::to('themes/' . $aTheme->id . '/edit') }}" data-toggle="tooltip" title="{{ trans('themes.themesBtnEdit') }}">
+                                        <a class="btn btn-sm btn-info btn-block" href="{{ URL::to('themes/' . $aTheme->id . '/edit') }}" data-bs-toggle="tooltip" title="{{ trans('themes.themesBtnEdit') }}">
                                             <i class="fa fa-pencil fa-fw" aria-hidden="true"></i>
-                                            <span class="sr-only">{{ trans('themes.themesBtnEdit') }}</span>
+                                            <span class="visually-hidden">{{ trans('themes.themesBtnEdit') }}</span>
                                         </a>
                                     </td>
                                     <td>
-                                        {!! Form::open(array('url' => 'themes/' . $aTheme->id, 'class' => '', 'data-toggle' => 'tooltip', 'title' => 'Delete Theme')) !!}
+                                        {!! Form::open(array('url' => 'themes/' . $aTheme->id, 'class' => '', 'data-bs-toggle' => 'tooltip', 'title' => 'Delete Theme')) !!}
                                             {!! Form::hidden('_method', 'DELETE') !!}
-                                            {!! Form::button('<i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> <span class="sr-only">Delete Theme</span>', array('class' => 'btn btn-danger btn-sm','type' => 'button', 'style' =>'width: 100%;' ,'data-toggle' => 'modal', 'data-target' => '#confirmDelete', 'data-title' => trans('themes.confirmDeleteHdr'), 'data-message' => trans('themes.confirmDelete'))) !!}
+                                            {!! Form::button('<i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> <span class="visually-hidden">Delete Theme</span>', array('id' => 'theme-delete-confirm-' . $aTheme->id, 'class' => 'btn btn-danger btn-sm','type' => 'button', 'style' =>'width: 100%;' ,'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-delete-modal', 'data-title' => trans('themes.confirmDeleteHdr'), 'data-initiator-id' => 'theme-delete-confirm-' . $aTheme->id, 'data-message' => trans('themes.confirmDelete'))) !!}
                                         {!! Form::close() !!}
                                     </td>
                                 </tr>
@@ -128,13 +125,14 @@
         </div>
     </div>
 
+    @include('modals.modal-save')
     @include('modals.modal-delete')
 
 @endsection
 
 @section('footer_scripts')
 
-    @if (count($themes) > 50)
+    @if (count($themes) > 20)
         @include('scripts.datatables')
     @endif
     @include('scripts.delete-modal-script')

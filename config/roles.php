@@ -136,25 +136,25 @@ return [
     // Additional Card classes for styling -
     // See: https://getbootstrap.com/docs/4.0/components/card/#background-and-color
     // Example classes: 'text-white bg-primary mb-3'
-    'bootstrapCardClasses'          => env('ROLES_GUI_CARD_CLASSES', ''),
+    'bootstrapCardClasses'          => env('ROLES_GUI_CARD_CLASSES', 'roles-card'),
 
     // Bootstrap Tooltips
     'tooltipsEnabled'               => env('ROLES_GUI_TOOLTIPS_ENABLED', false),
 
     // jQuery
-    'enablejQueryCDN'               => env('ROLES_GUI_JQUERY_CDN_ENABLED', true), // You may need to change this if you compile and include jquery
+    'enablejQueryCDN'               => env('ROLES_GUI_JQUERY_CDN_ENABLED', false), // You may need to change this if you compile and include jquery
     'JQueryCDN'                     => env('ROLES_GUI_JQUERY_CDN_URL', 'https://code.jquery.com/jquery-3.5.1.min.js'),
 
     // Selectize JS
-    'enableSelectizeJsCDN'          => env('ROLES_GUI_SELECTIZEJS_CDN_ENABLED', true),
-    'SelectizeJsCDN'                => env('ROLES_GUI_SELECTIZEJS_CDN_URL', 'https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js'),
+    'enableSelectizeJsCDN'          => env('ROLES_GUI_SELECTIZEJS_CDN_ENABLED', false),
+    'SelectizeJsCDN'                => env('ROLES_GUI_SELECTIZEJS_CDN_URL', 'https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js'),
     'enableSelectizeJs'             => env('ROLES_GUI_SELECTIZEJS_ENABLED', true),
     'enableSelectizeJsCssCDN'       => env('ROLES_GUI_SELECTIZEJS_CSS_CDN_ENABLED', true),
-    'SelectizeJsCssCDN'             => env('ROLES_GUI_SELECTIZEJS_CSS_CDN_URL', 'https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.min.css'),
+    'SelectizeJsCssCDN'             => env('ROLES_GUI_SELECTIZEJS_CSS_CDN_URL', 'https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.bootstrap5.min.css'),
 
     // Font Awesome
     'enableFontAwesomeCDN'          => env('ROLES_GUI_FONT_AWESOME_CDN_ENABLED', true),
-    'fontAwesomeCDN'                => env('ROLES_GUI_FONT_AWESOME_CDN_URL', 'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'),
+    'fontAwesomeCDN'                => env('ROLES_GUI_FONT_AWESOME_CDN_URL', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css'),
 
     // Flash Messaging
     'builtInFlashMessagesEnabled'   => env('ROLES_GUI_FLASH_MESSAGES_ENABLED', true),

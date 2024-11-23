@@ -40,7 +40,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             {!! trans('laravelblocker::laravelblocker.titles.create-blocked') !!}
                             <div class="pull-right">
-                                <a href="{{ url('blocker') }}" class="btn btn-warning btn-sm float-right text-white" data-toggle="tooltip" data-placement="left" title="{{ trans('laravelblocker::laravelblocker.tooltips.back-blocked') }}">
+                                <a href="{{ url('blocker') }}" class="btn btn-warning btn-sm float-end text-white" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('laravelblocker::laravelblocker.tooltips.back-blocked') }}">
                                     <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                     {!! trans('laravelblocker::laravelblocker.buttons.back-to-blocked') !!}
                                 </a>

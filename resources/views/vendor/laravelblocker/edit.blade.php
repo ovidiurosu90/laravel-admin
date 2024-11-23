@@ -42,7 +42,7 @@
                                 {!! trans('laravelblocker::laravelblocker.edit-blocked-item-title', ['name' => $item->value]) !!}
                             </span>
                             <div class="pull-right">
-                                <a href="{{ url('blocker') }}" class="btn btn-warning text-white btn-sm float-right" data-toggle="tooltip" data-placement="left" title="{{ trans('laravelblocker::laravelblocker.tooltips.back-blocked') }}">
+                                <a href="{{ url('blocker') }}" class="btn btn-warning text-white btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('laravelblocker::laravelblocker.tooltips.back-blocked') }}">
                                     <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                     {!! trans('laravelblocker::laravelblocker.buttons.back-to-blocked') !!}
                                 </a>
@@ -58,7 +58,7 @@
     </div>
 
     @include('laravelblocker::modals.confirm-modal',[
-        'formTrigger' => 'confirmDelete',
+        'formTrigger' => 'confirm-delete-modal',
         'modalClass' => 'danger',
         'actionBtnIcon' => 'fa-trash-o'
     ])
@@ -69,7 +69,7 @@
     @if(config('laravelblocker.enablejQueryCDN'))
         <script type="text/javascript" src="{{ config('laravelblocker.JQueryCDN') }}"></script>
     @endif
-    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => '#confirmDelete'])
+    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => 'confirm-delete-modal'])
     @if(config('laravelblocker.tooltipsEnabled'))
         @include('laravelblocker::scripts.tooltips')
     @endif

@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-  {{ trans('titles.adminThemesAdd') }}
-@endsection
+@section('template_title'){{ trans('titles.adminThemesAdd') }}@endsection
 
 @section('template_fastload_css')
 @endsection
@@ -15,11 +13,11 @@
                 <div class="card">
 
                     <div class="card-header">
-                        <div class="float-left">
+                        <div class="float-start">
                             {{ trans('titles.adminThemesAdd') }}
                         </div>
-                        <div class="float-right">
-                            <a href="{{ url('/themes/') }}" class="btn btn-light btn-sm float-right" data-toggle="tooltip" data-placement="left" title="{{ trans('themes.backToThemesTt') }}">
+                        <div class="float-end">
+                            <a href="{{ url('/themes/') }}" class="btn btn-light btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('themes.backToThemesTt') }}">
                                 <i class="fa fa-fw fa-mail-reply" aria-hidden="true"></i>
                                 {!! trans('themes.backToThemesBtn') !!}
                             </a>
@@ -33,7 +31,7 @@
 
                         <div class="card-body">
 
-                            <div class="form-group has-feedback row {{ $errors->has('status') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('status') ? ' has-error ' : '' }}">
                                 {!! Form::label('status', trans('themes.statusLabel') , array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <label class="switch checked" for="status">
@@ -51,7 +49,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
                                 {!! Form::label('name', trans('themes.nameLabel'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -70,7 +68,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('link') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('link') ? ' has-error ' : '' }}">
                                 {!! Form::label('link', trans('themes.linkLabel'), array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">
@@ -89,7 +87,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group has-feedback row {{ $errors->has('notes') ? ' has-error ' : '' }}">
+                            <div class="mb-3 has-feedback row {{ $errors->has('notes') ? ' has-error ' : '' }}">
                                 {!! Form::label('notes', trans('themes.notesLabel') , array('class' => 'col-md-3 control-label')); !!}
                                 <div class="col-md-9">
                                     <div class="input-group">

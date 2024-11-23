@@ -44,10 +44,10 @@ switch ($remainingAttempts) {
 
                     <form id="verification_form" class="form-horizontal" method="POST" >
 
-                        <div class="form-group margin-bottom-1 code-inputs">
+                        <div class="mb-3 margin-bottom-1 code-inputs">
                             <div class="col-xs-3">
                                 <div class="{{ $errors->has('v_input_1') ? ' has-error' : '' }}">
-                                    <label for="v_input_1" class="sr-only control-label">
+                                    <label for="v_input_1" class="visually-hidden control-label">
                                         {{ trans('laravel2step::laravel-verification.inputAlt1') }}
                                     </label>
                                     <input type="text"  id="v_input_1" class="form-control text-center required" required name="v_input_1" value="" autofocus maxlength="1" minlength="1" tabindex="1" placeholder="•">
@@ -60,7 +60,7 @@ switch ($remainingAttempts) {
                             </div>
                             <div class="col-xs-3">
                                 <div class="{{ $errors->has('v_input_2') ? ' has-error' : '' }}">
-                                    <label for="v_input_2" class="sr-only control-label">
+                                    <label for="v_input_2" class="visually-hidden control-label">
                                         {{ trans('laravel2step::laravel-verification.inputAlt2') }}
                                     </label>
                                     <input type="text"  id="v_input_2" class="form-control text-center required" required name="v_input_2" value="" maxlength="1" minlength="1" tabindex="2" placeholder="•">
@@ -73,7 +73,7 @@ switch ($remainingAttempts) {
                             </div>
                             <div class="col-xs-3">
                                 <div class="{{ $errors->has('v_input_3') ? ' has-error' : '' }}">
-                                    <label for="v_input_3" class="sr-only control-label">
+                                    <label for="v_input_3" class="visually-hidden control-label">
                                         {{ trans('laravel2step::laravel-verification.inputAlt3') }}
                                     </label>
                                     <input type="text"  id="v_input_3" class="form-control text-center required" required name="v_input_3" value="" maxlength="1" minlength="1" tabindex="3" placeholder="•">
@@ -86,7 +86,7 @@ switch ($remainingAttempts) {
                             </div>
                             <div class="col-xs-3">
                                 <div class="{{ $errors->has('v_input_4') ? ' has-error' : '' }}">
-                                    <label for="v_input_4" class="sr-only control-label">
+                                    <label for="v_input_4" class="visually-hidden control-label">
                                         {{ trans('laravel2step::laravel-verification.inputAlt4') }}
                                     </label>
                                     <input type="text"  id="v_input_4" class="form-control text-center required last-input " required name="v_input_4" value="" maxlength="1" minlength="1" tabindex="4" placeholder="•">
@@ -98,7 +98,7 @@ switch ($remainingAttempts) {
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="mb-3">
                             <div class="row">
                                 <div class="col-xs-8 col-xs-offset-2 text-center submit-container">
                                     <button type="submit" class="btn btn-lg btn-{{ $remainingAttemptsClass }} btn-block" id="submit_verification" tabindex="5">
@@ -140,17 +140,17 @@ switch ($remainingAttempts) {
         $hoursToExpire = $minutesToExpire / 60;
     @endphp
 
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-
     @include('laravel2step::scripts.input-parsing-auto-stepper');
 
-    <script>
+    <script type="module">
 
-        $('.code-inputs').on('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e){
+        $('.code-inputs').on('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e)
+        {
             $('.code-inputs').delay(200).removeClass('invalid-shake');
         });
 
-        $("#submit_verification").click(function(event) {
+        $("#submit_verification").click(function(event)
+        {
             event.preventDefault();
 
             var formData = $('#verification_form').serialize();
@@ -233,9 +233,10 @@ switch ($remainingAttempts) {
     </script>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.4.0/sweetalert2.all.js"></script>
-    <script type="text/javascript">
+    <script type="module">
 
-        $("#resend_code_trigger").click(function(event) {
+        $("#resend_code_trigger").click(function(event)
+        {
             event.preventDefault();
 
             var self = $(this);

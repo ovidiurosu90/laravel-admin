@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    {{ trans('profile.templateTitle') }}
-@endsection
+@section('template_title'){{ trans('profile.templateTitle') }}@endsection
 
 @section('content')
     <div class="container">
@@ -14,15 +12,15 @@
                             @if (Auth::user()->id == $user->id)
                             <div class="container">
                                 <div class="row">
-                                    <div class="col-12 col-sm-4 col-md-3 profile-sidebar text-white rounded-left-sm-up">
+                                    <div class="col-12 col-sm-4 col-md-3 profile-sidebar text-white rounded-start-sm-up">
                                         <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                                            <a class="nav-link active" data-toggle="pill" href=".edit-profile-tab" role="tab" aria-controls="edit-profile-tab" aria-selected="true">
+                                            <a class="nav-link active" data-bs-toggle="pill" href=".edit-profile-tab" role="tab" aria-controls="edit-profile-tab" aria-selected="true">
                                                 {{ trans('profile.editProfileTitle') }}
                                             </a>
-                                            <a class="nav-link" data-toggle="pill" href=".edit-settings-tab" role="tab" aria-controls="edit-settings-tab" aria-selected="false">
+                                            <a class="nav-link" data-bs-toggle="pill" href=".edit-settings-tab" role="tab" aria-controls="edit-settings-tab" aria-selected="false">
                                                 {{ trans('profile.editAccountTitle') }}
                                             </a>
-                                            <a class="nav-link" data-toggle="pill" href=".edit-account-tab" role="tab" aria-controls="edit-settings-tab" aria-selected="false">
+                                            <a class="nav-link" data-bs-toggle="pill" href=".edit-account-tab" role="tab" aria-controls="edit-settings-tab" aria-selected="false">
                                                 {{ trans('profile.editAccountAdminTitle') }}
                                             </a>
                                         </div>
@@ -53,24 +51,24 @@
                                                     {{ csrf_field() }}
                                                     <div class="row">
                                                         <div class="col-10 offset-1 col-sm-10 offset-sm-1 mb-1">
-                                                            <div class="row" data-toggle="buttons">
+                                                            <div class="row" data-bs-toggle="buttons">
                                                                 <div class="col-6 col-xs-6 right-btn-container">
-                                                                    <label class="btn btn-primary @if($user->profile->avatar_status == 0) active @endif btn-block btn-sm" data-toggle="collapse" data-target=".collapseOne:not(.show), .collapseTwo.show">
+                                                                    <label class="btn btn-primary @if($user->profile->avatar_status == 0) active @endif btn-block btn-sm" data-bs-toggle="collapse" data-bs-target=".collapseOne:not(.show), .collapseTwo.show">
                                                                         <input type="radio" name="avatar_status" id="option1" autocomplete="off" value="0" @if($user->profile->avatar_status == 0) checked @endif> Use Gravatar
                                                                     </label>
                                                                 </div>
                                                                 <div class="col-6 col-xs-6 left-btn-container">
-                                                                    <label class="btn btn-primary @if($user->profile->avatar_status == 1) active @endif btn-block btn-sm" data-toggle="collapse" data-target=".collapseOne.show, .collapseTwo:not(.show)">
+                                                                    <label class="btn btn-primary @if($user->profile->avatar_status == 1) active @endif btn-block btn-sm" data-bs-toggle="collapse" data-bs-target=".collapseOne.show, .collapseTwo:not(.show)">
                                                                         <input type="radio" name="avatar_status" id="option2" autocomplete="off" value="1" @if($user->profile->avatar_status == 1) checked @endif> Use My Image
                                                                     </label>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group has-feedback {{ $errors->has('theme') ? ' has-error ' : '' }}">
+                                                    <div class="mb-3 has-feedback {{ $errors->has('theme') ? ' has-error ' : '' }}">
                                                         {!! Form::label('theme_id', trans('profile.label-theme') , array('class' => 'col-12 control-label')); !!}
                                                         <div class="col-12">
-                                                            <select class="form-control" name="theme_id" id="theme_id">
+                                                            <select class="form-select" name="theme_id" id="theme_id">
                                                                 @if ($themes->count())
                                                                     @foreach($themes as $theme)
                                                                       <option value="{{ $theme->id }}"{{ $currentTheme->id == $theme->id ? 'selected="selected"' : '' }}>{{ $theme->name }}</option>
@@ -85,7 +83,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    <div class="form-group has-feedback {{ $errors->has('location') ? ' has-error ' : '' }}">
+                                                    <div class="mb-3 has-feedback {{ $errors->has('location') ? ' has-error ' : '' }}">
                                                         {!! Form::label('location', trans('profile.label-location') , array('class' => 'col-12 control-label')); !!}
                                                         <div class="col-12">
                                                             {!! Form::text('location', old('location'), array('id' => 'location', 'class' => 'form-control', 'placeholder' => trans('profile.ph-location'))) !!}
@@ -97,7 +95,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    <div class="form-group has-feedback {{ $errors->has('bio') ? ' has-error ' : '' }}">
+                                                    <div class="mb-3 has-feedback {{ $errors->has('bio') ? ' has-error ' : '' }}">
                                                         {!! Form::label('bio', trans('profile.label-bio') , array('class' => 'col-12 control-label')); !!}
                                                         <div class="col-12">
                                                             {!! Form::textarea('bio', old('bio'), array('id' => 'bio', 'class' => 'form-control', 'placeholder' => trans('profile.ph-bio'))) !!}
@@ -109,7 +107,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    <div class="form-group has-feedback {{ $errors->has('twitter_username') ? ' has-error ' : '' }}">
+                                                    <div class="mb-3 has-feedback {{ $errors->has('twitter_username') ? ' has-error ' : '' }}">
                                                         {!! Form::label('twitter_username', trans('profile.label-twitter_username') , array('class' => 'col-12 control-label')); !!}
                                                         <div class="col-12">
                                                             {!! Form::text('twitter_username', old('twitter_username'), array('id' => 'twitter_username', 'class' => 'form-control', 'placeholder' => trans('profile.ph-twitter_username'))) !!}
@@ -121,7 +119,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    <div class="margin-bottom-2 form-group has-feedback {{ $errors->has('github_username') ? ' has-error ' : '' }}">
+                                                    <div class="margin-bottom-2 mb-3 has-feedback {{ $errors->has('github_username') ? ' has-error ' : '' }}">
                                                         {!! Form::label('github_username', trans('profile.label-github_username') , array('class' => 'col-12 control-label')); !!}
                                                         <div class="col-12">
                                                             {!! Form::text('github_username', old('github_username'), array('id' => 'github_username', 'class' => 'form-control', 'placeholder' => trans('profile.ph-github_username'))) !!}
@@ -133,17 +131,17 @@
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    <div class="form-group margin-bottom-2">
+                                                    <div class="mb-3 margin-bottom-2">
                                                         <div class="col-12">
                                                             {!! Form::button(
                                                                 '<i class="fa fa-fw fa-save" aria-hidden="true"></i> ' . trans('profile.submitButton'),
                                                                  array(
-                                                                    'id'                => 'confirmFormSave',
+                                                                    'id'                => 'profile-settings-edit-confirm',
                                                                     'class'             => 'btn btn-success disabled',
                                                                     'type'              => 'button',
-                                                                    'data-target'       => '#confirmForm',
+                                                                    'data-bs-target'    => '#confirm-form-modal',
                                                                     'data-modalClass'   => 'modal-success',
-                                                                    'data-toggle'       => 'modal',
+                                                                    'data-bs-toggle'    => 'modal',
                                                                     'data-title'        => trans('modals.edit_user__modal_text_confirm_title'),
                                                                     'data-message'      => trans('modals.edit_user__modal_text_confirm_message')
                                                             )) !!}
@@ -158,7 +156,7 @@
 
                                                     {!! csrf_field() !!}
 
-                                                    <div class="pt-4 pr-3 pl-2 form-group has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
+                                                    <div class="pt-4 pe-3 ps-2 mb-3 has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
                                                         {!! Form::label('name', trans('forms.create_user_label_username'), array('class' => 'col-md-3 control-label')); !!}
                                                         <div class="col-md-9">
                                                             <div class="input-group">
@@ -177,7 +175,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="pr-3 pl-2 form-group has-feedback row {{ $errors->has('email') ? ' has-error ' : '' }}">
+                                                    <div class="pe-3 ps-2 mb-3 has-feedback row {{ $errors->has('email') ? ' has-error ' : '' }}">
                                                         {!! Form::label('email', trans('forms.create_user_label_email'), array('class' => 'col-md-3 control-label')); !!}
                                                         <div class="col-md-9">
                                                             <div class="input-group">
@@ -196,7 +194,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="pr-3 pl-2 form-group has-feedback row {{ $errors->has('first_name') ? ' has-error ' : '' }}">
+                                                    <div class="pe-3 ps-2 mb-3 has-feedback row {{ $errors->has('first_name') ? ' has-error ' : '' }}">
                                                         {!! Form::label('first_name', trans('forms.create_user_label_firstname'), array('class' => 'col-md-3 control-label')); !!}
                                                         <div class="col-md-9">
                                                             <div class="input-group">
@@ -215,7 +213,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="pr-3 pl-2 form-group has-feedback row {{ $errors->has('last_name') ? ' has-error ' : '' }}">
+                                                    <div class="pe-3 ps-2 mb-3 has-feedback row {{ $errors->has('last_name') ? ' has-error ' : '' }}">
                                                         {!! Form::label('last_name', trans('forms.create_user_label_lastname'), array('class' => 'col-md-3 control-label')); !!}
                                                         <div class="col-md-9">
                                                             <div class="input-group">
@@ -234,19 +232,19 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="form-group row">
+                                                    <div class="mb-3 row">
                                                         <div class="col-md-9 offset-md-3">
                                                             {!! Form::button(
                                                                 '<i class="fa fa-fw fa-save" aria-hidden="true"></i> ' . trans('profile.submitProfileButton'),
                                                                  array(
                                                                     'class'             => 'btn btn-success disabled',
-                                                                    'id'                => 'account_save_trigger',
+                                                                    'id'                => 'account-settings-edit-confirm',
                                                                     'disabled'          => true,
                                                                     'type'              => 'button',
                                                                     'data-submit'       => trans('profile.submitProfileButton'),
-                                                                    'data-target'       => '#confirmForm',
+                                                                    'data-bs-target'    => '#confirm-form-modal',
                                                                     'data-modalClass'   => 'modal-success',
-                                                                    'data-toggle'       => 'modal',
+                                                                    'data-bs-toggle'    => 'modal',
                                                                     'data-title'        => trans('modals.edit_user__modal_text_confirm_title'),
                                                                     'data-message'      => trans('modals.edit_user__modal_text_confirm_message')
                                                             )) !!}
@@ -258,12 +256,12 @@
                                             <div class="tab-pane fade edit-account-tab" role="tabpanel" aria-labelledby="edit-account-tab">
                                                 <ul class="account-admin-subnav nav nav-pills nav-justified margin-bottom-3 margin-top-1">
                                                     <li class="nav-item bg-info">
-                                                        <a data-toggle="pill" href="#changepw" class="nav-link warning-pill-trigger text-white active" aria-selected="true">
+                                                        <a data-bs-toggle="pill" href="#changepw" class="nav-link warning-pill-trigger text-white active" aria-selected="true">
                                                             {{ trans('profile.changePwPill') }}
                                                         </a>
                                                     </li>
                                                     <li class="nav-item bg-info">
-                                                        <a data-toggle="pill" href="#deleteAccount" class="nav-link danger-pill-trigger text-white">
+                                                        <a data-bs-toggle="pill" href="#deleteAccount" class="nav-link danger-pill-trigger text-white">
                                                             {{ trans('profile.deleteAccountPill') }}
                                                         </a>
                                                     </li>
@@ -280,7 +278,7 @@
 
                                                             <div class="pw-change-container margin-bottom-2">
 
-                                                                <div class="form-group has-feedback row {{ $errors->has('password') ? ' has-error ' : '' }}">
+                                                                <div class="mb-3 has-feedback row {{ $errors->has('password') ? ' has-error ' : '' }}">
                                                                     {!! Form::label('password', trans('forms.create_user_label_password'), array('class' => 'col-md-3 control-label')); !!}
                                                                     <div class="col-md-9">
                                                                         {!! Form::password('password', array('id' => 'password', 'class' => 'form-control ', 'placeholder' => trans('forms.create_user_ph_password'), 'autocomplete' => 'new-password')) !!}
@@ -292,7 +290,7 @@
                                                                     </div>
                                                                 </div>
 
-                                                                <div class="form-group has-feedback row {{ $errors->has('password_confirmation') ? ' has-error ' : '' }}">
+                                                                <div class="mb-3 has-feedback row {{ $errors->has('password_confirmation') ? ' has-error ' : '' }}">
                                                                     {!! Form::label('password_confirmation', trans('forms.create_user_label_pw_confirmation'), array('class' => 'col-md-3 control-label')); !!}
                                                                     <div class="col-md-9">
                                                                         {!! Form::password('password_confirmation', array('id' => 'password_confirmation', 'class' => 'form-control', 'placeholder' => trans('forms.create_user_ph_pw_confirmation'))) !!}
@@ -305,19 +303,19 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group row">
+                                                            <div class="mb-3 row">
                                                                 <div class="col-md-9 offset-md-3">
                                                                     {!! Form::button(
                                                                         '<i class="fa fa-fw fa-save" aria-hidden="true"></i> ' . trans('profile.submitPWButton'),
                                                                          array(
                                                                             'class'             => 'btn btn-warning',
-                                                                            'id'                => 'pw_save_trigger',
+                                                                            'id'                => 'account-password-edit-confirm',
                                                                             'disabled'          => true,
                                                                             'type'              => 'button',
                                                                             'data-submit'       => trans('profile.submitButton'),
-                                                                            'data-target'       => '#confirmForm',
+                                                                            'data-bs-target'    => '#confirm-form-modal',
                                                                             'data-modalClass'   => 'modal-warning',
-                                                                            'data-toggle'       => 'modal',
+                                                                            'data-bs-toggle'    => 'modal',
                                                                             'data-title'        => trans('modals.edit_user__modal_text_confirm_title'),
                                                                             'data-message'      => trans('modals.edit_user__modal_text_confirm_message')
                                                                     )) !!}
@@ -342,7 +340,7 @@
 
                                                                 {!! Form::model($user, array('action' => array('ProfilesController@deleteUserAccount', $user->id), 'method' => 'DELETE')) !!}
 
-                                                                    <div class="btn-group btn-group-vertical margin-bottom-2 custom-checkbox-fa" data-toggle="buttons">
+                                                                    <div class="btn-group btn-group-vertical margin-bottom-2 custom-checkbox-fa" data-bs-toggle="buttons">
                                                                         <label class="btn no-shadow" for="checkConfirmDelete" >
                                                                             <input type="checkbox" name='checkConfirmDelete' id="checkConfirmDelete">
                                                                             <i class="fa fa-square-o fa-fw fa-2x"></i>
@@ -355,12 +353,12 @@
                                                                         '<i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> ' . trans('profile.deleteAccountBtn'),
                                                                         array(
                                                                             'class'             => 'btn btn-block btn-danger',
-                                                                            'id'                => 'delete_account_trigger',
+                                                                            'id'                => 'account-delete-confirm',
                                                                             'disabled'          => true,
                                                                             'type'              => 'button',
-                                                                            'data-toggle'       => 'modal',
+                                                                            'data-bs-toggle'    => 'modal',
                                                                             'data-submit'       => trans('profile.deleteAccountBtnConfirm'),
-                                                                            'data-target'       => '#confirmForm',
+                                                                            'data-bs-target'    => '#confirm-form-modal',
                                                                             'data-modalClass'   => 'modal-danger',
                                                                             'data-title'        => trans('profile.deleteAccountConfirmTitle'),
                                                                             'data-message'      => trans('profile.deleteAccountConfirmMsg')
@@ -400,12 +398,41 @@
     @include('scripts.form-modal-script')
 
     @if(config('settings.googleMapsAPIStatus'))
+
+        <!-- {{-- Obsolete --}}
+        {!! HTML::script('//maps.googleapis.com/maps/api/js?key='.config("settings.googleMapsAPIKey").'&loading=async&libraries=places', array('type' => 'text/javascript')) !!}
+        -->
+        <script>
+        (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+            key: "{{ config("settings.googleMapsAPIKey") }}",
+            v: "weekly",
+            // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
+            // Add other bootstrap parameters as needed, using camel case.
+        });
+        </script>
+
         @include('scripts.gmaps-address-lookup-api3')
     @endif
 
     @include('scripts.user-avatar-dz')
 
-    <script type="text/javascript">
+    <script type="module">
+        var $profileSettingsEditConfirm = $('#profile-settings-edit-confirm');
+        var $accountSettingsEditConfirm = $('#account-settings-edit-confirm');
+        var $accountPasswordEditConfirm = $('#account-password-edit-confirm');
+        var $accountDeleteConfirm       = $('#account-delete-confirm');
+
+        var addInitiatorIdToConfirmFormModal = function(eventData)
+        {
+            var initiatorId = $(eventData.target).attr('id');
+            $('#confirm-form-modal').data('initiator-id', initiatorId);
+        };
+
+        $profileSettingsEditConfirm.click(addInitiatorIdToConfirmFormModal);
+        $accountSettingsEditConfirm.click(addInitiatorIdToConfirmFormModal);
+        $accountPasswordEditConfirm.click(addInitiatorIdToConfirmFormModal);
+        $accountDeleteConfirm.click(addInitiatorIdToConfirmFormModal);
+
 
         $('.dropdown-menu li a').click(function() {
             $('.dropdown-menu li').removeClass('active');
@@ -437,22 +464,20 @@
         });
 
         $('#user_basics_form').on('keyup change', 'input, select, textarea', function(){
-            $('#account_save_trigger').attr('disabled', false).removeClass('disabled').show();
+            $accountSettingsEditConfirm.attr('disabled', false).removeClass('disabled').show();
         });
 
         $('#user_profile_form').on('keyup change', 'input, select, textarea', function(){
-            $('#confirmFormSave').attr('disabled', false).removeClass('disabled').show();
+            $profileSettingsEditConfirm.attr('disabled', false).removeClass('disabled').show();
         });
 
         $('#checkConfirmDelete').change(function() {
-            var submitDelete = $('#delete_account_trigger');
-            var self = $(this);
+            var $self = $(this);
 
-            if (self.is(':checked')) {
-                submitDelete.attr('disabled', false);
-            }
-            else {
-                submitDelete.attr('disabled', true);
+            if ($self.is(':checked')) {
+                $accountDeleteConfirm.attr('disabled', false);
+            } else {
+                $accountDeleteConfirm.attr('disabled', true);
             }
         });
 
@@ -496,12 +521,10 @@
         function enableSubmitPWCheck() {
             var password = $("#password").val();
             var confirmPassword = $("#password_confirmation").val();
-            var submitChange = $('#pw_save_trigger');
             if (password != confirmPassword) {
-                submitChange.attr('disabled', true);
-            }
-            else {
-                submitChange.attr('disabled', false);
+                $accountPasswordEditConfirm.attr('disabled', true);
+            } else {
+                $accountPasswordEditConfirm.attr('disabled', false);
             }
         }
 

@@ -1,34 +1,150 @@
+import { defineConfig, splitVendorChunkPlugin, loadEnv } from "vite";
 import { createHtmlPlugin } from "vite-plugin-html";
-import { defineConfig, splitVendorChunkPlugin, loadEnv, Plugin } from "vite";
-import eslint from "vite-plugin-eslint";
 import { esbuildCommonjs } from "@originjs/vite-plugin-commonjs";
-import laravel from "laravel-vite-plugin";
-import legacy from "@vitejs/plugin-legacy";
-import manifestSRI from "vite-plugin-manifest-sri";
-import path from "path";
-import StylelintPlugin from "vite-plugin-stylelint";
-import { webUpdateNotice } from "@plugin-web-update-notification/vite";
 import { viteCommonjs } from "@originjs/vite-plugin-commonjs";
+import legacy from "@vitejs/plugin-legacy";
+import vue from "@vitejs/plugin-vue";
+import manifestSRI from "vite-plugin-manifest-sri";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import viteImagemin from "vite-plugin-imagemin";
-import vue from "@vitejs/plugin-vue";
 import Pages from "vite-plugin-pages";
 import generateSitemap from "vite-plugin-pages-sitemap";
-import "jquery";
-import $ from "jquery";
-import jQuery from "jquery";
+import { viteExternalsPlugin } from "vite-plugin-externals";
 
-export default ({ mode }) => {
+import laravel from "laravel-vite-plugin";
+import path from "path";
+import { webUpdateNotice } from "@plugin-web-update-notification/vite";
+
+// import eslint from "vite-plugin-eslint"; // not needed
+// import StylelintPlugin from "vite-plugin-stylelint"; // not needed
+
+const externalLibs = [
+  // "jquery",
+  // "Vue",
+];
+const externalGlobals = {
+  // jquery: "jQuery",
+  // vue: "Vue",
+};
+
+export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
-  return defineConfig({
-    optimizeDeps: {
-      force: true,
-      esbuildOptions: {
-        plugins: [esbuildCommonjs()],
+
+  let plugins = [
+    laravel({
+      input: ["resources/assets/sass/app.scss", "resources/assets/js/app.js"],
+      refresh: true,
+    }),
+    // StylelintPlugin({
+    //     fix: true,
+    //     quite: false,
+    //     lintOnStart: false,
+    // }),
+    // eslint({
+    //     cache: true,
+    //     fix: true,
+    //     lintOnStart: false,
+    //     emitWarning: true,
+    //     emitError: true,
+    //     failOnWarning: false,
+    //     failOnError: true,
+    // }),
+    vue({
+      template: {
+        transformAssetUrls: {
+          base: null,
+          includeAbsolute: false,
+        },
       },
-      include: ["jquery"],
-    },
+      features: {
+        prodDevtools: true,
+      },
+    }),
+    ViteMinifyPlugin({
+      minifyCSS: true,
+      removeComments: true,
+    }),
+    createHtmlPlugin({
+      minify: true,
+      entry: "resources/assets/js/app.js",
+    }),
+    viteCommonjs(),
+    manifestSRI(),
+    webUpdateNotice({
+      logVersion: true,
+      logHash: true,
+      checkInterval: 0.5 * 60 * 1000,
+      notificationProps: {
+        title: "system update",
+        description: "System update, please refresh the page",
+        buttonText: "refresh",
+      },
+    }),
+    viteStaticCopy({
+      targets: [
+        {
+          src: "node_modules/hideshowpassword/images/wink.svg",
+          dest: "../../public/images",
+        },
+        {
+          src: "node_modules/hideshowpassword/images/wink.png",
+          dest: "../../public/images",
+        },
+        // {
+        //     src: 'resources/img/favicon/favicon.ico',
+        //     dest: '../',
+        // },
+      ], // end targets
+    }), // end viteStaticCopy
+    viteImagemin({
+      gifsicle: {
+        optimizationLevel: 7,
+        interlaced: false,
+      },
+      optipng: {
+        optimizationLevel: 7,
+      },
+      mozjpeg: {
+        quality: 20,
+      },
+      pngquant: {
+        quality: [0.8, 0.9],
+        speed: 4,
+      },
+      svgo: {
+        plugins: [
+          {
+            name: "removeViewBox",
+          },
+          {
+            name: "removeEmptyAttrs",
+            active: false,
+          },
+        ],
+      },
+    }), // end viteImagemin
+    legacy({
+      targets: ["defaults", "not IE 11"],
+      polyfills: true,
+    }),
+    Pages({
+      onRoutesGenerated: async (routes) => {
+        generateSitemap({
+          hostname: process.env.VITE_APP_NAME,
+          routes: [...routes],
+          readable: true,
+          allowRobots: false,
+          filename: "sitemap.xml",
+        });
+      },
+    }),
+  ]; // end plugins
+
+  plugins.push(viteExternalsPlugin(externalGlobals, { disableInServe: true }));
+
+  const config = {
+    plugins: plugins,
     build: {
       ssr: false,
       minify: "esnext",
@@ -37,7 +153,7 @@ export default ({ mode }) => {
       manifest: true,
       sourcemap: process.env.VITE_APP_ENV == "local" ? true : false,
       rollupOptions: {
-        external: ["Vue"],
+        external: externalLibs,
         output: {
           manualChunks(id, { getModuleInfo }) {
             const match = /.*\.strings\.(\w+)\.js/.exec(id);
@@ -67,190 +183,77 @@ export default ({ mode }) => {
                 return `shared.strings.${language}`;
               }
             }
-          },
-          globals: {
-            vue: "Vue",
-          },
-        },
-      },
+          }, // end manualChunks
+          globals: externalGlobals,
+        }, // end output
+      }, // end rollupOptions
       modulePreload: {
         polyfill: true,
       },
       commonjsOptions: {
-        include: [/node_modules/],
+        include: [/node_modules/, /resources\/assets\/js\/vendor/],
       },
+    }, // end build
+    optimizeDeps: {
+      force: true,
+      esbuildOptions: {
+        plugins: [esbuildCommonjs()],
+      },
+      exclude: externalLibs,
     },
-    plugins: [
-      laravel({
-        input: ["resources/assets/sass/app.scss", "resources/assets/js/app.js"],
-        refresh: true,
-      }),
-      // StylelintPlugin({
-      //   fix: true,
-      //   quite: false,
-      //   lintOnStart: false,
-      // }),
-      // eslint({
-      //   cache: true,
-      //   fix: true,
-      //   lintOnStart: false,
-      //   emitWarning: true,
-      //   emitError: true,
-      //   failOnWarning: false,
-      //   failOnError: true,
-      // }),
-      vue({
-        template: {
-          transformAssetUrls: {
-            base: null,
-            includeAbsolute: false,
-          },
-        },
-      }),
-      ViteMinifyPlugin({
-        minifyCSS: true,
-        removeComments: true,
-      }),
-      createHtmlPlugin({
-        minify: true,
-        entry: "resources/assets/js/app.js",
-      }),
-      viteCommonjs(),
-      manifestSRI(),
-      webUpdateNotice({
-        logVersion: true,
-        logHash: true,
-        checkInterval: 0.5 * 60 * 1000,
-        notificationProps: {
-          title: "system update",
-          description: "System update, please refresh the page",
-          buttonText: "refresh",
-        },
-      }),
-      viteStaticCopy({
-        targets: [
-          {
-            src: "node_modules/hideshowpassword/images/wink.svg",
-            dest: "assets/",
-          },
-          {
-            src: "node_modules/hideshowpassword/images/wink.png",
-            dest: "assets/",
-          },
-          // {
-          //   src: 'resources/img/favicon/favicon.ico',
-          //   dest: '../',
-          // },
-          // {
-          //   src: 'resources/img/favicon/favicon-32x32.png',
-          //   dest: '../',
-          // },
-          // {
-          //   src: 'resources/img/favicon/android-chrome-192x192.png',
-          //   dest: '../',
-          // },
-          // {
-          //   src: 'resources/img/favicon/android-chrome-512x512.png',
-          //   dest: '../',
-          // },
-          // {
-          //   src: 'resources/img/favicon/apple-touch-icon.png',
-          //   dest: '../',
-          // },
-          // {
-          //   src: 'resources/img/favicon/favicon-16x16.png',
-          //   dest: '../',
-          // },
-          // {
-          //   src: 'resources/img/favicon/favicon.ico',
-          //   dest: '../',
-          // },
-          // {
-          //   src: 'resources/img/favicon/favicon.ico',
-          //   dest: '',
-          // },
-          // {
-          //   src: 'resources/img/favicon/favicon-32x32.png',
-          //   dest: '',
-          // },
-          // {
-          //   src: 'resources/img/favicon/android-chrome-192x192.png',
-          //   dest: '',
-          // },
-          // {
-          //   src: 'resources/img/favicon/android-chrome-512x512.png',
-          //   dest: '',
-          // },
-          // {
-          //   src: 'resources/img/favicon/apple-touch-icon.png',
-          //   dest: '',
-          // },
-          // {
-          //   src: 'resources/img/favicon/favicon-16x16.png',
-          //   dest: '',
-          // },
-          // {
-          //   src: 'resources/img/favicon/favicon.ico',
-          //   dest: '',
-          // },
-        ],
-      }),
-      viteImagemin({
-        gifsicle: {
-          optimizationLevel: 7,
-          interlaced: false,
-        },
-        optipng: {
-          optimizationLevel: 7,
-        },
-        mozjpeg: {
-          quality: 20,
-        },
-        pngquant: {
-          quality: [0.8, 0.9],
-          speed: 4,
-        },
-        svgo: {
-          plugins: [
-            {
-              name: "removeViewBox",
-            },
-            {
-              name: "removeEmptyAttrs",
-              active: false,
-            },
-          ],
-        },
-      }),
-      legacy({
-        targets: ["defaults", "not IE 11"],
-        polyfills: true,
-      }),
-      Pages({
-        onRoutesGenerated: async (routes) => {
-          generateSitemap({
-            hostname: process.env.VITE_APP_NAME,
-            routes: [...routes],
-            readable: true,
-            allowRobots: false,
-            filename: "sitemap.xml",
-          });
-        },
-      }),
-    ],
     sourcemap: true,
     resolve: {
       alias: {
+        $: "jQuery",
+        tempusDominus: "TempusDominus",
         "~": path.resolve(__dirname, "node_modules"),
         "~bootstrap": path.resolve(__dirname, "node_modules/bootstrap"),
-        "~font-awesome": path.resolve(__dirname, "node_modules/font-awesome"),
+        "~selectize": path.resolve(
+          __dirname,
+          "node_modules/@selectize/selectize",
+        ),
+        "~tempus-dominus": path.resolve(
+          __dirname,
+          "node_modules/@eonasdan/tempus-dominus",
+        ),
+        "~jquery-tempus-dominus": path.resolve(
+          __dirname,
+          "resources/assets/js/vendor/jquery-tempus-dominus",
+        ),
+        "~jquery-mask": path.resolve(
+          __dirname,
+          "node_modules/jquery-mask-plugin",
+        ),
+        "~datatables": path.resolve(
+          __dirname,
+          "node_modules/datatables.net-bs5",
+        ),
+        "~bootstrap5-toggle": path.resolve(
+          __dirname,
+          "node_modules/bootstrap5-toggle",
+        ),
+        "~jquery-bootstrap5-toggle": path.resolve(
+          __dirname,
+          "resources/assets/js/vendor/jquery-bootstrap5-toggle",
+        ),
         "@js": path.resolve(__dirname, "resources/assets/js"),
         "@sass": path.resolve(__dirname, "resources/assets/sass"),
+        "~hideshowpassword": path.resolve(
+          __dirname,
+          "node_modules/hideshowpassword",
+        ),
+        "~password-strength-meter": path.resolve(
+          __dirname,
+          "resources/assets/js/vendor/password-strength-meter",
+        ),
+        // "~font-awesome": path.resolve(__dirname, "node_modules/font-awesome"),
       },
     },
     server: {
       port: 8080,
       hot: true,
     },
-  });
-};
+  }; // end config
+
+  return config;
+});

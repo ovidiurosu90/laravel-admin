@@ -56,18 +56,18 @@ return [
     'blockerBladePlacementJs'       => env('LARAVEL_BLOCKER_BLADE_PLACEMENT_JS', 'inline_footer_scripts'),
 
     // jQuery
-    'enablejQueryCDN'               => env('LARAVEL_BLOCKER_JQUERY_CDN_ENABLED', true),
+    'enablejQueryCDN'               => env('LARAVEL_BLOCKER_JQUERY_CDN_ENABLED', false),
     'JQueryCDN'                     => env('LARAVEL_BLOCKER_JQUERY_CDN_URL', 'https://code.jquery.com/jquery-3.3.1.min.js'),
 
     // Font Awesome
     'blockerEnableFontAwesomeCDN'   => env('LARAVEL_BLOCKER_FONT_AWESOME_CDN_ENABLED', true),
-    'blockerFontAwesomeCDN'         => env('LARAVEL_BLOCKER_FONT_AWESOME_CDN_URL', 'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'),
+    'blockerFontAwesomeCDN'         => env('LARAVEL_BLOCKER_FONT_AWESOME_CDN_URL', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css'),
 
     // Bootstrap Tooltips
     'tooltipsEnabled'               => env('LARAVEL_BLOCKER_TOOLTIPS_ENABLED', false),
 
     // jQuery IP Mask
-    'jQueryIpMaskEnabled'           => env('LARAVEL_BLOCKER_JQUERY_IP_MASK_ENABLED', true),
+    'jQueryIpMaskEnabled'           => env('LARAVEL_BLOCKER_JQUERY_IP_MASK_ENABLED', false),
     'jQueryIpMaskCDN'               => env('LARAVEL_BLOCKER_JQUERY_IP_MASK_CDN', 'https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js'),
 
     // Flash Messaging

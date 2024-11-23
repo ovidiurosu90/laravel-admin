@@ -12,7 +12,7 @@
         {!! HTML::icon_link(route('social.redirect',['provider' => 'github']), 'fa-brands fa-github', 'GitHub', array('class' => 'btn btn-block btn-social btn-github')) !!}
     </div>
     <div class="col-sm-6 mb-2">
-        {!! HTML::icon_link(route('social.redirect',['provider' => 'youtube']), 'fa-brands-brands fa-youtube', 'YouTube', array('class' => 'btn btn-block btn-social btn-youtube btn-danger')) !!}
+        {!! HTML::icon_link(route('social.redirect',['provider' => 'youtube']), 'fa-brands fa-youtube', 'YouTube', array('class' => 'btn btn-block btn-social btn-youtube btn-danger')) !!}
     </div>
     <div class="col-sm-6 mb-2">
         {!! HTML::icon_link(route('social.redirect',['provider' => 'twitch']), 'fa-brands fa-twitch', 'Twitch', array('class' => 'btn btn-block btn-social btn-twitch btn-info')) !!}

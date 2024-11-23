@@ -1,0 +1,8 @@
+{
+    "bitbucket-oauth": {
+        "bitbucket.org": {
+            "consumer-key": "Paste your consumer key here",
+            "consumer-secret": "Paste your consumer secret here"
+        }
+    }
+}

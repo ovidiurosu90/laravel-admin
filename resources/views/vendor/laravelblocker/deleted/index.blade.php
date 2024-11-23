@@ -45,13 +45,13 @@
                                 {!! trans('laravelblocker::laravelblocker.blocked-items-deleted-title') !!}
                             </span>
                             <div class="btn-group pull-right btn-group-xs">
-                                <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fa fa-ellipsis-v fa-fw" aria-hidden="true"></i>
-                                    <span class="sr-only">
+                                    <span class="visually-hidden">
                                         {!! trans('laravelblocker::laravelblocker.users-menu-alt') !!}
                                     </span>
                                 </button>
-                                <div class="dropdown-menu dropdown-menu-right">
+                                <div class="dropdown-menu dropdown-menu-end">
                                     <a href="{{ url('blocker') }}" class="dropdown-item">
                                         <i class="fa fa-fw fa-reply" aria-hidden="true"></i>
                                         {!! trans('laravelblocker::laravelblocker.buttons.back-to-blocked') !!}
@@ -76,13 +76,13 @@
     </div>
 
     @include('laravelblocker::modals.confirm-modal', [
-        'formTrigger' => 'confirmDelete',
+        'formTrigger' => 'confirm-delete-modal',
         'modalClass' => 'danger',
         'actionBtnIcon' => 'fa-trash-o'
     ])
 
     @include('laravelblocker::modals.confirm-modal',[
-        'formTrigger' => 'confirmRestore',
+        'formTrigger' => 'confirm-restore-modal',
         'modalClass' => 'success',
         'actionBtnIcon' => 'fa-check'
     ])
@@ -97,8 +97,8 @@
         @include('laravelblocker::scripts.datatables')
     @endif
 
-    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => '#confirmDelete'])
-    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => '#confirmRestore'])
+    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => 'confirm-delete-modal'])
+    @include('laravelblocker::scripts.confirm-modal', ['formTrigger' => 'confirm-restore-modal'])
 
     @if(config('laravelblocker.tooltipsEnabled'))
         @include('laravelblocker::scripts.tooltips')

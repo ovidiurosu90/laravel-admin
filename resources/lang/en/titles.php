@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     'app'               => 'Laravel',
     'app2'              => 'Auth :version',
     'auth'              => 'Auth',
@@ -38,3 +37,4 @@ return [
 
     'laravelroles'      => 'Roles Administration',
 ];
+
