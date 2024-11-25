@@ -18,12 +18,14 @@ use Illuminate\Support\Facades\Route;
 
 // Homepage Route
 Route::group(['middleware' => ['web', 'checkblocked']], function () {
-    Route::get('/', 'App\Http\Controllers\WelcomeController@welcome')->name('welcome');
+    // Route::get('/', 'App\Http\Controllers\WelcomeController@welcome')->name('welcome'); // allow home to be managed by a vendor package
     Route::get('/terms', 'App\Http\Controllers\TermsController@terms')->name('terms');
 });
 
 // Authentication Routes
-Auth::routes();
+Auth::routes([
+    'register' => false, // Disable register until we add user restrictions to all assets
+]);
 
 // Public Routes
 Route::group(['middleware' => ['web', 'activity', 'checkblocked']], function () {

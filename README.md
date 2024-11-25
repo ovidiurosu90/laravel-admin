@@ -22,15 +22,15 @@ Please check the original [README.md](README-laravel-auth.md).
 ## Installation instructions
 
 ```bash
-sudo apt-get install php-intl php-dom php-mysql php-mbstring php-gd htop
+sudo apt-get install php-intl php-dom php-mysql php-mbstring php-gd htop colordiff
 
 mysql -uroot -p
-    CREATE DATABASE [DB_NAME];
+    CREATE DATABASE [DB_DATABASE];
     CREATE USER '[DB_USERNAME]'@'localhost' IDENTIFIED WITH mysql_native_password BY '[DB_PASSWORD]';
-    GRANT ALL PRIVILEGES ON [DB_NAME].* TO '[DB_USERNAME]'@'localhost';
+    GRANT ALL PRIVILEGES ON [DB_DATABASE].* TO '[DB_USERNAME]'@'localhost';
     exit
 
-mysql -u[DB_USERNAME] -p [DB_NAME] # use the password set above
+mysql -u[DB_USERNAME] -p [DB_DATABASE] # use [DB_PASSWORD] set above
 
 
 cp .env.example .env
@@ -119,6 +119,7 @@ php artisan vendor:publish --tag=laravelblocker-migrations
 chmod 775 database/seeders/*
 ls -la database/seeders/
 
+#NOTE Execute the following the the vendor assets or the Database Seeds were not already run above
 php artisan vendor:publish --tag=laravelblocker-seeds
 php artisan db:seed
 ```
@@ -147,5 +148,36 @@ php artisan view:clear
 yarn install
 yarn run dev
 yarn run prod
+```
+
+## Check README.md from ovidiuro/myfinance2 and follow the installation instructions
+
+## Cleanup after full install
+
+After you registered and ensured that everything works fine, clean up the default users.
+
+```bash
+mysql -u[DB_USERNAME] -p [DB_DATABASE] # use [DB_PASSWORD] set above
+    select * from users;
+    delete from users where id <> [YOUR_USER_ID];
+
+    select * from role_user;
+    delete from role_user;
+
+    select * from roles;
+
+    -- Make yourself an admin
+    insert into role_user (role_id, user_id, created_at, updated_at) values (1, [YOUR_USER_ID], now(), now());
+```
+
+### Disable register until we add user restrictions to all assets
+
+```bash
+vim routes/web.php
+######################
+Auth::routes([
+    'register' => false, // Disable register until we add user restrictions to all assets
+]);
+######################
 ```
 
