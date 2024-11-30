@@ -100,13 +100,16 @@ Route::group(['middleware' => ['auth', 'activated', 'currentUser', 'activity', '
         'uses' => 'App\Http\Controllers\ProfilesController@deleteUserAccount',
     ]);
 
+    // Route to upload user avatar.
+    Route::post('avatar/upload', ['as' => 'avatar.upload', 'uses' => 'App\Http\Controllers\ProfilesController@upload']);
+});
+// Don't log activity
+Route::group(['middleware' => ['auth', 'activated', 'currentUser', 'twostep', 'checkblocked']], function ()
+{
     // Route to show user avatar
     Route::get('images/profile/{id}/avatar/{image}', [
         'uses' => 'App\Http\Controllers\ProfilesController@userProfileAvatar',
     ]);
-
-    // Route to upload user avatar.
-    Route::post('avatar/upload', ['as' => 'avatar.upload', 'uses' => 'App\Http\Controllers\ProfilesController@upload']);
 });
 
 // Registered, activated, and is admin routes.
