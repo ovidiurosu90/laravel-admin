@@ -10,6 +10,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "~hideshowpassword/hideShowPassword.js";
 import "~password-strength-meter/password.js";
 import "~selectize/dist/js/selectize.min.js";
+import "~selectize/dist/css/selectize.bootstrap5.css";
 import "~jquery-mask/dist/jquery.mask.min.js";
 import DataTable from "~datatables/js/dataTables.bootstrap5.min.js";
 import "~datatables/css/dataTables.bootstrap5.min.css";

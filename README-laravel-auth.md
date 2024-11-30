@@ -26,28 +26,28 @@ If you like this, you will love [Laravel Auth Spa](https://github.com/jeremykene
 
 #### Table of contents
 
--   [About](#about)
--   [Features](#features)
--   [Installation Instructions](#installation-instructions)
-    -   [Build the Front End Assets with Mix](#build-the-front-end-assets-with-mix)
-    -   [Optionally Build Cache](#optionally-build-cache)
--   [Seeds](#seeds)
-    -   [Seeded Roles](#seeded-roles)
-    -   [Seeded Permissions](#seeded-permissions)
-    -   [Seeded Users](#seeded-users)
-    -   [Themes Seed List](#themes-seed-list)
--   [Routes](#routes)
--   [Socialite](#socialite)
-    -   [Get Socialite Login API Keys](#get-socialite-login-api-keys)
-    -   [Add More Socialite Logins](#add-more-socialite-logins)
--   [Other API keys](#other-api-keys)
--   [Environment File](#environment-file)
--   [Updates](#updates)
--   [Screenshots](#screenshots)
--   [File Tree](#file-tree)
--   [Opening an Issue](#opening-an-issue)
--   [Laravel Auth License](#laravel-auth-license)
--   [Contributors](#Contributors)
+- [About](#about)
+- [Features](#features)
+- [Installation Instructions](#installation-instructions)
+    - [Build the Front End Assets with Mix](#build-the-front-end-assets-with-mix)
+    - [Optionally Build Cache](#optionally-build-cache)
+- [Seeds](#seeds)
+    - [Seeded Roles](#seeded-roles)
+    - [Seeded Permissions](#seeded-permissions)
+    - [Seeded Users](#seeded-users)
+    - [Themes Seed List](#themes-seed-list)
+- [Routes](#routes)
+- [Socialite](#socialite)
+    - [Get Socialite Login API Keys](#get-socialite-login-api-keys)
+    - [Add More Socialite Logins](#add-more-socialite-logins)
+- [Other API keys](#other-api-keys)
+- [Environment File](#environment-file)
+- [Updates](#updates)
+- [Screenshots](#screenshots)
+- [File Tree](#file-tree)
+- [Opening an Issue](#opening-an-issue)
+- [Laravel Auth License](#laravel-auth-license)
+- [Contributors](#Contributors)
 
 ### About
 
@@ -141,14 +141,14 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
 2. From the projects root folder run `yarn install`
 3. From the projects root folder run `yarn run dev` or `yarn run production`
 
--   You can watch assets with `yarn run watch`
+- You can watch assets with `yarn run watch`
 
 ##### Using NPM:
 
 1. From the projects root folder run `npm install`
 2. From the projects root folder run `npm run dev` or `npm run production`
 
--   You can watch assets with `npm run watch`
+- You can watch assets with `npm run watch`
 
 #### Optionally Build Cache
 
@@ -160,16 +160,16 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
 
 ##### Seeded Roles
 
--   Unverified - Level 0
--   User - Level 1
--   Administrator - Level 5
+- Unverified - Level 0
+- User - Level 1
+- Administrator - Level 5
 
 ##### Seeded Permissions
 
--   view.users
--   create.users
--   edit.users
--   delete.users
+- view.users
+- create.users
+- edit.users
+- delete.users
 
 ##### Seeded Users
 
@@ -180,12 +180,12 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
 
 ##### Themes Seed List
 
--   [ThemesTableSeeder](https://github.com/jeremykenedy/laravel-auth/blob/master/database/seeders/ThemesTableSeeder.php)
--   NOTE: A lot of themes render incorrectly on Bootstrap 4 since their core was built to override Bootstrap 4. These will be updated soon and ones that do not render correctly will be removed from the seed. In the mean time you can remove them from the seed or manaully from the UI or database.
+- [ThemesTableSeeder](https://github.com/jeremykenedy/laravel-auth/blob/master/database/seeders/ThemesTableSeeder.php)
+- NOTE: A lot of themes render incorrectly on Bootstrap 4 since their core was built to override Bootstrap 4. These will be updated soon and ones that do not render correctly will be removed from the seed. In the mean time you can remove them from the seed or manaully from the UI or database.
 
 ##### Blocked Types Seed List
 
--   [BlockedTypeTableSeeder.php](https://github.com/jeremykenedy/laravel-auth/blob/master/database/seeders/BlockedTypeTableSeeder.php)
+- [BlockedTypeTableSeeder.php](https://github.com/jeremykenedy/laravel-auth/blob/master/database/seeders/BlockedTypeTableSeeder.php)
 
 | Slug        | Name         |
 | :---------- | :----------- |
@@ -202,7 +202,7 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
 
 ##### Blocked Items Seed List
 
--   [BlockedItemsTableSeeder.php](https://github.com/jeremykenedy/laravel-auth/blob/master/database/seeders/BlockedItemsTableSeeder.php)
+- [BlockedItemsTableSeeder.php](https://github.com/jeremykenedy/laravel-auth/blob/master/database/seeders/BlockedItemsTableSeeder.php)
 
 | Type   | Value          | Note                                     |
 | :----- | :------------- | :--------------------------------------- |
@@ -337,19 +337,19 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
 
 #### Get Socialite Login API Keys:
 
--   [Google Captcha API](https://www.google.com/recaptcha/admin#list)
--   [Facebook API](https://developers.facebook.com/)
--   [Twitter API](https://apps.twitter.com/)
--   [Google &plus; API](https://console.developers.google.com/)
--   [GitHub API](https://github.com/settings/applications/new)
--   [YouTube API](https://developers.google.com/youtube/v3/getting-started)
--   [Twitch TV API](https://www.twitch.tv/kraken/oauth2/clients/new)
--   [Instagram API](https://instagram.com/developer/register/)
--   [37 Signals API](https://github.com/basecamp/basecamp-classic-api)
+- [Google Captcha API](https://www.google.com/recaptcha/admin#list)
+- [Facebook API](https://developers.facebook.com/)
+- [Twitter API](https://apps.twitter.com/)
+- [Google &plus; API](https://console.developers.google.com/)
+- [GitHub API](https://github.com/settings/applications/new)
+- [YouTube API](https://developers.google.com/youtube/v3/getting-started)
+- [Twitch TV API](https://www.twitch.tv/kraken/oauth2/clients/new)
+- [Instagram API](https://instagram.com/developer/register/)
+- [37 Signals API](https://github.com/basecamp/basecamp-classic-api)
 
 #### Add More Socialite Logins
 
--   See full list of providers: [https://socialiteproviders.github.io](https://socialiteproviders.github.io/#providers)
+- See full list of providers: [https://socialiteproviders.github.io](https://socialiteproviders.github.io/#providers)
 
 ###### **Steps**:
 
@@ -404,7 +404,7 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
 
 ### Other API keys
 
--   [Google Maps API v3 Key](https://developers.google.com/maps/documentation/javascript/get-api-key#get-an-api-key)
+- [Google Maps API v3 Key](https://developers.google.com/maps/documentation/javascript/get-api-key#get-an-api-key)
 
 ### Environment File
 
@@ -615,59 +615,59 @@ INSTAGRAM_REDIRECT_URI=https://YOURWEBURLHERE.COM/social/handle/instagram
 
 #### Laravel Developement Packages Used References
 
--   https://laravel.com/docs/master/authentication
--   https://laravel.com/docs/master/authorization
--   https://laravel.com/docs/master/routing
--   https://laravel.com/docs/master/migrations
--   https://laravel.com/docs/master/queries
--   https://laravel.com/docs/master/views
--   https://laravel.com/docs/master/eloquent
--   https://laravel.com/docs/master/eloquent-relationships
--   https://laravel.com/docs/master/requests
--   https://laravel.com/docs/master/errors
+- https://laravel.com/docs/master/authentication
+- https://laravel.com/docs/master/authorization
+- https://laravel.com/docs/master/routing
+- https://laravel.com/docs/master/migrations
+- https://laravel.com/docs/master/queries
+- https://laravel.com/docs/master/views
+- https://laravel.com/docs/master/eloquent
+- https://laravel.com/docs/master/eloquent-relationships
+- https://laravel.com/docs/master/requests
+- https://laravel.com/docs/master/errors
 
 ###### Updates:
 
--   Update to Laravel 10 (Major Changes)
--   Update to Laravel 9
--   Update to Laravel 8
--   Update to Laravel 7 [See changes in this PR](https://github.com/jeremykenedy/laravel-auth/pull/348/files)
--   Update to Laravel 6
--   Update to Laravel 5.8
--   Added [Laravel Blocker Package](https://github.com/jeremykenedy/laravel-blocker)
--   Added [PHP Info Package](https://github.com/jeremykenedy/laravel-phpinfo)
--   Update to Bootstrap 4
--   Update to Laravel 5.7
--   Added optional 2-step account login verfication with [Laravel 2-Step Verification](https://github.com/jeremykenedy/laravel2step)
--   Added activity logging using [Laravel-logger](https://github.com/jeremykenedy/laravel-logger)
--   Added Configurable Email Notification using [Laravel-Exception-Notifier](https://github.com/jeremykenedy/laravel-exception-notifier)
--   Update to Laravel 5.5
--   Added User Delete with Goodbye email
--   Added User Restore Deleted Account from email with secure token
--   Added [Soft Deletes](https://laravel.com/docs/master/eloquent#soft-deleting) and Soft Deletes Management panel
--   Added User Account Settings to Profile Edit
--   Added User Change Password to Profile Edit
--   Added User Delete Account to Profile Edit
--   Added [Password Strength Meter](https://github.com/elboletaire/password-strength-meter)
--   Added [hideShowPassword](https://github.com/cloudfour/hideShowPassword)
--   Added Admin Routing Details
--   Admin PHP Information
--   Added Robust [Laravel Logging](https://laravel.com/docs/master/errors#logging) with admin UI using MonoLog
--   Added Active Nav states using [Laravel Requests](https://laravel.com/docs/master/requests)
--   Added [Laravel Debugger](https://github.com/barryvdh/laravel-debugbar) with Service Provider to manage status in `.env` file.
--   Updated Capture IP not found IP address
--   Added User Avatar Image AJAX Upload with [Dropzone.js](http://www.dropzonejs.com/#configuration)
--   Added User Gravatar using Gravatar API
--   Added Themes Management.
--   Add user profiles with seeded list and global view
--   Major overhaul on Laravel 5.4
--   Update from Laravel 5.1 to 5.2
--   Added eloquent editable user profile
--   Added IP Capture
--   Added Google Maps API v3 for User Location lookup
--   Added Google Maps API v3 for User Location Input Geocoding
--   Added Google Maps API v3 for User Location Map with Options
--   Added CRUD(Create, Read, Update, Delete) User Management
+- Update to Laravel 10 (Major Changes)
+- Update to Laravel 9
+- Update to Laravel 8
+- Update to Laravel 7 [See changes in this PR](https://github.com/jeremykenedy/laravel-auth/pull/348/files)
+- Update to Laravel 6
+- Update to Laravel 5.8
+- Added [Laravel Blocker Package](https://github.com/jeremykenedy/laravel-blocker)
+- Added [PHP Info Package](https://github.com/jeremykenedy/laravel-phpinfo)
+- Update to Bootstrap 4
+- Update to Laravel 5.7
+- Added optional 2-step account login verfication with [Laravel 2-Step Verification](https://github.com/jeremykenedy/laravel2step)
+- Added activity logging using [Laravel-logger](https://github.com/jeremykenedy/laravel-logger)
+- Added Configurable Email Notification using [Laravel-Exception-Notifier](https://github.com/jeremykenedy/laravel-exception-notifier)
+- Update to Laravel 5.5
+- Added User Delete with Goodbye email
+- Added User Restore Deleted Account from email with secure token
+- Added [Soft Deletes](https://laravel.com/docs/master/eloquent#soft-deleting) and Soft Deletes Management panel
+- Added User Account Settings to Profile Edit
+- Added User Change Password to Profile Edit
+- Added User Delete Account to Profile Edit
+- Added [Password Strength Meter](https://github.com/elboletaire/password-strength-meter)
+- Added [hideShowPassword](https://github.com/cloudfour/hideShowPassword)
+- Added Admin Routing Details
+- Admin PHP Information
+- Added Robust [Laravel Logging](https://laravel.com/docs/master/errors#logging) with admin UI using MonoLog
+- Added Active Nav states using [Laravel Requests](https://laravel.com/docs/master/requests)
+- Added [Laravel Debugger](https://github.com/barryvdh/laravel-debugbar) with Service Provider to manage status in `.env` file.
+- Updated Capture IP not found IP address
+- Added User Avatar Image AJAX Upload with [Dropzone.js](http://www.dropzonejs.com/#configuration)
+- Added User Gravatar using Gravatar API
+- Added Themes Management.
+- Add user profiles with seeded list and global view
+- Major overhaul on Laravel 5.4
+- Update from Laravel 5.1 to 5.2
+- Added eloquent editable user profile
+- Added IP Capture
+- Added Google Maps API v3 for User Location lookup
+- Added Google Maps API v3 for User Location Input Geocoding
+- Added Google Maps API v3 for User Location Map with Options
+- Added CRUD(Create, Read, Update, Delete) User Management
 
 ### Screenshots
 
@@ -1089,20 +1089,20 @@ laravel-auth
 └── webpack.mix.js
 ```
 
--   Tree command can be installed using brew: `brew install tree`
--   File tree generated using command `tree -a -I '.git|node_modules|vendor|storage|tests'`
+- Tree command can be installed using brew: `brew install tree`
+- File tree generated using command `tree -a -I '.git|node_modules|vendor|storage|tests'`
 
 ### Opening an Issue
 
 Before opening an issue there are a couple of considerations:
 
--   You are all awesome!
--   **Please Read the instructions** and make sure all steps were _followed correctly_.
--   **Please Check** that the issue is not _specific to the development environment_ setup.
--   **Please Provide** _duplication steps_.
--   **Please Attempt to look into the issue**, and if you _have a solution, make a pull request_.
--   **Please Show that you have made an attempt** to _look into the issue_.
--   **Please Check** to see if the issue you are _reporting is a duplicate_ of a previous reported issue.
+- You are all awesome!
+- **Please Read the instructions** and make sure all steps were _followed correctly_.
+- **Please Check** that the issue is not _specific to the development environment_ setup.
+- **Please Provide** _duplication steps_.
+- **Please Attempt to look into the issue**, and if you _have a solution, make a pull request_.
+- **Please Show that you have made an attempt** to _look into the issue_.
+- **Please Check** to see if the issue you are _reporting is a duplicate_ of a previous reported issue.
 
 ### Laravel Auth License
 
@@ -1110,5 +1110,5 @@ Licensed under the [MIT license](https://opensource.org/licenses/MIT). Enjoy!
 
 ### Contributors
 
--   Thanks goes to these [wonderful people](https://github.com/jeremykenedy/laravel-auth/graphs/contributors):
--   Please feel free to contribute and make pull requests!
+- Thanks goes to these [wonderful people](https://github.com/jeremykenedy/laravel-auth/graphs/contributors):
+- Please feel free to contribute and make pull requests!

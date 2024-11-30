@@ -12,7 +12,6 @@ Laravel application for managing accounts and their assets
 - routing details
 - blocker
 
-
 ## Original Source
 
 Forked from [jeremykenedy/laravel-auth](https://github.com/jeremykenedy/laravel-auth) from Nov 17, 2024.
@@ -138,7 +137,6 @@ mkdir -p ~/.composer/; cp auth.json.example ~/.composer/auth.json
 vim ~/.composer/auth.json
 ```
 
-
 ## Build the Back End and Front End Assets
 
 ```bash
@@ -180,4 +178,3 @@ Auth::routes([
 ]);
 ######################
 ```
-
