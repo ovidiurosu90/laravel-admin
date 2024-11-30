@@ -91,11 +91,13 @@
 
 
                         @if(config('settings.reCaptchStatus'))
-                            <div class="mb-3">
-                                <div class="col-sm-6 col-sm-offset-4">
-                                    <div class="g-recaptcha" data-sitekey="{{ config('settings.reCaptchSite') }}"></div>
-                                </div>
+                        <div class="mb-3 row">
+                            <label for="captcha-containter" class="col-md-4 col-form-label text-md-end pt-4">Captcha</label>
+
+                            <div class="col-md-6">
+                                <div id="captcha-containter" class="g-recaptcha" data-sitekey="{{ config('settings.reCaptchSite') }}"></div>
                             </div>
+                        </div>
                         @endif
 
                         <div class="mb-3 row mb-4">

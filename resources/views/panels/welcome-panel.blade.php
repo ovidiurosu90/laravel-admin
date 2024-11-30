@@ -4,7 +4,6 @@
 
     if (Auth::User()->level() >= 2) {
         $levelAmount = 'levels';
-
     }
 
 @endphp
@@ -29,22 +28,6 @@
         <h2 class="lead">
             {{ trans('auth.loggedIn') }}
         </h2>
-        <p>
-            <em>Thank you</em> for checking this project out. <strong>Please remember to star it!</strong>
-        </p>
-        <p>
-            <iframe src="https://ghbtns.com/github-btn.html?user=jeremykenedy&repo=laravel-auth&type=star&count=true" frameborder="0" scrolling="0" width="170px" height="20px" style="margin: 0px 0 -3px .5em;"></iframe>
-        </p>
-        <p>
-            This page route is protected by <code>activated</code> middleware. Only accounts with activated emails are able pass this middleware.
-        </p>
-        <p>
-            <small>
-                Users registered via Social providers are by default activated.
-            </small>
-        </p>
-
-        <hr>
 
         <p>
             You have
@@ -84,39 +67,52 @@
             @endlevel
         </p>
 
-        @role('admin')
+        <hr>
 
-            <hr>
+        <p>
+            You have roles:
+            @foreach (Auth::user()->getRoles() as $role)
+                <span class="badge text-bg-secondary margin-half margin-left-0">
+                    {{ $role->name }}
+                </span>
+            @endforeach
+        </p>
 
-            <p>
-                You have permissions:
-                @permission('view.users')
-                    <span class="badge text-bg-primary margin-half margin-left-0">
-                        {{ trans('permsandroles.permissionView') }}
-                    </span>
-                @endpermission
+        <hr>
 
-                @permission('create.users')
-                    <span class="badge text-bg-info margin-half margin-left-0">
-                        {{ trans('permsandroles.permissionCreate') }}
-                    </span>
-                @endpermission
+        <p>
+            You have permissions:
+            @permission('view.users')
+                <span class="badge text-bg-primary margin-half margin-left-0">
+                    {{ trans('permsandroles.permissionView') }}
+                </span>
+            @endpermission
 
-                @permission('edit.users')
-                    <span class="badge text-bg-warning margin-half margin-left-0">
-                        {{ trans('permsandroles.permissionEdit') }}
-                    </span>
-                @endpermission
+            @permission('create.users')
+                <span class="badge text-bg-info margin-half margin-left-0">
+                    {{ trans('permsandroles.permissionCreate') }}
+                </span>
+            @endpermission
 
-                @permission('delete.users')
-                    <span class="badge text-bg-danger margin-half margin-left-0">
-                        {{ trans('permsandroles.permissionDelete') }}
-                    </span>
-                @endpermission
+            @permission('edit.users')
+                <span class="badge text-bg-warning margin-half margin-left-0">
+                    {{ trans('permsandroles.permissionEdit') }}
+                </span>
+            @endpermission
 
-            </p>
+            @permission('delete.users')
+                <span class="badge text-bg-danger margin-half margin-left-0">
+                    {{ trans('permsandroles.permissionDelete') }}
+                </span>
+            @endpermission
 
-        @endrole
+            <br>
 
+            @foreach (Auth::user()->getPermissions() as $permission)
+                <span class="badge text-bg-light margin-half margin-left-0">
+                    {{ $permission->name }}
+                </span>
+            @endforeach
+        </p>
     </div>
 </div>
