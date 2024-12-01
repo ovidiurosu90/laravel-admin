@@ -208,6 +208,7 @@ return [
         MacroServiceProvider::class,
 
         ovidiuro\myfinance2\MyFinance2ServiceProvider::class,
+        ovidiuro\adminmydata\AdminMyDataServiceProvider::class,
     ],
 
     /*

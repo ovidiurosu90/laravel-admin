@@ -50,7 +50,9 @@
     "nunomaduro/collision": "^7.0",
     "phpunit/phpunit": "^10.0",
     "spatie/laravel-ignition": "^2.0",
-    "barryvdh/laravel-debugbar": "^3.14.6"
+    "barryvdh/laravel-debugbar": "^3.14.6",
+    "dragon-code/laravel-data-dumper": "^1.1.0",
+    "ovidiuro/laravel-package-admin-mydata": "*"
   },
   "autoload": {
     "exclude-from-classmap": [
@@ -63,7 +65,9 @@
       "vendor/jeremykenedy/laravel-blocker/src/App/Traits/IpAddressDetails.php",
       "vendor/jeremykenedy/laravel-blocker/src/App/Http/Middleware/LaravelBlocker.php",
       "vendor/jeremykenedy/laravel-blocker/src/App/Http/Controllers/LaravelBlockerController.php",
-      "vendor/jeremykenedy/laravel-blocker/src/App/Http/Controllers/LaravelBlockerDeletedController.php"
+      "vendor/jeremykenedy/laravel-blocker/src/App/Http/Controllers/LaravelBlockerDeletedController.php",
+      "vendor/dragon-code/laravel-data-dumper/src/Listeners/DumpListener.php",
+      "vendor/dragon-code/laravel-data-dumper/src/Service/Tables.php"
     ],
     "psr-4": {
       "App\\": "app/",
@@ -76,7 +80,9 @@
       "jeremykenedy\\LaravelLogger\\App\\Listeners\\": "app/Listeners/Overrides/",
       "jeremykenedy\\LaravelBlocker\\App\\Traits\\": "app/Traits/Overrides/",
       "jeremykenedy\\LaravelBlocker\\App\\Http\\Middleware\\": "app/Http/Middleware/Overrides/",
-      "jeremykenedy\\LaravelBlocker\\App\\Http\\Controllers\\": "app/Http/Controllers/Overrides/"
+      "jeremykenedy\\LaravelBlocker\\App\\Http\\Controllers\\": "app/Http/Controllers/Overrides/",
+      "DragonCode\\LaravelDataDumper\\Listeners\\": "vendor/ovidiuro/laravel-package-admin-mydata/src/Listeners/Overrides/",
+      "DragonCode\\LaravelDataDumper\\Service\\": "vendor/ovidiuro/laravel-package-admin-mydata/src/Service/Overrides/"
     }
   },
   "autoload-dev": {
@@ -90,7 +96,9 @@
       "vendor/jeremykenedy/laravel-blocker/src/App/Traits/IpAddressDetails.php",
       "vendor/jeremykenedy/laravel-blocker/src/App/Http/Middleware/LaravelBlocker.php",
       "vendor/jeremykenedy/laravel-blocker/src/App/Http/Controllers/LaravelBlockerController.php",
-      "vendor/jeremykenedy/laravel-blocker/src/App/Http/Controllers/LaravelBlockerDeletedController.php"
+      "vendor/jeremykenedy/laravel-blocker/src/App/Http/Controllers/LaravelBlockerDeletedController.php",
+      "vendor/dragon-code/laravel-data-dumper/src/Listeners/DumpListener.php",
+      "vendor/dragon-code/laravel-data-dumper/src/Service/Tables.php"
     ],
     "psr-4": {
       "Tests\\": "tests/",
@@ -102,7 +110,9 @@
       "jeremykenedy\\LaravelLogger\\App\\Listeners\\": "app/Listeners/Overrides/",
       "jeremykenedy\\LaravelBlocker\\App\\Traits\\": "app/Traits/Overrides/",
       "jeremykenedy\\LaravelBlocker\\App\\Http\\Middleware\\": "app/Http/Middleware/Overrides/",
-      "jeremykenedy\\LaravelBlocker\\App\\Http\\Controllers\\": "app/Http/Controllers/Overrides/"
+      "jeremykenedy\\LaravelBlocker\\App\\Http\\Controllers\\": "app/Http/Controllers/Overrides/",
+      "DragonCode\\LaravelDataDumper\\Listeners\\": "vendor/ovidiuro/laravel-package-admin-mydata/src/Listeners/Overrides/",
+      "DragonCode\\LaravelDataDumper\\Service\\": "vendor/ovidiuro/laravel-package-admin-mydata/src/Service/Overrides/"
     }
   },
   "files": [
@@ -115,7 +125,9 @@
     "app/Listeners/Overrides/LogSuccessfulLogin.php",
     "app/Models/Overrides/Activity.php",
     "app/Traits/Overrides/LaravelCheckBlockedTrait.php",
-    "app/Traits/Overrides/IpAddressDetails.php"
+    "app/Traits/Overrides/IpAddressDetails.php",
+    "vendor/ovidiuro/laravel-package-admin-mydata/src/Listeners/Overrides/DumpListener.php",
+    "vendor/ovidiuro/laravel-package-admin-mydata/src/Service/Overrides/Tables.php"
   ],
   "scripts": {
     "post-autoload-dump": [
@@ -208,9 +220,115 @@
       }
     },
     {
+      "type": "package",
+      "package": {
+        "name": "dragon-code/laravel-data-dumper",
+        "description": "Adding data from certain tables when executing the `php artisan schema:dump` console command",
+        "license": "MIT",
+        "type": "library",
+        "keywords": [
+            "laravel",
+            "migration",
+            "migrations",
+            "database",
+            "schema",
+            "dumper",
+            "dump",
+            "squash",
+            "dragon-code",
+            "andrey-helldar"
+        ],
+        "authors": [
+            {
+                "name": "Andrey Helldar",
+                "email": "helldar@dragon-code.pro",
+                "homepage": "https://dragon-code.pro"
+            }
+        ],
+        "support": {
+            "issues": "https://github.com/TheDragonCode/laravel-data-dumper/issues",
+            "source": "https://github.com/TheDragonCode/laravel-data-dumper"
+        },
+        "funding": [
+            {
+                "type": "boosty",
+                "url": "https://boosty.to/dragon-code"
+            },
+            {
+                "type": "yoomoney",
+                "url": "https://yoomoney.ru/to/410012608840929"
+            },
+            {
+                "type": "donationalerts",
+                "url": "https://www.donationalerts.com/r/dragon_code"
+            }
+        ],
+        "require": {
+            "php": "^8.1|^8.2",
+            "composer-runtime-api": "^2.2",
+            "dragon-code/support": "^6.13",
+            "illuminate/config": "^10.0 || ^11.0",
+            "illuminate/database": "^10.0 || ^11.0",
+            "illuminate/support": "^10.0 || ^11.0"
+        },
+        "require-dev": {
+            "ext-pdo": "*",
+            "mockery/mockery": "^1.3.1",
+            "orchestra/testbench": "^8.0 || ^9.0",
+            "pestphp/pest": "^2.34"
+        },
+        "minimum-stability": "stable",
+        "prefer-stable": true,
+        "autoload": {
+            "psr-4": {
+                "DragonCode\\LaravelDataDumper\\": "src"
+            }
+        },
+        "autoload-dev": {
+            "psr-4": {
+                "Tests\\": "tests"
+            }
+        },
+        "config": {
+            "allow-plugins": {
+                "dragon-code/codestyler": true,
+                "ergebnis/composer-normalize": true,
+                "friendsofphp/php-cs-fixer": true,
+                "pestphp/pest-plugin": true,
+                "symfony/thanks": true
+            },
+            "preferred-install": "dist",
+            "sort-packages": true
+        },
+        "extra": {
+            "laravel": {
+                "providers": [
+                    "DragonCode\\LaravelDataDumper\\ServiceProvider"
+                ]
+            }
+        },
+        "scripts": {
+            "test": [
+                "vendor/bin/pest"
+            ]
+        },
+        "minimum-stability": "stable",
+        "version": "1.1.0",
+        "dist": {
+          "url": "https://github.com/TheDragonCode/laravel-data-dumper/archive/refs/tags/1.1.0.zip",
+          "type": "zip"
+        }
+      }
+    },
+    {
       "name": "ovidiuro/myfinance2",
       "type": "git",
       "url": "https://bitbucket.org/ovidiuro/laravel-package-myfinance2.git"
+    },
+    {
+      "name": "ovidiuro/laravel-package-admin-mydata",
+      "type": "git",
+      "url": "https://bitbucket.org/ovidiuro/laravel-package-admin-mydata.git"
     }
   ]
 }
