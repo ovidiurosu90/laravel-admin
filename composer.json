@@ -227,90 +227,90 @@
         "license": "MIT",
         "type": "library",
         "keywords": [
-            "laravel",
-            "migration",
-            "migrations",
-            "database",
-            "schema",
-            "dumper",
-            "dump",
-            "squash",
-            "dragon-code",
-            "andrey-helldar"
+          "laravel",
+          "migration",
+          "migrations",
+          "database",
+          "schema",
+          "dumper",
+          "dump",
+          "squash",
+          "dragon-code",
+          "andrey-helldar"
         ],
         "authors": [
-            {
-                "name": "Andrey Helldar",
-                "email": "helldar@dragon-code.pro",
-                "homepage": "https://dragon-code.pro"
-            }
+          {
+            "name": "Andrey Helldar",
+            "email": "helldar@dragon-code.pro",
+            "homepage": "https://dragon-code.pro"
+          }
         ],
         "support": {
-            "issues": "https://github.com/TheDragonCode/laravel-data-dumper/issues",
-            "source": "https://github.com/TheDragonCode/laravel-data-dumper"
+          "issues": "https://github.com/TheDragonCode/laravel-data-dumper/issues",
+          "source": "https://github.com/TheDragonCode/laravel-data-dumper"
         },
         "funding": [
-            {
-                "type": "boosty",
-                "url": "https://boosty.to/dragon-code"
-            },
-            {
-                "type": "yoomoney",
-                "url": "https://yoomoney.ru/to/410012608840929"
-            },
-            {
-                "type": "donationalerts",
-                "url": "https://www.donationalerts.com/r/dragon_code"
-            }
+          {
+            "type": "boosty",
+            "url": "https://boosty.to/dragon-code"
+          },
+          {
+            "type": "yoomoney",
+            "url": "https://yoomoney.ru/to/410012608840929"
+          },
+          {
+            "type": "donationalerts",
+            "url": "https://www.donationalerts.com/r/dragon_code"
+          }
         ],
         "require": {
-            "php": "^8.1|^8.2",
-            "composer-runtime-api": "^2.2",
-            "dragon-code/support": "^6.13",
-            "illuminate/config": "^10.0 || ^11.0",
-            "illuminate/database": "^10.0 || ^11.0",
-            "illuminate/support": "^10.0 || ^11.0"
+          "php": "^8.1|^8.2",
+          "composer-runtime-api": "^2.2",
+          "dragon-code/support": "^6.13",
+          "illuminate/config": "^10.0 || ^11.0",
+          "illuminate/database": "^10.0 || ^11.0",
+          "illuminate/support": "^10.0 || ^11.0"
         },
         "require-dev": {
-            "ext-pdo": "*",
-            "mockery/mockery": "^1.3.1",
-            "orchestra/testbench": "^8.0 || ^9.0",
-            "pestphp/pest": "^2.34"
+          "ext-pdo": "*",
+          "mockery/mockery": "^1.3.1",
+          "orchestra/testbench": "^8.0 || ^9.0",
+          "pestphp/pest": "^2.34"
         },
         "minimum-stability": "stable",
         "prefer-stable": true,
         "autoload": {
-            "psr-4": {
-                "DragonCode\\LaravelDataDumper\\": "src"
-            }
+          "psr-4": {
+            "DragonCode\\LaravelDataDumper\\": "src"
+          }
         },
         "autoload-dev": {
-            "psr-4": {
-                "Tests\\": "tests"
-            }
+          "psr-4": {
+            "Tests\\": "tests"
+          }
         },
         "config": {
-            "allow-plugins": {
-                "dragon-code/codestyler": true,
-                "ergebnis/composer-normalize": true,
-                "friendsofphp/php-cs-fixer": true,
-                "pestphp/pest-plugin": true,
-                "symfony/thanks": true
-            },
-            "preferred-install": "dist",
-            "sort-packages": true
+          "allow-plugins": {
+            "dragon-code/codestyler": true,
+            "ergebnis/composer-normalize": true,
+            "friendsofphp/php-cs-fixer": true,
+            "pestphp/pest-plugin": true,
+            "symfony/thanks": true
+          },
+          "preferred-install": "dist",
+          "sort-packages": true
         },
         "extra": {
-            "laravel": {
-                "providers": [
-                    "DragonCode\\LaravelDataDumper\\ServiceProvider"
-                ]
-            }
+          "laravel": {
+            "providers": [
+              "DragonCode\\LaravelDataDumper\\ServiceProvider"
+            ]
+          }
         },
         "scripts": {
-            "test": [
-                "vendor/bin/pest"
-            ]
+          "test": [
+            "vendor/bin/pest"
+          ]
         },
         "minimum-stability": "stable",
         "version": "1.1.0",
