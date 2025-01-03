@@ -34,15 +34,18 @@ class ThemeComposer
         if (Auth::check()) {
             $user = $this->user;
 
-            if ($user->profile) {
+            if ($user->profile && !$this->user->theme) {
                 $theme = Theme::find($user->profile->theme_id);
 
                 if ($theme->status === 0) {
                     $theme = Theme::find(Theme::default);
                 }
+                $this->user->theme = $theme; // avoid querying multiple times
             }
+            $theme = $this->user->theme;
         }
 
         $view->with('theme', $theme);
     }
 }
+
