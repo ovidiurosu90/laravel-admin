@@ -10,6 +10,12 @@
                 <div class="card-body">
                     <form method="POST" action="{{ route('register') }}">
                         @csrf
+                        <input type="hidden" name="invite_token"
+                            value="{{ request()->get('invite_token') }}"
+                            autocomplete="off" />
+                        <input type="hidden" name="myfinance2_invite_token"
+                            value="{{ request()->get('myfinance2_invite_token') }}"
+                            autocomplete="off" />
 
                         <div class="mb-3 row">
                             <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Username') }}</label>

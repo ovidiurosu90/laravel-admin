@@ -25,7 +25,7 @@ Route::group(['middleware' => ['web', 'checkblocked']], function ()
 
 // Authentication Routes
 Auth::routes([
-    'register' => false, // Disable register until we add user restrictions to all assets
+    // 'register' => false, // Disable register by uncommenting this line
 ]);
 
 // Public Routes

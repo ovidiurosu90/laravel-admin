@@ -10,6 +10,7 @@ use App\Traits\ActivationTrait;
 use App\Traits\CaptchaTrait;
 use App\Traits\CaptureIpTrait;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -40,10 +41,18 @@ class RegisterController extends Controller
     /**
      * Create a new controller instance.
      *
+     * @param Request $request
+     *
      * @return void
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
+        if (config('auth.require_invite_token')
+            && (empty($request->invite_token)
+                || $request->invite_token != config('auth.invite_token'))
+        ) {
+            abort(403);
+        }
         $this->middleware('guest', [
             'except' => 'logout',
         ]);
@@ -66,7 +75,8 @@ class RegisterController extends Controller
         return Validator::make(
             $data,
             [
-                'name'                  => 'required|max:255|unique:users|alpha_dash',
+                'name'                  => 'required|max:255|unique:users'
+                                           . '|alpha_dash',
                 'first_name'            => 'alpha_dash',
                 'last_name'             => 'alpha_dash',
                 'email'                 => 'required|email|max:255|unique:users',
@@ -100,12 +110,32 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         $ipAddress = new CaptureIpTrait();
+        $role;
+
+        if (class_exists('ovidiuro\myfinance2\MyFinance2ServiceProvider')) {
+            $serviceProvider = new \ovidiuro\myfinance2\MyFinance2ServiceProvider(
+                new \Illuminate\Container\Container());
+            $hasValidInviteToken = $serviceProvider->hasValidInviteToken(
+                    $data['myfinance2_invite_token']);
+
+            if ($hasValidInviteToken) {
+                if (config('settings.activation')) {
+                    $role = $serviceProvider->getUnverifiedRole();
+                } else {
+                    $role = $serviceProvider->getVerifiedRole();
+                }
+            }
+        }
 
         if (config('settings.activation')) {
-            $role = Role::where('slug', '=', 'unverified')->first();
+            if (empty($role)) {
+                $role = Role::where('slug', '=', 'unverified')->first();
+            }
             $activated = false;
         } else {
-            $role = Role::where('slug', '=', 'user')->first();
+            if (empty($role)) {
+                $role = Role::where('slug', '=', 'user')->first();
+            }
             $activated = true;
         }
 
@@ -130,3 +160,4 @@ class RegisterController extends Controller
         return $user;
     }
 }
+

@@ -120,4 +120,7 @@ return [
 
     'password_timeout' => 10800,
 
+    'require_invite_token' => env('REQUIRE_INVITE_TOKEN', true),
+    'invite_token' => env('INVITE_TOKEN'),
 ];
+

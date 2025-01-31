@@ -182,7 +182,7 @@ class ActivateController extends Controller
         $user = Auth::user();
         $currentRoute = Route::currentRouteName();
         $ipAddress = new CaptureIpTrait();
-        $role = Role::where('slug', '=', 'user')->first();
+        $role;
 
         $rCheck = $this->activeRedirect($user, $currentRoute);
         if ($rCheck) {
@@ -194,11 +194,32 @@ class ActivateController extends Controller
             ->first();
 
         if (empty($activation)) {
-            Log::info('Registered user attempted to activate with an invalid token: '.$currentRoute.'. ', [$user]);
+            Log::info('Registered user attempted to activate with an invalid token'
+                . ': ' . $currentRoute . '. ', [$user]);
 
             return redirect()->route(self::getActivationRoute())
                 ->with('status', 'danger')
                 ->with('message', trans('auth.invalidToken'));
+        }
+
+        if (class_exists('ovidiuro\myfinance2\MyFinance2ServiceProvider')) {
+            $serviceProvider = new \ovidiuro\myfinance2\MyFinance2ServiceProvider(
+                new \Illuminate\Container\Container());
+            if ($serviceProvider->hasUnverifiedRole($user)) {
+                $role = $serviceProvider->getVerifiedRole();
+                $serviceProvider->createInitialSeeds($user);
+            }
+        }
+
+        if (empty($role)) {
+            if ($user->hasRole('unverified')) {
+                $role = Role::where('slug', '=', 'user')->first();
+            } else {
+                Log::error('Unexpected role setup', [$user]);
+                return redirect()->route(self::getActivationRoute())
+                    ->with('status', 'danger')
+                    ->with('message', 'Unexpected role setup');
+            }
         }
 
         $user->activated = true;
@@ -212,7 +233,8 @@ class ActivateController extends Controller
             $anActivation->delete();
         }
 
-        Log::info('Registered user successfully activated. '.$currentRoute.'. ', [$user]);
+        Log::info('Registered user successfully activated. ' . $currentRoute
+            . '. ', [$user]);
 
         if ($user->isAdmin()) {
             return redirect()->route(self::getAdminHomeRoute())
