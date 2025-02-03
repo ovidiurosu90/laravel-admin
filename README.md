@@ -168,7 +168,7 @@ mysql -u[DB_USERNAME] -p [DB_DATABASE] # use [DB_PASSWORD] set above
     insert into role_user (role_id, user_id, created_at, updated_at) values (1, [YOUR_USER_ID], now(), now());
 ```
 
-### Disable register by uncommenting the following line
+## Disable register by uncommenting the following line
 
 ```bash
 vim routes/web.php
@@ -178,3 +178,4 @@ Auth::routes([
 ]);
 ######################
 ```
+
