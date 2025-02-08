@@ -12,6 +12,21 @@ Laravel application for managing accounts and their assets
 - routing details
 - blocker
 
+## Images
+
+![Register](./images/register.png "Register")
+
+![Login](./images/login.png "Login")
+
+![Roles Administration](./images/roles_administration.png "Roles Administration")
+
+![Users](./images/users.png "Users")
+
+![Activity Log](./images/activity_log.png "Activity Log")
+
+More images in the [images folder](images).
+
+
 ## Original Source
 
 Forked from [jeremykenedy/laravel-auth](https://github.com/jeremykenedy/laravel-auth) from Nov 17, 2024.
