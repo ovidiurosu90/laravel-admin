@@ -55,7 +55,7 @@ yarn run dev
 ## Added "type": "module" to package.json
 
 
-# Error 2: failed to load config from /home/ovidiuro/Repositories/myfinance2/vite.config.js
+# Error 2: failed to load config from vite.config.js
 ## Removed 'Plugin' from 'import {} from '"vite"' in vite.config.js
 
 
@@ -127,7 +127,7 @@ php artisan db:seed
 
 1. Login on bitbucket
 1. Your profile >> All workspaces >> Manage >> OAuth consumers >> Add consumer
-    - name: admin.ovidiurosu.com
+    - name: [SUBDOMAIN].[DOMAIN].[TLD]
     - check 'This is a private consumer'
     - check Repositories.Read
 1. Copy the Key & Secret into auth.json
@@ -146,6 +146,7 @@ php artisan view:clear
 yarn install
 yarn run dev
 yarn run prod
+>storage/logs/laravel.log
 ```
 
 ## Check README.md from ovidiuro/myfinance2 and follow the installation instructions
