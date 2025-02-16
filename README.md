@@ -26,7 +26,6 @@ Laravel application for managing accounts and their assets
 
 More images in the [images folder](images).
 
-
 ## Original Source
 
 Forked from [jeremykenedy/laravel-auth](https://github.com/jeremykenedy/laravel-auth) from Nov 17, 2024.
