@@ -207,6 +207,8 @@ return [
         ComposerServiceProvider::class,
         MacroServiceProvider::class,
 
+        Lab404\Impersonate\ImpersonateServiceProvider::class,
+
         ovidiuro\myfinance2\MyFinance2ServiceProvider::class,
         ovidiuro\adminmydata\AdminMyDataServiceProvider::class,
     ],

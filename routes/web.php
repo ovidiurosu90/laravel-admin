@@ -44,6 +44,14 @@ Route::group(['middleware' => ['web', 'activity', 'checkblocked']], function ()
 
     // Route to for user to reactivate their user deleted account.
     Route::get('/re-activate/{token}', ['as' => 'user.reactivate', 'uses' => 'App\Http\Controllers\RestoreUserController@userReActivate']);
+
+    // Reset password
+    Route::get('reset-password/{token}', [
+        App\Http\Controllers\Auth\NewPasswordController::class, 'create'])
+        ->name('password.reset');
+    Route::post('reset-password', [
+        App\Http\Controllers\Auth\NewPasswordController::class, 'store'])
+        ->name('password.store');
 });
 
 // Registered and Activated User Routes
@@ -69,6 +77,11 @@ Route::group(['middleware' => ['auth', 'activated', 'activity', 'twostep', 'chec
         'as'   => '{username}',
         'uses' => 'App\Http\Controllers\ProfilesController@show',
     ]);
+
+    Route::impersonate();
+    Route::get('/impersonate/leave-and-take/{id}/{guardName?}',
+        '\App\Http\Controllers\Impersonate\MyImpersonateController@leaveAndTake')
+        ->name('impersonate.leave-and-take');
 });
 
 // Registered, activated, and is current user routes.
@@ -103,6 +116,7 @@ Route::group(['middleware' => ['auth', 'activated', 'currentUser', 'activity', '
     // Route to upload user avatar.
     Route::post('avatar/upload', ['as' => 'avatar.upload', 'uses' => 'App\Http\Controllers\ProfilesController@upload']);
 });
+
 // Don't log activity
 Route::group(['middleware' => ['auth', 'activated', 'currentUser', 'twostep', 'checkblocked']], function ()
 {
@@ -145,8 +159,4 @@ Route::group(['middleware' => ['auth', 'activated', 'role:admin', 'activity', 't
 });
 
 Route::redirect('/php', '/phpinfo', 301);
-
-// Reset password
-Route::get('reset-password/{token}', [App\Http\Controllers\Auth\NewPasswordController::class, 'create'])->name('password.reset');
-Route::post('reset-password', [App\Http\Controllers\Auth\NewPasswordController::class, 'store'])->name('password.store');
 

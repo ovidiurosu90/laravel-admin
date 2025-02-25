@@ -3,17 +3,21 @@
 namespace App\Models;
 
 use App\Notifications\ResetPasswordNotification;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+
 use jeremykenedy\LaravelRoles\Traits\HasRoleAndPermission;
 use Laravel\Sanctum\HasApiTokens;
+use Lab404\Impersonate\Models\Impersonate;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoleAndPermission, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoleAndPermission, Notifiable, SoftDeletes,
+        Impersonate;
 
     /**
      * The database table used by the model.
@@ -160,4 +164,21 @@ class User extends Authenticatable
     {
         return $this->profiles()->detach($profile);
     }
+
+    /**
+     * @return bool
+     */
+    public function canImpersonate()
+    {
+        return $this->hasRole('admin') || $this->isImpersonated();
+    }
+
+    /**
+     * @return bool
+     */
+    public function canBeImpersonated()
+    {
+        return !$this->hasRole('admin');
+    }
 }
+

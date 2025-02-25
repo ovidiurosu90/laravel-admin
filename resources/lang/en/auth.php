@@ -77,4 +77,8 @@ return [
     'CaptchaWrong'     => 'Wrong captcha, please try again.',
     'roleRequired'     => 'User role is required.',
 
+    'impersonate-user' => [
+        'placeholder'   => 'Impersonate user',
+        'impersonating' => 'Impersonating',
+    ],
 ];
