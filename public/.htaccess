@@ -1,3 +1,6 @@
+SetEnv LD_PRELOAD /usr/local/lib/libcurl-impersonate-chrome.so
+SetEnv CURL_IMPERSONATE chrome116
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
