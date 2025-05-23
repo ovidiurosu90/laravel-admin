@@ -129,6 +129,7 @@
     "vue-router": "^4.1.6",
     "vuex": "^4.1.0",
     "vuex-persistedstate": "^4.1.0",
-    "vuex-shared-mutations": "^1.0.2"
+    "vuex-shared-mutations": "^1.0.2",
+    "lightweight-charts": "^5.0.7"
   }
 }

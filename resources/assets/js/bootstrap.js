@@ -16,6 +16,7 @@ import DataTable from "~datatables/js/dataTables.bootstrap5.min.js";
 import "~datatables/css/dataTables.bootstrap5.min.css";
 import "~jquery-bootstrap5-toggle/bootstrap5-toggle.jquery.js";
 import "~bootstrap5-toggle/css/bootstrap5-toggle.min.css";
+import "~lightweight-charts/dist/lightweight-charts.standalone.production.js";
 
 window.$ = jQuery;
 window.jQuery = window.$ = jQuery;

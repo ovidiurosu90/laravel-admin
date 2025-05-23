@@ -246,6 +246,10 @@ export default defineConfig(({ mode }) => {
           __dirname,
           "resources/assets/js/vendor/password-strength-meter",
         ),
+        "~lightweight-charts": path.resolve(
+          __dirname,
+          "node_modules/lightweight-charts",
+        ),
         // "~font-awesome": path.resolve(__dirname, "node_modules/font-awesome"),
       },
     },
