@@ -49,6 +49,7 @@ auth.json
 /storage/framework
 /storage/logs
 /storage/users
+/storage/app
 packages/
 .phpunit.result.cache
 .env.backup

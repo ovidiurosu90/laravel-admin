@@ -40,7 +40,9 @@ trait IpAddressDetails
         ];
         if (filter_var($ip, FILTER_VALIDATE_IP) && in_array($purpose, $support)) {
             $ipdat = @json_decode(file_get_contents('http://www.geoplugin.net/json.gp?ip='.$ip));
-            if (@strlen(trim($ipdat->geoplugin_countryCode)) == 2) {
+            if (!empty($ipdat->geoplugin_countryCode)
+                && @strlen(trim($ipdat->geoplugin_countryCode)) == 2
+            ) {
                 switch ($purpose) {
                     case 'location':
                         $output = [
