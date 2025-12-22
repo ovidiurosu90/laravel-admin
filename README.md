@@ -49,12 +49,19 @@ mysql -u[DB_USERNAME] -p [DB_DATABASE] # use [DB_PASSWORD] set above
 cp .env.example .env
 vim .env # update the settings
 
+mkdir -p storage/framework/cache/data/
+mkdir -p storage/app/
+sudo chown -R :www-data storage/
+sudo chown -R :www-data storage/framework/cache/data/
+sudo chown -R :www-data storage/app/
+sudo chmod -R 775 storage/app/
+
 composer update
 
+# If you have a database dump, use that, otherwise setup the basic things
 php artisan vendor:publish --tag=laravelroles
 php artisan vendor:publish --tag=laravel2step
 php artisan vendor:publish --tag=laravel-email-database-log-migration
-
 # sudo chmod -R 755 ../laravel-admin
 php artisan key:generate
 php artisan migrate
@@ -118,7 +125,7 @@ vim vendor/jeremykenedy/laravel-blocker/src/LaravelBlockerServiceProvider.php
 
 ```
 
-## Populate sample blockers
+## Populate sample blockers (if you didn't import a database dump already)
 
 ```bash
 cd vendor/jeremykenedy/laravel-blocker/src/

@@ -355,7 +355,6 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
 
 1. Go to [https://socialiteproviders.github.io](https://socialiteproviders.github.io/providers/twitch/) and select the provider to be added.
 2. From the projects root folder, in the terminal, run composer to get the needed package.
-
     - Example:
 
     ```
@@ -364,7 +363,6 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
 
 3. From the projects root folder run `composer update`
 4. Add the service provider to `/config/services.php`
-
     - Example:
 
     ```
@@ -376,7 +374,6 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
     ```
 
 5. Add the API credentials to `/.env `
-
     - Example:
 
     ```
@@ -386,10 +383,8 @@ php artisan vendor:publish --tag=laravel-email-database-log-migration
     ```
 
 6. Add the social media login link:
-
     - Example:
       In file `/resources/views/auth/login.blade.php` add ONE of the following:
-
         - Conventional HTML:
 
         ```
