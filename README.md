@@ -56,6 +56,16 @@ sudo chown -R :www-data storage/framework/cache/data/
 sudo chown -R :www-data storage/app/
 sudo chmod -R 775 storage/app/
 
+cd storage/
+mkdir -p framework/{sessions,views,cache}
+chmod -R 775 framework
+chown -R :www-data framework
+cd ..
+php artisan cache:clear
+
+sudo apt-get install php8.1-bcmath
+
+# Check below how to get the bitbucket oauth keys
 composer update
 
 # If you have a database dump, use that, otherwise setup the basic things
@@ -69,60 +79,8 @@ composer dump-autoload
 php artisan db:seed
 
 yarn install
-
 yarn run dev
-######################
-# Error 1: ERROR] "vite-plugin-pages-sitemap" resolved to an ESM file. ESM file cannot be loaded by `require`
-## Added "type": "module" to package.json
-
-
-# Error 2: failed to load config from vite.config.js
-## Removed 'Plugin' from 'import {} from '"vite"' in vite.config.js
-
-
-# Error 3: [Failed to load PostCSS config] Failed to load PostCSS config
-## mv postcss.config.js backup_postcss.config.js
-#######################
-
 yarn run prod
-######################
-# Error 1: npm error Could not resolve dependency:
-           npm error peer eslint@"^8.56.0" from @vue/eslint-config-typescript@13.0.0
-## Change "@vue/eslint-config-typescript": "^13.0.0" TO "@vue/eslint-config-typescript": "^14.1.3" in package.json
-
-# Error 2: npm error Could not resolve dependency:
-           npm error peer eslint@"^7.32.0 || ^8.2.0" from eslint-config-airbnb-base@15.0.0
-## Remove "eslint-config-airbnb-base": "^15.0.0" from package.json
-## Remove "airbnb-base" from .eslintrc.js
-
-# Error 3: npm error Could not resolve dependency:
-           npm error peer stylelint@"^13.0.0 || ^14.0.0 || ^15.0.0" from stylelint-webpack-plugin@4.1.1
-## Change "stylelint-webpack-plugin": "^4.1.0" TO "stylelint-webpack-plugin": "^5.0.1" in package.json
-
-# Error 4: Invalid option '--ext' - perhaps you meant '-c'?
-           You're using eslint.config.js, some command line flags are no longer available.
-## Add ESLINT_USE_FLAT_CONFIG=false before 'eslint' for both 'lint' and 'prod' scripts in package.json
-
-# Error 5: .eslintrc.js is treated as an ES module file as it is a .js file whose nearest parent package.json contains "type": "module" which declares all .js files in that package scope as ES modules.
-## git mv .eslintrc.js .eslintrc.cjs
-######################
-
-```
-
-## Utilities
-
-```bash
-# After migrating to Bootstrap 5, we need to do these changes to keep certain functionality
-cd resources/views/vendor/
-grep -rl data-target . | xargs sed -i 's/data-target/data-bs-target/g'
-grep -rl data-toggle . | xargs sed -i 's/data-toggle/data-bs-toggle/g'
-grep -rl data-dismiss . | xargs sed -i 's/data-dismiss/data-bs-dismiss/g'
-grep -rl data-original-title . | xargs sed -i 's/data-original-title/data-bs-original-title/g'
-
-# Check vendor overwrite path (Look for publishFiles and use error_log to see the path)
-vim vendor/jeremykenedy/laravel-logger/src/LaravelLoggerServiceProvider.php
-vim vendor/jeremykenedy/laravel-blocker/src/LaravelBlockerServiceProvider.php
-
 ```
 
 ## Populate sample blockers (if you didn't import a database dump already)
@@ -142,20 +100,6 @@ ls -la database/seeders/
 #NOTE Execute the following the the vendor assets or the Database Seeds were not already run above
 php artisan vendor:publish --tag=laravelblocker-seeds
 php artisan db:seed
-```
-
-## Setup the private bitbucket repository
-
-1. Login on bitbucket
-1. Your profile >> All workspaces >> Manage >> OAuth consumers >> Add consumer
-    - name: [SUBDOMAIN].[DOMAIN].[TLD]
-    - check 'This is a private consumer'
-    - check Repositories.Read
-1. Copy the Key & Secret into auth.json
-
-```bash
-mkdir -p ~/.composer/; cp auth.json.example ~/.composer/auth.json
-vim ~/.composer/auth.json
 ```
 
 ## Build the Back End and Front End Assets
@@ -199,4 +143,75 @@ Auth::routes([
     // 'register' => false, // Disable register by uncommenting this line
 ]);
 ######################
+```
+
+## Setup the private bitbucket repository
+
+1. Login on bitbucket
+1. Your profile >> All workspaces >> Manage >> OAuth consumers >> Add consumer
+    - name: [SUBDOMAIN].[DOMAIN].[TLD]
+    - check 'This is a private consumer'
+    - check Repositories.Read
+1. Copy the Key & Secret into auth.json
+
+```bash
+mkdir -p ~/.composer/; cp auth.json.example ~/.composer/auth.json
+vim ~/.composer/auth.json
+```
+
+## How I solved some 'yarn run' failures
+
+```bash
+yarn run dev
+######################
+# Error 1: ERROR] "vite-plugin-pages-sitemap" resolved to an ESM file. ESM file cannot be loaded by `require`
+## Added "type": "module" to package.json
+
+
+# Error 2: failed to load config from vite.config.js
+## Removed 'Plugin' from 'import {} from '"vite"' in vite.config.js
+
+
+# Error 3: [Failed to load PostCSS config] Failed to load PostCSS config
+## mv postcss.config.js backup_postcss.config.js
+#######################
+
+yarn run prod
+######################
+# Error 1: npm error Could not resolve dependency:
+           npm error peer eslint@"^8.56.0" from @vue/eslint-config-typescript@13.0.0
+## Change "@vue/eslint-config-typescript": "^13.0.0" TO "@vue/eslint-config-typescript": "^14.1.3" in package.json
+
+# Error 2: npm error Could not resolve dependency:
+           npm error peer eslint@"^7.32.0 || ^8.2.0" from eslint-config-airbnb-base@15.0.0
+## Remove "eslint-config-airbnb-base": "^15.0.0" from package.json
+## Remove "airbnb-base" from .eslintrc.js
+
+# Error 3: npm error Could not resolve dependency:
+           npm error peer stylelint@"^13.0.0 || ^14.0.0 || ^15.0.0" from stylelint-webpack-plugin@4.1.1
+## Change "stylelint-webpack-plugin": "^4.1.0" TO "stylelint-webpack-plugin": "^5.0.1" in package.json
+
+# Error 4: Invalid option '--ext' - perhaps you meant '-c'?
+           You're using eslint.config.js, some command line flags are no longer available.
+## Add ESLINT_USE_FLAT_CONFIG=false before 'eslint' for both 'lint' and 'prod' scripts in package.json
+
+# Error 5: .eslintrc.js is treated as an ES module file as it is a .js file whose nearest parent package.json contains "type": "module" which declares all .js files in that package scope as ES modules.
+## git mv .eslintrc.js .eslintrc.cjs
+######################
+```
+
+## Other Utilities
+
+```bash
+# After migrating to Bootstrap 5, we need to do these changes to keep certain functionality
+cd resources/views/vendor/
+grep -rl data-target . | xargs sed -i 's/data-target/data-bs-target/g'
+grep -rl data-toggle . | xargs sed -i 's/data-toggle/data-bs-toggle/g'
+grep -rl data-dismiss . | xargs sed -i 's/data-dismiss/data-bs-dismiss/g'
+grep -rl data-original-title . | xargs sed -i 's/data-original-title/data-bs-original-title/g'
+
+# Check vendor overwrite path (Look for publishFiles and use error_log to see the path)
+vim vendor/jeremykenedy/laravel-logger/src/LaravelLoggerServiceProvider.php
+vim vendor/jeremykenedy/laravel-blocker/src/LaravelBlockerServiceProvider.php
+
 ```

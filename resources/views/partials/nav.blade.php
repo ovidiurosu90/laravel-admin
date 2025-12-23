@@ -116,7 +116,7 @@
                     @if ((Auth::User()->profile)
                          && Auth::user()->profile->avatar_status == 1)
                         <img src="{{ Auth::user()->profile->avatar }}"
-                            alt="{{ Auth::user()->name }}"
+                            alt="" title="{{ Auth::user()->name }}"
                             class="user-avatar-nav">
                     @else
                         <div class="user-avatar-nav"></div>
