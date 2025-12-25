@@ -13,11 +13,11 @@
                 <div class="card">
 
                     <div class="card-header">
-                        <div class="float-start">
+                        <div class="float-left">
                             {{ trans('titles.adminThemesAdd') }}
                         </div>
-                        <div class="float-end">
-                            <a href="{{ url('/themes/') }}" class="btn btn-light btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('themes.backToThemesTt') }}">
+                        <div class="float-right">
+                            <a href="{{ url('/themes/') }}" class="btn btn-light btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('themes.backToThemesTt') }}">
                                 <i class="fa fa-fw fa-mail-reply" aria-hidden="true"></i>
                                 {!! trans('themes.backToThemesBtn') !!}
                             </a>
@@ -25,14 +25,16 @@
                     </div>
 
 
-                    {!! Form::open(array('action' => 'ThemesManagementController@store', 'method' => 'POST', 'role' => 'form')) !!}
+                    {{ html()->form('POST', action([App\Http\Controllers\ThemesManagementController::class, 'store']))
+                            ->attribute('role', 'form')
+                            ->open() }}
 
-                        {!! csrf_field() !!}
+                        @csrf
 
                         <div class="card-body">
 
-                            <div class="mb-3 has-feedback row {{ $errors->has('status') ? ' has-error ' : '' }}">
-                                {!! Form::label('status', trans('themes.statusLabel') , array('class' => 'col-md-3 control-label')); !!}
+                            <div class="mb-3 has-feedback row {{ $errors->has('status') ? 'has-error' : '' }}">
+                                <label for="status" class="col-md-3 control-label">{{ trans('themes.statusLabel') }}</label>
                                 <div class="col-md-9">
                                     <label class="switch checked" for="status">
                                         <span class="active"><i class="fa fa-toggle-on fa-2x"></i> {{ trans('themes.statusEnabled') }}</span>
@@ -49,11 +51,11 @@
                                 </div>
                             </div>
 
-                            <div class="mb-3 has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
-                                {!! Form::label('name', trans('themes.nameLabel'), array('class' => 'col-md-3 control-label')); !!}
+                            <div class="mb-3 has-feedback row {{ $errors->has('name') ? 'has-error' : '' }}">
+                                <label for="name" class="col-md-3 control-label">{{ trans('themes.nameLabel') }}</label>
                                 <div class="col-md-9">
                                     <div class="input-group">
-                                        {!! Form::text('name', null, array('id' => 'name', 'class' => 'form-control', 'placeholder' => trans('themes.namePlaceholder'))) !!}
+                                        {{ html()->text('name', old('name'))->id('name')->class('form-control')->placeholder(trans('themes.namePlaceholder')) }}
                                         <div class="input-group-append">
                                             <label for="name" class="input-group-text">
                                                 <i class="fa fa-fw fa-pencil" aria-hidden="true"></i>
@@ -68,11 +70,11 @@
                                 </div>
                             </div>
 
-                            <div class="mb-3 has-feedback row {{ $errors->has('link') ? ' has-error ' : '' }}">
-                                {!! Form::label('link', trans('themes.linkLabel'), array('class' => 'col-md-3 control-label')); !!}
+                            <div class="mb-3 has-feedback row {{ $errors->has('link') ? 'has-error' : '' }}">
+                                <label for="link" class="col-md-3 control-label">{{ trans('themes.linkLabel') }}</label>
                                 <div class="col-md-9">
                                     <div class="input-group">
-                                        {!! Form::text('link', null, array('id' => 'link', 'class' => 'form-control', 'placeholder' => trans('themes.linkPlaceholder'))) !!}
+                                        {{ html()->text('link', old('link'))->id('link')->class('form-control')->placeholder(trans('themes.linkPlaceholder')) }}
                                         <div class="input-group-append">
                                             <label for="link" class="input-group-text">
                                                 <i class="fa fa-fw fa-link fa-rotate-90" aria-hidden="true"></i>
@@ -87,11 +89,11 @@
                                 </div>
                             </div>
 
-                            <div class="mb-3 has-feedback row {{ $errors->has('notes') ? ' has-error ' : '' }}">
-                                {!! Form::label('notes', trans('themes.notesLabel') , array('class' => 'col-md-3 control-label')); !!}
+                            <div class="mb-3 has-feedback row {{ $errors->has('notes') ? 'has-error' : '' }}">
+                                <label for="notes" class="col-md-3 control-label">{{ trans('themes.notesLabel') }}</label>
                                 <div class="col-md-9">
                                     <div class="input-group">
-                                        {!! Form::textarea('notes', old('notes'), array('id' => 'notes', 'class' => 'form-control', 'placeholder' => trans('themes.notesPlaceholder'))) !!}
+                                        {{ html()->textarea('notes', old('notes'))->id('notes')->class('form-control')->placeholder(trans('themes.notesPlaceholder')) }}
                                         <div class="input-group-append">
                                             <label for="notes" class="input-group-text">
                                                 <i class="fa fa-fw fa-pencil" aria-hidden="true"></i>
@@ -111,12 +113,14 @@
                         <div class="card-footer">
                             <div class="row">
                                 <div class="col-sm-6 offset-sm-6">
-                                    {!! Form::button('<i class="fa fa-plus" aria-hidden="true"></i>&nbsp;' . trans('themes.btnAddTheme'), array('class' => 'btn btn-success btn-block mb-0','type' => 'submit', )) !!}
+                                    {{ html()->button('<i class="fa fa-plus" aria-hidden="true"></i>&nbsp;' . trans('themes.btnAddTheme'))
+                                        ->class('btn btn-success w-100 mb-0')
+                                        ->type('submit') }}
                                 </div>
                             </div>
                         </div>
 
-                    {!! Form::close() !!}
+                    {{ html()->form()->close() }}
 
                 </div>
             </div>

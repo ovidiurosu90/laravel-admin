@@ -98,7 +98,7 @@
                                         {{ trans('profile.showProfileTwitterUsername') }}
                                     </dt>
                                     <dd>
-                                        {!! HTML::link('https://twitter.com/'.$user->profile->twitter_username, $user->profile->twitter_username, array('class' => 'twitter-link', 'target' => '_blank')) !!}
+                                        {!! html()->link('https://twitter.com/'.$user->profile->twitter_username, $user->profile->twitter_username, array('class' => 'twitter-link', 'target' => '_blank')) !!}
                                     </dd>
                                 @endif
 
@@ -107,7 +107,7 @@
                                         {{ trans('profile.showProfileGitHubUsername') }}
                                     </dt>
                                     <dd>
-                                        {!! HTML::link('https://github.com/'.$user->profile->github_username, $user->profile->github_username, array('class' => 'github-link', 'target' => '_blank')) !!}
+                                        {!! html()->link('https://github.com/'.$user->profile->github_username, $user->profile->github_username, array('class' => 'github-link', 'target' => '_blank')) !!}
                                     </dd>
                                 @endif
                             @endif
@@ -116,13 +116,13 @@
 
                         @if ($user->profile)
                             @if ($currentUser->id == $user->id)
-                                {!! HTML::icon_link(URL::to('/profile/'.$currentUser->name.'/edit'), 'fa fa-fw fa-cog', trans('titles.editProfile'), array('class' => 'btn btn-small btn-info btn-block')) !!}
+                                {!! html()->icon_link(URL::to('/profile/'.$currentUser->name.'/edit'), 'fa fa-fw fa-cog', trans('titles.editProfile'), array('class' => 'btn btn-small btn-info w-100')) !!}
                             @endif
                         @else
                             <p>
                                 {{ trans('profile.noProfileYet') }}
                             </p>
-                            {!! HTML::icon_link(URL::to('/profile/'.$currentUser->name.'/edit'), 'fa fa-fw fa-plus ', trans('titles.createProfile'), array('class' => 'btn btn-small btn-info btn-block')) !!}
+                            {!! html()->icon_link(URL::to('/profile/'.$currentUser->name.'/edit'), 'fa fa-fw fa-plus ', trans('titles.createProfile'), array('class' => 'btn btn-small btn-info w-100')) !!}
                         @endif
                     </div>
                 </div>
@@ -136,7 +136,7 @@
     @if(config('settings.googleMapsAPIStatus'))
 
         <!-- {{-- Obsolete --}}
-        {!! HTML::script('//maps.googleapis.com/maps/api/js?key='.config("settings.googleMapsAPIKey").'&loading=async&libraries=places', array('type' => 'text/javascript')) !!}
+        <script src="//maps.googleapis.com/maps/api/js?key={{ config("settings.googleMapsAPIKey") }}&loading=async&libraries=places" type="text/javascript"></script>
         -->
         <script>
         (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({

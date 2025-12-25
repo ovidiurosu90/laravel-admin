@@ -70,33 +70,38 @@ export default defineConfig(({ mode }) => {
       entry: "resources/assets/js/app.js",
     }),
     viteCommonjs(),
-    manifestSRI(),
-    webUpdateNotice({
-      logVersion: true,
-      logHash: true,
-      checkInterval: 0.5 * 60 * 1000,
-      notificationProps: {
-        title: "system update",
-        description: "System update, please refresh the page",
-        buttonText: "refresh",
-      },
-    }),
-    viteStaticCopy({
-      targets: [
-        {
-          src: "node_modules/hideshowpassword/images/wink.svg",
-          dest: "../../public/images",
-        },
-        {
-          src: "node_modules/hideshowpassword/images/wink.png",
-          dest: "../../public/images",
-        },
-        // {
-        //     src: 'resources/img/favicon/favicon.ico',
-        //     dest: '../',
-        // },
-      ], // end targets
-    }), // end viteStaticCopy
+    // manifestSRI(), // disabled: causing manifest generation error
+    // webUpdateNotice disabled: conflicts with manifest generation
+    // webUpdateNotice({
+    //   logVersion: true,
+    //   logHash: true,
+    //   checkInterval: 0.5 * 60 * 1000,
+    //   notificationProps: {
+    //     title: "system update",
+    //     description: "System update, please refresh the page",
+    //     buttonText: "refresh",
+    //   },
+    // }),
+    ...(mode === "build"
+      ? [
+          viteStaticCopy({
+            targets: [
+              {
+                src: "node_modules/hideshowpassword/images/wink.svg",
+                dest: "../../public/images",
+              },
+              {
+                src: "node_modules/hideshowpassword/images/wink.png",
+                dest: "../../public/images",
+              },
+              // {
+              //     src: 'resources/img/favicon/favicon.ico',
+              //     dest: '../',
+              // },
+            ], // end targets
+          }),
+        ]
+      : []),
     viteImagemin({
       gifsicle: {
         optimizationLevel: 7,
@@ -184,7 +189,7 @@ export default defineConfig(({ mode }) => {
               }
             }
           }, // end manualChunks
-          globals: externalGlobals,
+          // globals: externalGlobals, // disabled: conflicts with manifest generation in Vite 6
         }, // end output
       }, // end rollupOptions
       modulePreload: {

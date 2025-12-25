@@ -51,12 +51,12 @@
                             </span>
                             <div class="pull-right">
                                 @isset($typeDeleted)
-                                    <a href="{{ route('laravelroles::roles-deleted') }}" class="btn btn-outline-danger btn-sm float-right" data-bs-toggle="tooltip" data-placement="left" title="{{ trans('laravelroles::laravelroles.tooltips.back-roles-deleted') }}">
+                                    <a href="{{ route('laravelroles::roles-deleted') }}" class="btn btn-outline-danger btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('laravelroles::laravelroles.tooltips.back-roles-deleted') }}">
                                         <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                         {!! trans('laravelroles::laravelroles.buttons.back-to-roles-deleted') !!}
                                     </a>
                                 @else
-                                    <a href="{{ route('laravelroles::roles.index') }}" class="btn btn-outline-secondary btn-sm float-right" data-bs-toggle="tooltip" data-placement="left" title="{{ trans('laravelroles::laravelroles.tooltips.back-roles') }}">
+                                    <a href="{{ route('laravelroles::roles.index') }}" class="btn btn-outline-secondary btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('laravelroles::laravelroles.tooltips.back-roles') }}">
                                         <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                         {!! trans('laravelroles::laravelroles.buttons.back-to-roles') !!}
                                     </a>

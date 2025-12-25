@@ -15,21 +15,21 @@
     @endphp
 @endif
 
-{!! Form::open([
+{!! form()->open([
     'route' => ['laravelblocker::blocker-item-restore', $itemId],
     'method' => 'PUT',
     'accept-charset' => 'UTF-8',
-    'data-toggle' => 'tooltip',
+    'data-bs-toggle' => 'tooltip',
     'title' => trans("laravelblocker::laravelblocker.tooltips.restoreItem")
 ]) !!}
-    {!! Form::hidden("_method", "PUT") !!}
+    {!! form()->hidden("_method", "PUT") !!}
     {!! csrf_field() !!}
-    {!! Form::button($itemText, [
+    {!! form()->button($itemText, [
             'type' => 'button',
             'class' => $itemClasses,
-            'data-toggle' => 'modal',
-            'data-target' => '#confirmRestore',
+            'data-bs-toggle' => 'modal',
+            'data-bs-target' => '#confirmRestore',
             'data-title' => trans('laravelblocker::laravelblocker.modals.resotreBlockedItemTitle'),
             'data-message' => trans('laravelblocker::laravelblocker.modals.resotreBlockedItemMessage', ['value' => $itemValue])
         ]) !!}
-{!! Form::close() !!}
+{!! form()->close() !!}

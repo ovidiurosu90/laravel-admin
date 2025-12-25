@@ -6,11 +6,11 @@ use App\Models\Profile;
 use App\Models\Role;
 use App\Models\User;
 use App\Traits\CaptureIpTrait;
-use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class UsersManagementController extends Controller
 {
@@ -158,22 +158,19 @@ class UsersManagementController extends Controller
         $emailCheck = ($request->input('email') !== '') && ($request->input('email') !== $user->email);
         $ipAddress = new CaptureIpTrait();
 
+        $validationRules = [
+            'name'          => 'required|max:255|alpha_dash|unique:users,name,'.$user->id,
+            'first_name'    => 'alpha_dash',
+            'last_name'     => 'alpha_dash',
+        ];
+
         if ($emailCheck) {
-            $validator = Validator::make($request->all(), [
-                'name'          => 'required|max:255|unique:users|alpha_dash',
-                'email'         => 'email|max:255|unique:users',
-                'first_name'    => 'alpha_dash',
-                'last_name'     => 'alpha_dash',
-                'password'      => 'present|confirmed|min:6',
-            ]);
-        } else {
-            $validator = Validator::make($request->all(), [
-                'name'          => 'required|max:255|alpha_dash|unique:users,name,'.$user->id,
-                'first_name'    => 'alpha_dash',
-                'last_name'     => 'alpha_dash',
-                'password'      => 'nullable|confirmed|min:6',
-            ]);
+            $validationRules['email'] = 'email|max:255|unique:users';
         }
+        if ($request->input('change_password')) {
+            $validationRules['password'] = 'present|confirmed|min:6';
+        }
+        $validator = Validator::make($request->all(), $validationRules);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();

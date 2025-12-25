@@ -34,29 +34,31 @@ $theme = $currentTheme; //NOTE The current theme is overwritten by the profile t
             <div class="col-12 col-xl-10 offset-xl-1">
                 <div class="card">
                     <div class="card-header">
-                        <div class="float-start">
+                        <div class="float-left">
                             <strong>{{ trans('themes.editTitle') }}</strong> {{ $theme->name }}
                         </div>
-                        <div class="float-end">
+                        <div class="float-right">
                             <a href="{{ url('/themes/' . $theme->id) }}" class="btn btn-light btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('themes.backToThemeTt') }}">
                                 <i class="fa fa-fw fa-mail-reply" aria-hidden="true"></i>
                                 {!! trans('themes.backToThemeBtn') !!}
                             </a>
-                            <a href="{{ url('/themes/') }}" class="btn btn-light btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('themes.backToThemesTt') }}">
+                            <a href="{{ url('/themes/') }}" class="btn btn-light btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('themes.backToThemesTt') }}">
                                 <i class="fa fa-fw fa-mail-reply" aria-hidden="true"></i>
                                 {!! trans('themes.backToThemesBtn') !!}
                             </a>
                         </div>
                     </div>
 
-                    {!! Form::model($theme, array('action' => array('ThemesManagementController@update', $theme->id), 'method' => 'PUT')) !!}
+                    {{ html()->form('POST', action([App\Http\Controllers\ThemesManagementController::class, 'update'], $theme->id))
+                            ->open() }}
 
-                        {!! csrf_field() !!}
+                        @csrf
+                        @method('PUT')
 
                         <div class="card-body">
 
-                            <div class="mb-3 has-feedback row {{ $errors->has('status') ? ' has-error ' : '' }} @if($theme->id == 1) disabled @endif ">
-                                {!! Form::label('status', trans('themes.statusLabel'), array('class' => 'col-md-3 control-label')); !!}
+                            <div class="mb-3 has-feedback row {{ $errors->has('status') ? 'has-error' : '' }} @if($theme->id == 1) disabled @endif ">
+                                <label for="status" class="col-md-3 control-label">{{ trans('themes.statusLabel') }}</label>
                                 <div class="col-md-9">
                                     <label class="switch {{ $themeActive['checked'] }}" for="status">
                                         <span class="active"><i class="fa fa-toggle-on fa-2x"></i> {{ trans('themes.statusEnabled') }}</span>
@@ -73,11 +75,11 @@ $theme = $currentTheme; //NOTE The current theme is overwritten by the profile t
                                 </div>
                             </div>
 
-                            <div class="mb-3 has-feedback row {{ $errors->has('name') ? ' has-error ' : '' }}">
-                                {!! Form::label('name', trans('themes.nameLabel'), array('class' => 'col-md-3 control-label')); !!}
+                            <div class="mb-3 has-feedback row {{ $errors->has('name') ? 'has-error' : '' }}">
+                                <label for="name" class="col-md-3 control-label">{{ trans('themes.nameLabel') }}</label>
                                 <div class="col-md-9">
                                     <div class="input-group">
-                                        {!! Form::text('name', $theme->name, array('id' => 'name', 'class' => 'form-control', 'placeholder' => trans('themes.namePlaceholder'))) !!}
+                                        {{ html()->text('name', old('name', $theme->name))->id('name')->class('form-control')->placeholder(trans('themes.namePlaceholder')) }}
                                         <div class="input-group-append">
                                             <label for="name" class="input-group-text">
                                                 <i class="fa fa-fw fa-pencil" aria-hidden="true"></i>
@@ -92,11 +94,11 @@ $theme = $currentTheme; //NOTE The current theme is overwritten by the profile t
                                 </div>
                             </div>
 
-                            <div class="mb-3 has-feedback row {{ $errors->has('link') ? ' has-error ' : '' }}">
-                                {!! Form::label('link', trans('themes.linkLabel'), array('class' => 'col-md-3 control-label')); !!}
+                            <div class="mb-3 has-feedback row {{ $errors->has('link') ? 'has-error' : '' }}">
+                                <label for="link" class="col-md-3 control-label">{{ trans('themes.linkLabel') }}</label>
                                 <div class="col-md-9">
                                     <div class="input-group">
-                                        {!! Form::text('link', $theme->link, array('id' => 'link', 'class' => 'form-control', 'placeholder' => trans('themes.linkPlaceholder'))) !!}
+                                        {{ html()->text('link', old('link', $theme->link))->id('link')->class('form-control')->placeholder(trans('themes.linkPlaceholder')) }}
                                         <div class="input-group-append">
                                             <label for="link" class="input-group-text">
                                                 <i class="fa fa-fw fa-link fa-rotate-90" aria-hidden="true"></i>
@@ -111,11 +113,11 @@ $theme = $currentTheme; //NOTE The current theme is overwritten by the profile t
                                 </div>
                             </div>
 
-                            <div class="mb-3 has-feedback row {{ $errors->has('notes') ? ' has-error ' : '' }}">
-                                {!! Form::label('notes', trans('themes.notesLabel') , array('class' => 'col-md-3 control-label')); !!}
+                            <div class="mb-3 has-feedback row {{ $errors->has('notes') ? 'has-error' : '' }}">
+                                <label for="notes" class="col-md-3 control-label">{{ trans('themes.notesLabel') }}</label>
                                 <div class="col-md-9">
                                     <div class="input-group">
-                                        {!! Form::textarea('notes', old('notes'), array('id' => 'notes', 'class' => 'form-control', 'placeholder' => trans('themes.notesPlaceholder'))) !!}
+                                        {{ html()->textarea('notes', old('notes', $theme->notes))->id('notes')->class('form-control')->placeholder(trans('themes.notesPlaceholder')) }}
                                         <div class="input-group-append">
                                             <label for="notes" class="input-group-text">
                                                 <i class="fa fa-fw fa-pencil" aria-hidden="true"></i>
@@ -135,12 +137,20 @@ $theme = $currentTheme; //NOTE The current theme is overwritten by the profile t
                         <div class="card-footer">
                             <div class="row">
                                 <div class="col-sm-6">
-                                    {!! Form::button('<i class="fa fa-fw fa-save" aria-hidden="true"></i> ' . trans('themes.editSave'), array('id' => 'theme-save-confirm', 'class' => 'btn btn-success btn-block mb-0 btn-save','type' => 'button', 'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-save-modal', 'data-initiator-id' => 'theme-save-confirm', 'data-title' => trans('modals.edit_user__modal_text_confirm_title'), 'data-message' => trans('modals.edit_user__modal_text_confirm_message'))) !!}
+                                    {{ html()->button('<i class="fa fa-fw fa-save" aria-hidden="true"></i> ' . trans('themes.editSave'))
+                                        ->id('theme-save-confirm')
+                                        ->class('btn btn-success w-100 mb-0 btn-save')
+                                        ->type('button')
+                                        ->attribute('data-bs-toggle', 'modal')
+                                        ->attribute('data-bs-target', '#confirm-save-modal')
+                                        ->attribute('data-initiator-id', 'theme-save-confirm')
+                                        ->attribute('data-title', trans('modals.edit_user__modal_text_confirm_title'))
+                                        ->attribute('data-message', trans('modals.edit_user__modal_text_confirm_message')) }}
                                 </div>
                             </div>
                         </div>
 
-                    {!! Form::close() !!}
+                    {{ html()->form()->close() }}
 
                 </div>
             </div>

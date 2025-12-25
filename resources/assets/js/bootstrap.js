@@ -3,8 +3,6 @@ window._ = _;
 
 import jQuery from "jquery";
 import * as bootstrap from "bootstrap";
-import * as Popper from "popper.js";
-// import "~bootstrap/dist/js/bootstrap.bundle.min.js"; // dropdown doesn't work
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
 import "~hideshowpassword/hideShowPassword.js";
@@ -20,8 +18,6 @@ import "~lightweight-charts/dist/lightweight-charts.standalone.production.js";
 
 window.$ = jQuery;
 window.jQuery = window.$ = jQuery;
-// window.Popper = Popper; // jquery-tempus-dominus/jQuery-provider doesn't work
-
 window.DataTable = DataTable;
 
 import { TempusDominus } from "~tempus-dominus/dist/js/tempus-dominus.js";

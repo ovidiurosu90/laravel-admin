@@ -9,8 +9,8 @@ use App\Models\Role;
 use App\Models\User;
 use App\Traits\ActivationTrait;
 use App\Traits\CaptureIpTrait;
-use Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
@@ -195,7 +195,7 @@ class ActivateController extends Controller
 
         if (empty($activation)) {
             Log::info('Registered user attempted to activate with an invalid token'
-                . ': ' . $currentRoute . '. ', [$user]);
+                      . ': ' . $currentRoute . '. ', [$user]);
 
             return redirect()->route(self::getActivationRoute())
                 ->with('status', 'danger')
@@ -234,7 +234,7 @@ class ActivateController extends Controller
         }
 
         Log::info('Registered user successfully activated. ' . $currentRoute
-            . '. ', [$user]);
+                  . '. ', [$user]);
 
         if ($user->isAdmin()) {
             return redirect()->route(self::getAdminHomeRoute())

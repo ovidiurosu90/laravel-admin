@@ -10,15 +10,15 @@ use App\Models\Theme;
 use App\Models\User;
 use App\Notifications\SendGoodbyeEmail;
 use App\Traits\CaptureIpTrait;
-use File;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\View;
 use Image;
 use jeremykenedy\Uuid\Uuid;
-use Validator;
-use View;
 
 class ProfilesController extends Controller
 {

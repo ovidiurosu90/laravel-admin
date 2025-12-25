@@ -29,6 +29,7 @@ More images in the [images folder](images).
 ## Original Source
 
 Forked from [jeremykenedy/laravel-auth](https://github.com/jeremykenedy/laravel-auth) from Nov 17, 2024.
+Updated (sync fork) on Dec 26, 2025.
 
 Please check the original [README.md](README-laravel-auth.md).
 
@@ -83,6 +84,27 @@ yarn run dev
 yarn run prod
 ```
 
+
+## Update to PHP 8.2
+
+```bash
+sudo apt-get install php8.1
+sudo add-apt-repository ppa:ondrej/apache2
+sudo add-apt-repository ppa:ondrej/php
+sudo apt update
+sudo apt install php8.2
+php --version
+php8.2 --version
+sudo apt-get install php8.2-cli libapache2-mod-php8.2 php8.2-mysql php8.2-curl php8.2-intl php8.2-mbstring php8.2-gd php8.2-simplexml php8.2-bcmath
+sudo update-alternatives --set php /usr/bin/php8.2
+php --version
+
+sudo a2dismod php8.1
+sudo a2enmod php8.2
+systemctl restart apache2
+```
+
+
 ## Populate sample blockers (if you didn't import a database dump already)
 
 ```bash
@@ -108,6 +130,11 @@ php artisan db:seed
 composer update
 composer dump-autoload
 php artisan view:clear
+php artisan optimize:clear
+
+#php artisan test --filter test_users_can_authenticate_using_the_login_screen
+php artisan test
+
 yarn install
 yarn run dev
 yarn run prod

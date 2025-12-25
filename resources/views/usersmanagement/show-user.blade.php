@@ -20,8 +20,8 @@
           <div class="card-header text-white @if ($user->activated == 1) bg-success @else bg-danger @endif">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               {!! trans('usersmanagement.showing-user-title', ['name' => $user->name]) !!}
-              <div class="float-end">
-                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
+              <div class="float-right">
+                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
                   <i class="fa fa-fw fa-mail-reply" aria-hidden="true"></i>
                   {!! trans('usersmanagement.buttons.back-to-users') !!}
                 </a>
@@ -36,32 +36,46 @@
                 <img src="@if ($user->profile && $user->profile->avatar_status == 1) {{ $user->profile->avatar }} @else {{ Gravatar::get($user->email) }} @endif" alt="{{ $user->name }}" class="rounded-circle center-block mb-3 mt-4 user-image">
               </div>
               <div class="col-sm-4 col-md-6">
-                <h4 class="text-muted margin-top-sm-1 text-center text-start-tablet">
+                <h4 class="text-muted margin-top-sm-1 text-center text-left-tablet">
                   {{ $user->name }}
                 </h4>
-                <p class="text-center text-start-tablet">
+                <p class="text-center text-left-tablet">
                   <strong>
                     {{ $user->first_name }} {{ $user->last_name }}
                   </strong>
                   @if($user->email)
                     <br />
                     <span class="text-center" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('usersmanagement.tooltips.email-user', ['user' => $user->email]) }}">
-                      {{ Html::mailto($user->email, $user->email) }}
+                      {{ html()->mailto($user->email, $user->email) }}
                     </span>
                   @endif
                 </p>
                 @if ($user->profile)
-                  <div class="text-center text-start-tablet mb-4">
+                  <div class="text-center text-left-tablet mb-4">
                     <a href="{{ url('/profile/'.$user->name) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('usersmanagement.viewProfile') }}">
                       <i class="fa fa-eye fa-fw" aria-hidden="true"></i> <span class="hidden-xs hidden-sm hidden-md"> {{ trans('usersmanagement.viewProfile') }}</span>
                     </a>
                     <a href="/users/{{$user->id}}/edit" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('usersmanagement.editUser') }}">
                       <i class="fa fa-pencil fa-fw" aria-hidden="true"></i> <span class="hidden-xs hidden-sm hidden-md"> {{ trans('usersmanagement.editUser') }} </span>
                     </a>
-                    {!! Form::open(array('url' => 'users/' . $user->id, 'class' => 'form-inline', 'data-bs-toggle' => 'tooltip', 'data-placement' => 'right', 'title' => trans('usersmanagement.deleteUser'))) !!}
-                      {!! Form::hidden('_method', 'DELETE') !!}
-                      {!! Form::button('<i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> <span class="hidden-xs hidden-sm hidden-md">' . trans('usersmanagement.deleteUser') . '</span>' , array('id' => 'user-delete-confirm-' . $user->id, 'class' => 'btn btn-danger btn-sm','type' => 'button', 'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-delete-modal', 'data-title' => 'Delete User', 'data-initiator-id' => 'user-delete-confirm-' . $user->id, 'data-message' => 'Are you sure you want to delete this user?')) !!}
-                    {!! Form::close() !!}
+                    {{ html()->form('POST', url('users/' . $user->id))
+                        ->class('form-inline')
+                        ->attribute('data-bs-toggle', 'tooltip')
+                        ->attribute('data-bs-placement', 'right')
+                        ->attribute('title', trans('usersmanagement.deleteUser'))
+                        ->open() }}
+                      @csrf
+                      @method('DELETE')
+                      {{ html()->button('<i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> <span class="hidden-xs hidden-sm hidden-md">' . trans('usersmanagement.deleteUser') . '</span>')
+                        ->id('user-delete-confirm-' . $user->id)
+                        ->class('btn btn-danger btn-sm')
+                        ->type('button')
+                        ->attribute('data-bs-toggle', 'modal')
+                        ->attribute('data-bs-target', '#confirm-delete-modal')
+                        ->attribute('data-initiator-id', 'user-delete-confirm-' . $user->id)
+                        ->attribute('data-title', 'Delete User')
+                        ->attribute('data-message', 'Are you sure you want to delete this user?') }}
+                    {{ html()->form()->close() }}
                   </div>
                 @endif
               </div>
@@ -97,7 +111,7 @@
 
             <div class="col-sm-7">
               <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('usersmanagement.tooltips.email-user', ['user' => $user->email]) }}">
-                {{ HTML::mailto($user->email, $user->email) }}
+                {{ html()->mailto($user->email, $user->email) }}
               </span>
             </div>
 
@@ -179,11 +193,11 @@
 
             <div class="col-sm-7">
               @if ($user->activated == 1)
-                <span class="badge text-bg-success">
+                <span class="badge badge-success">
                   Activated
                 </span>
               @else
-                <span class="badge text-bg-danger">
+                <span class="badge badge-danger">
                   Not-Activated
                 </span>
               @endif
@@ -201,23 +215,23 @@
             <div class="col-sm-7">
 
               @if($user->level() >= 5)
-                <span class="badge text-bg-primary margin-half margin-left-0">5</span>
+                <span class="badge badge-primary margin-half margin-left-0">5</span>
               @endif
 
               @if($user->level() >= 4)
-                 <span class="badge text-bg-info margin-half margin-left-0">4</span>
+                 <span class="badge badge-info margin-half margin-left-0">4</span>
               @endif
 
               @if($user->level() >= 3)
-                <span class="badge text-bg-success margin-half margin-left-0">3</span>
+                <span class="badge badge-success margin-half margin-left-0">3</span>
               @endif
 
               @if($user->level() >= 2)
-                <span class="badge text-bg-warning margin-half margin-left-0">2</span>
+                <span class="badge badge-warning margin-half margin-left-0">2</span>
               @endif
 
               @if($user->level() >= 1)
-                <span class="badge bg-light text-dark margin-half margin-left-0">1</span>
+                <span class="badge badge-default margin-half margin-left-0">1</span>
               @endif
 
             </div>
@@ -233,25 +247,25 @@
 
             <div class="col-sm-7">
               @if($user->canViewUsers())
-                <span class="badge text-bg-primary margin-half margin-left-0">
+                <span class="badge badge-primary margin-half margin-left-0">
                   {{ trans('permsandroles.permissionView') }}
                 </span>
               @endif
 
               @if($user->canCreateUsers())
-                <span class="badge text-bg-info margin-half margin-left-0">
+                <span class="badge badge-info margin-half margin-left-0">
                   {{ trans('permsandroles.permissionCreate') }}
                 </span>
               @endif
 
               @if($user->canEditUsers())
-                <span class="badge text-bg-warning margin-half margin-left-0">
+                <span class="badge badge-warning margin-half margin-left-0">
                   {{ trans('permsandroles.permissionEdit') }}
                 </span>
               @endif
 
               @if($user->canDeleteUsers())
-                <span class="badge text-bg-danger margin-half margin-left-0">
+                <span class="badge badge-danger margin-half margin-left-0">
                   {{ trans('permsandroles.permissionDelete') }}
                 </span>
               @endif

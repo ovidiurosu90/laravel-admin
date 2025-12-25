@@ -39,11 +39,11 @@
                             <div class="btn-group pull-right btn-group-xs">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fa fa-ellipsis-v fa-fw" aria-hidden="true"></i>
-                                    <span class="visually-hidden">
+                                    <span class="sr-only">
                                         {!! trans('usersmanagement.users-menu-alt') !!}
                                     </span>
                                 </button>
-                                <div class="dropdown-menu dropdown-menu-end">
+                                <div class="dropdown-menu dropdown-menu-right">
                                     <a class="dropdown-item" href="/users/create">
                                         <i class="fa fa-fw fa-user-plus" aria-hidden="true"></i>
                                         {!! trans('usersmanagement.buttons.create-new') !!}
@@ -108,18 +108,31 @@
                                             <td class="hidden-sm hidden-xs hidden-md">{{$user->created_at}}</td>
                                             <td class="hidden-sm hidden-xs hidden-md">{{$user->updated_at}}</td>
                                             <td>
-                                                {!! Form::open(array('url' => 'users/' . $user->id, 'class' => '', 'data-bs-toggle' => 'tooltip', 'title' => 'Delete')) !!}
-                                                    {!! Form::hidden('_method', 'DELETE') !!}
-                                                    {!! Form::button(trans('usersmanagement.buttons.delete'), array('id' => 'user-delete-confirm-' . $user->id, 'class' => 'btn btn-danger btn-sm','type' => 'button', 'style' =>'width: 100%;' ,'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-delete-modal', 'data-title' => 'Delete User', 'data-initiator-id' => 'user-delete-confirm-' . $user->id, 'data-message' => 'Are you sure you want to delete this user ?')) !!}
-                                                {!! Form::close() !!}
+                                                {{ html()->form('POST', url('users/' . $user->id))
+                                                        ->attribute('data-bs-toggle', 'tooltip')
+                                                        ->attribute('title', 'Delete')
+                                                        ->open() }}
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    {{ html()->button(trans('usersmanagement.buttons.delete'))
+                                                        ->id('user-delete-confirm-' . $user->id)
+                                                        ->class('btn btn-danger btn-sm')
+                                                        ->type('button')
+                                                        ->style('width: 100%;')
+                                                        ->attribute('data-bs-toggle', 'modal')
+                                                        ->attribute('data-bs-target', '#confirm-delete-modal')
+                                                        ->attribute('data-initiator-id', 'user-delete-confirm-' . $user->id)
+                                                        ->attribute('data-title', 'Delete User')
+                                                        ->attribute('data-message', 'Are you sure you want to delete this user ?') }}
+                                                {{ html()->form()->close() }}
                                             </td>
                                             <td>
-                                                <a class="btn btn-sm btn-success btn-block" href="{{ URL::to('users/' . $user->id) }}" data-bs-toggle="tooltip" title="Show">
+                                                <a class="btn btn-sm btn-success w-100" href="{{ URL::to('users/' . $user->id) }}" data-bs-toggle="tooltip" title="Show">
                                                     {!! trans('usersmanagement.buttons.show') !!}
                                                 </a>
                                             </td>
                                             <td>
-                                                <a class="btn btn-sm btn-info btn-block" href="{{ URL::to('users/' . $user->id . '/edit') }}" data-bs-toggle="tooltip" title="Edit">
+                                                <a class="btn btn-sm btn-info w-100" href="{{ URL::to('users/' . $user->id . '/edit') }}" data-bs-toggle="tooltip" title="Edit">
                                                     {!! trans('usersmanagement.buttons.edit') !!}
                                                 </a>
                                             </td>

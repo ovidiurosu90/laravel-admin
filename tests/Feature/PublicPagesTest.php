@@ -16,7 +16,14 @@ class PublicPagesTest extends TestCase
         $this->get('/')->assertStatus(200);
         $this->get('/login')->assertStatus(200);
         $this->get('/password/reset')->assertStatus(200);
-        $this->get('/register')->assertStatus(200);
+
+        // Registration requires an invite token if REQUIRE_INVITE_TOKEN is enabled
+        if (config('auth.require_invite_token')) {
+            $inviteToken = config('auth.invite_token');
+            $this->get("/register?invite_token={$inviteToken}")->assertStatus(200);
+        } else {
+            $this->get('/register')->assertStatus(200);
+        }
     }
 
     /**

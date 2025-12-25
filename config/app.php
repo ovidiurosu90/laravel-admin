@@ -2,8 +2,6 @@
 
 use App\Providers\ComposerServiceProvider;
 use App\Providers\MacroServiceProvider;
-use Collective\Html\FormFacade;
-use Collective\Html\HtmlFacade;
 use Creativeorange\Gravatar\Facades\Gravatar;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Input;
@@ -206,9 +204,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         ComposerServiceProvider::class,
         MacroServiceProvider::class,
-
         Lab404\Impersonate\ImpersonateServiceProvider::class,
-
         ovidiuro\myfinance2\MyFinance2ServiceProvider::class,
         ovidiuro\adminmydata\AdminMyDataServiceProvider::class,
     ],
@@ -226,8 +222,6 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'Redis'     => Redis::class,
-        'Form'      => FormFacade::class,
-        'HTML'      => HtmlFacade::class,
         'Socialite' => Socialite::class,
         'Input'     => Input::class,
         'Gravatar'  => Gravatar::class,

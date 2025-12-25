@@ -74,12 +74,12 @@
                         @endif
                         @if($tabletype == 'normal')
                             <td>
-                                <a class="btn btn-sm btn-info btn-block text-white" href="/blocker/{{ $blockedItem->id }}" data-toggle="tooltip" title="{{ trans("laravelblocker::laravelblocker.tooltips.show") }}">
+                                <a class="btn btn-sm btn-info w-100 text-white" href="/blocker/{{ $blockedItem->id }}" data-bs-toggle="tooltip" title="{{ trans("laravelblocker::laravelblocker.tooltips.show") }}">
                                     {!! trans("laravelblocker::laravelblocker.buttons.show") !!}
                                 </a>
                             </td>
                             <td>
-                                <a class="btn btn-sm btn-warning btn-block text-white" href="/blocker/{{ $blockedItem->id }}/edit" data-toggle="tooltip" title="{{ trans("laravelblocker::laravelblocker.tooltips.edit") }}">
+                                <a class="btn btn-sm btn-warning w-100 text-white" href="/blocker/{{ $blockedItem->id }}/edit" data-bs-toggle="tooltip" title="{{ trans("laravelblocker::laravelblocker.tooltips.edit") }}">
                                     {!! trans("laravelblocker::laravelblocker.buttons.edit") !!}
                                 </a>
                             </td>
@@ -89,7 +89,7 @@
                         @endif
                         @if($tabletype == 'deleted')
                             <td>
-                                <a class="btn btn-sm btn-info btn-block text-white" href="/blocker-deleted/{{ $blockedItem->id }}" data-toggle="tooltip" title="{{ trans("laravelblocker::laravelblocker.tooltips.show") }}">
+                                <a class="btn btn-sm btn-info w-100 text-white" href="/blocker-deleted/{{ $blockedItem->id }}" data-bs-toggle="tooltip" title="{{ trans("laravelblocker::laravelblocker.tooltips.show") }}">
                                     {!! trans("laravelblocker::laravelblocker.buttons.show") !!}
                                 </a>
                             </td>

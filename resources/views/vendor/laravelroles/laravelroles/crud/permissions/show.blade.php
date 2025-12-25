@@ -51,12 +51,12 @@
                             </span>
                             <div class="pull-right">
                                 @isset($typeDeleted)
-                                    <a href="{{ route('laravelroles::permissions-deleted') }}" class="btn btn-outline-danger btn-sm float-right" data-bs-toggle="tooltip" data-placement="left" title="{{ trans('laravelroles::laravelroles.tooltips.back-permissions-deleted') }}">
+                                    <a href="{{ route('laravelroles::permissions-deleted') }}" class="btn btn-outline-danger btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('laravelroles::laravelroles.tooltips.back-permissions-deleted') }}">
                                         <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                         {!! trans('laravelroles::laravelroles.buttons.back-to-permissions-deleted') !!}
                                     </a>
                                 @else
-                                    <a href="{{ route('laravelroles::roles.index') }}" class="btn btn-outline-secondary btn-sm float-right" data-bs-toggle="tooltip" data-placement="left" title="{{ trans('laravelroles::laravelroles.tooltips.back-permissions') }}">
+                                    <a href="{{ route('laravelroles::roles.index') }}" class="btn btn-outline-secondary btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('laravelroles::laravelroles.tooltips.back-permissions') }}">
                                         <i class="fa fa-fw fa-reply-all" aria-hidden="true"></i>
                                         {!! trans('laravelroles::laravelroles.buttons.back-to-permissions') !!}
                                     </a>

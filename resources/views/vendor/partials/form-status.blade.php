@@ -1,6 +1,6 @@
 @if (session('message'))
     <div class="alert alert-{{ Session::get('status') }} status-box alert-dismissable fade show" role="alert">
-        <a href="#" class="close" data-dismiss="alert" aria-label="close">
+        <a href="#" class="close" data-bs-dismiss="alert" aria-label="close">
             &times;
             <span class="sr-only">
                 {!! trans('laravelblocker::laravelblocker.flash-messages.close') !!}
@@ -12,7 +12,7 @@
 
 @if (session('success'))
     <div class="alert alert-success alert-dismissable fade show" role="alert">
-        <a href="#" class="close" data-dismiss="alert" aria-label="close">
+        <a href="#" class="close" data-bs-dismiss="alert" aria-label="close">
             &times;
             <span class="sr-only">
                 {!! trans('laravelblocker::laravelblocker.flash-messages.close') !!}
@@ -29,7 +29,7 @@
 @if(session()->has('status'))
     @if(session()->get('status') == 'wrong')
         <div class="alert alert-danger status-box alert-dismissable fade show" role="alert">
-            <a href="#" class="close" data-dismiss="alert" aria-label="close">
+            <a href="#" class="close" data-bs-dismiss="alert" aria-label="close">
                 &times;
                 <span class="sr-only">
                     {!! trans('laravelblocker::laravelblocker.flash-messages.close') !!}
@@ -42,7 +42,7 @@
 
 @if (session('error'))
     <div class="alert alert-danger alert-dismissable fade show" role="alert">
-        <a href="#" class="close" data-dismiss="alert" aria-label="close">
+        <a href="#" class="close" data-bs-dismiss="alert" aria-label="close">
             &times;
             <span class="sr-only">
                 {!! trans('laravelblocker::laravelblocker.flash-messages.close') !!}
@@ -58,7 +58,7 @@
 
 @if (session('errors') && count($errors) > 0)
     <div class="alert alert-danger alert-dismissable fade show" role="alert">
-        <a href="#" class="close" data-dismiss="alert" aria-label="close">
+        <a href="#" class="close" data-bs-dismiss="alert" aria-label="close">
             &times;
             <span class="sr-only">
                 {!! trans('laravelblocker::laravelblocker.flash-messages.close') !!}

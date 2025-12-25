@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Logic\Macros\Macros;
-use Collective\Html\HtmlServiceProvider;
+use Spatie\Html\HtmlServiceProvider;
 
 /**
  * Class MacroServiceProvider.
@@ -19,8 +19,22 @@ class MacroServiceProvider extends HtmlServiceProvider
         // register method is called. Otherwise, csrf tokens
         // will not be generated
         parent::register();
+    }
+
+    /**
+     * Bootstrap the application services.
+     */
+    public function boot(): void
+    {
+        // Register FormBuilder as a singleton after all services are booted
+        $this->app->singleton(\App\Html\FormBuilder::class, function ($app) {
+            return new \App\Html\FormBuilder($app->make(\Spatie\Html\Html::class));
+        });
+
+        // Load form() helper alias
+        require base_path().'/app/Html/FormHelper.php';
 
         // Load HTML Macros
-        require base_path().'/app/Logic/Macros/HtmlMacros.php';
+        require base_path().'/app/Html/HtmlMacros.php';
     }
 }

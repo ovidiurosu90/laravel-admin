@@ -1,4 +1,4 @@
-{!! Form::open([
+{!! form()->open([
     'route' => 'laravelblocker::blocker.store',
     'method' => 'POST',
     'role' => 'form',
@@ -11,7 +11,7 @@
     @include('laravelblocker::forms.partials.item-note-input')
     <div class="row">
         <div class="col-sm-9 offset-sm-3">
-                {!! Form::button(trans('laravelblocker::laravelblocker.buttons.create-larger'), array('class' => 'btn btn-success btn-block margin-bottom-1 mb-1 float-right','type' => 'submit' )) !!}
+                {!! form()->button(trans('laravelblocker::laravelblocker.buttons.create-larger'), array('class' => 'btn btn-success btn-block margin-bottom-1 mb-1 float-right','type' => 'submit' )) !!}
         </div>
     </div>
-{!! Form::close() !!}
+{!! form()->close() !!}

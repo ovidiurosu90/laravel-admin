@@ -31,8 +31,8 @@
                             <span id="card_title">
                                 {!!trans('usersmanagement.show-deleted-users')!!}
                             </span>
-                            <div class="float-end">
-                                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-end" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
+                            <div class="float-right">
+                                <a href="{{ route('users') }}" class="btn btn-light btn-sm float-right" data-bs-toggle="tooltip" data-bs-placement="left" title="{{ trans('usersmanagement.tooltips.back-users') }}">
                                     <i class="fa fa-fw fa-mail-reply" aria-hidden="true"></i>
                                     {!! trans('usersmanagement.buttons.back-to-users') !!}
                                 </a>
@@ -104,22 +104,40 @@
                                                 </td>
                                                 <td class="hidden-xs">{{$user->deleted_at}}</td>
                                                 <td class="hidden-xs">{{$user->deleted_ip_address}}</td>
+                                                <td>                                                    {{ html()->form('POST', action([App\Http\Controllers\SoftDeletesController::class, 'update'], $user->id))
+                                                            ->attribute('data-bs-toggle', 'tooltip')
+                                                            ->open() }}
+                                                        @csrf
+                                                        @method('PUT')
+                                                        {{ html()->button('<i class="fa fa-refresh" aria-hidden="true"></i>')
+                                                            ->class('btn btn-success w-100 btn-sm')
+                                                            ->type('submit')
+                                                            ->attribute('data-bs-toggle', 'tooltip')
+                                                            ->attribute('title', 'Restore User') }}
+                                                    {{ html()->form()->close() }}                                                </td>
                                                 <td>
-                                                    {!! Form::model($user, array('action' => array('SoftDeletesController@update', $user->id), 'method' => 'PUT', 'data-bs-toggle' => 'tooltip')) !!}
-                                                        {!! Form::button('<i class="fa fa-refresh" aria-hidden="true"></i>', array('class' => 'btn btn-success btn-block btn-sm', 'type' => 'submit', 'data-bs-toggle' => 'tooltip', 'title' => 'Restore User')) !!}
-                                                    {!! Form::close() !!}
-                                                </td>
-                                                <td>
-                                                    <a class="btn btn-sm btn-info btn-block" href="{{ URL::to('users/deleted/' . $user->id) }}" data-bs-toggle="tooltip" title="Show User">
+                                                    <a class="btn btn-sm btn-info w-100" href="{{ URL::to('users/deleted/' . $user->id) }}" data-bs-toggle="tooltip" title="Show User">
                                                         <i class="fa fa-eye fa-fw" aria-hidden="true"></i>
                                                     </a>
                                                 </td>
-                                                <td>
-                                                    {!! Form::model($user, array('action' => array('SoftDeletesController@destroy', $user->id), 'method' => 'DELETE', 'class' => 'inline', 'data-bs-toggle' => 'tooltip', 'title' => 'Destroy User Record')) !!}
-                                                        {!! Form::hidden('_method', 'DELETE') !!}
-                                                        {!! Form::button('<i class="fa fa-user-times" aria-hidden="true"></i>', array('id' => 'user-delete-confirm-' . $user->id, 'class' => 'btn btn-danger btn-sm inline','type' => 'button', 'style' =>'width: 100%;' ,'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-delete-modal', 'data-title' => 'Delete User', 'data-initiator-id' => 'user-delete-confirm-' . $user->id, 'data-message' => 'Are you sure you want to delete this user ?')) !!}
-                                                    {!! Form::close() !!}
-                                                </td>
+                                                <td>                                                    {{ html()->form('POST', action([App\Http\Controllers\SoftDeletesController::class, 'destroy'], $user->id))
+                                                            ->class('inline')
+                                                            ->attribute('data-bs-toggle', 'tooltip')
+                                                            ->attribute('title', 'Destroy User Record')
+                                                            ->open() }}
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        {{ html()->button('<i class="fa fa-user-times" aria-hidden="true"></i>')
+                                                            ->id('user-delete-confirm-' . $user->id)
+                                                            ->class('btn btn-danger btn-sm inline')
+                                                            ->type('button')
+                                                            ->style('width: 100%;')
+                                                            ->attribute('data-bs-toggle', 'modal')
+                                                            ->attribute('data-bs-target', '#confirm-delete-modal')
+                                                            ->attribute('data-initiator-id', 'user-delete-confirm-' . $user->id)
+                                                            ->attribute('data-title', 'Delete User')
+                                                            ->attribute('data-message', 'Are you sure you want to delete this user ?') }}
+                                                    {{ html()->form()->close() }}                                                </td>
                                             </tr>
                                         @endforeach
 

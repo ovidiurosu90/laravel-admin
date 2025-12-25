@@ -3,33 +3,30 @@
 namespace Tests\Feature;
 
 use App\Models\Theme;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+// use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
+use PHPUnit\Framework\Attributes\Depends;
 use Tests\TestCase;
 
 class ThemesTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase;
     use WithoutMiddleware;
-
-    private $_faker;
-    private $_themeName;
-    private $_themeUrl;
 
     /**
      * Create a new theme test.
      *
-     * @return void
+     * @return Theme
      */
     public function testCreateNewTheme()
     {
-        $this->_faker = (object) \Faker\Factory::create();
-        $this->_themeName = $this->_faker->domainWord;
-        $this->_themeUrl = $this->_faker->url;
+        $faker = \Faker\Factory::create();
+        $themeName = $faker->domainWord;
+        $themeUrl = $faker->url;
 
         $theme = Theme::create([
-            'name'          => $this->_themeName,
-            'link'          => $this->_themeUrl,
+            'name'          => $themeName,
+            'link'          => $themeUrl,
             'notes'         => 'Test Default Theme.',
             'status'        => 1,
             'taggable_id'   => 0,
@@ -38,8 +35,57 @@ class ThemesTest extends TestCase
         $theme->taggable_id = $theme->id;
         $theme->save();
 
-        $theme = Theme::where('name', $this->_themeName)->first();
-        $this->assertEquals($this->_themeUrl, $theme->link);
-        $this->assertEquals($theme->id, $theme->taggable_id);
+        $createdTheme = Theme::where('name', $themeName)->first();
+        $this->assertEquals($themeUrl, $createdTheme->link);
+        $this->assertEquals($createdTheme->id, $createdTheme->taggable_id);
+
+        return $createdTheme;
+    }
+
+    /**
+     * Test updating an existing theme.
+     *
+     * @return Theme
+     */
+    #[Depends('testCreateNewTheme')]
+    public function testUpdateTheme(Theme $theme)
+    {
+        // Update the theme
+        $updatedName = 'Updated Theme';
+        $updatedUrl = 'https://updated.theme.com';
+        $updatedNotes = 'Updated notes for testing';
+
+        $theme->update([
+            'name'   => $updatedName,
+            'link'   => $updatedUrl,
+            'notes'  => $updatedNotes,
+            'status' => 0,
+        ]);
+
+        // Verify the update
+        $updatedTheme = Theme::find($theme->id);
+        $this->assertEquals($updatedName, $updatedTheme->name);
+        $this->assertEquals($updatedUrl, $updatedTheme->link);
+        $this->assertEquals($updatedNotes, $updatedTheme->notes);
+        $this->assertEquals(0, $updatedTheme->status);
+
+        return $updatedTheme;
+    }
+
+    /**
+     * Test force deleting a theme (permanent deletion).
+     *
+     * @return void
+     */
+    #[Depends('testUpdateTheme')]
+    public function testForceDeleteTheme(Theme $theme)
+    {
+        $themeId = $theme->id;
+
+        // Force delete the theme
+        $theme->forceDelete();
+
+        // Verify it's completely gone from database
+        $this->assertNull(Theme::withTrashed()->find($themeId));
     }
 }

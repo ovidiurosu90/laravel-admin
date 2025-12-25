@@ -103,14 +103,25 @@ $theme = $currentTheme; //NOTE The current theme is overwritten by the profile t
                 <div class="card-footer">
                     <div class="row pt-2">
                         <div class="col-sm-6 mb-2">
-                            <a href="/themes/{{$theme->id}}/edit" class="btn btn-small btn-info btn-block">
+                            <a href="/themes/{{$theme->id}}/edit" class="btn btn-small btn-info w-100">
                                 <i class="fa fa-pencil fa-fw" aria-hidden="true"></i> Edit<span class="hidden-sm"> this</span><span class="hidden-sm"> Theme</span>
                             </a>
                         </div>
-                        {!! Form::open(array('url' => 'themes/' . $theme->id, 'class' => 'col-sm-6 mb-2')) !!}
-                            {!! Form::hidden('_method', 'DELETE') !!}
-                            {!! Form::button('<i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> Delete<span class="hidden-sm"> this</span><span class="hidden-sm"> Theme</span>', array('id' => 'theme-delete-confirm', 'class' => 'btn btn-danger btn-block btn-flat','type' => 'button', 'data-bs-toggle' => 'modal', 'data-bs-target' => '#confirm-delete-modal', 'data-title' => trans('themes.confirmDeleteHdr'), 'data-initiator-id' => 'theme-delete-confirm', 'data-message' => trans('themes.confirmDelete'))) !!}
-                        {!! Form::close() !!}
+                        {{ html()->form('POST', url('themes/' . $theme->id))
+                                ->class('col-sm-6 mb-2')
+                                ->open() }}
+                            @csrf
+                            @method('DELETE')
+                            {{ html()->button('<i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> Delete<span class="hidden-sm"> this</span><span class="hidden-sm"> Theme</span>')
+                                ->id('theme-delete-confirm')
+                                ->class('btn btn-danger w-100 btn-flat')
+                                ->type('button')
+                                ->attribute('data-bs-toggle', 'modal')
+                                ->attribute('data-bs-target', '#confirm-delete-modal')
+                                ->attribute('data-initiator-id', 'theme-delete-confirm')
+                                ->attribute('data-title', trans('themes.confirmDeleteHdr'))
+                                ->attribute('data-message', trans('themes.confirmDelete')) }}
+                        {{ html()->form()->close() }}
                     </div>
                 </div>
             </div>
