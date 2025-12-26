@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // Body
 $white: #ffffff;
 $body-bg: #f5f8fa;
@@ -51,9 +53,9 @@ $queries: (
 $btn-default-color: $text-color;
 
 // Inputs
-$input-border: lighten($text-color, 40%);
-$input-border-focus: lighten($brand-primary, 25%);
-$input-color-placeholder: lighten($text-color, 30%);
+$input-border: color.adjust($text-color, $lightness: 40%);
+$input-border-focus: color.adjust($brand-primary, $lightness: 25%);
+$input-color-placeholder: color.adjust($text-color, $lightness: 30%);
 
 // Panels / Cards
 $panel-default-heading-bg: $white;

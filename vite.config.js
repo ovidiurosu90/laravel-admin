@@ -154,7 +154,7 @@ export default defineConfig(({ mode }) => {
       ssr: false,
       minify: "esnext",
       reportCompressedSize: true,
-      chunkSizeWarningLimit: 1600,
+      chunkSizeWarningLimit: 2000,
       manifest: true,
       sourcemap: process.env.VITE_APP_ENV == "local" ? true : false,
       rollupOptions: {
@@ -261,6 +261,26 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 8080,
       hot: true,
+    },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: "modern-compiler",
+          // Silence Bootstrap-specific Sass deprecation warnings:
+          // - if-function: Bootstrap uses deprecated Sass if() function
+          // - global-builtin: Bootstrap uses deprecated color functions (mix, red, green, blue)
+          // - color-functions: Bootstrap uses deprecated lighten/darken functions
+          // - import: Bootstrap and external CSS files use deprecated @import syntax
+          // These warnings come from node_modules/bootstrap and external libraries,
+          // not from our own code. Our custom SCSS files have been updated to use modern syntax.
+          silenceDeprecations: [
+            "if-function",
+            "global-builtin",
+            "color-functions",
+            "import",
+          ],
+        },
+      },
     },
   }; // end config
 

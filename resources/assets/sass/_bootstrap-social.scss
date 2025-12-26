@@ -8,6 +8,8 @@
  * modified for bootstrap 4
  */
 
+@use "sass:color";
+
 $youtube: #ff0000;
 $twitch: #643fa6;
 $basecamp: #5ac45e;
@@ -1330,13 +1332,13 @@ fieldset[disabled] .btn.btn-yahoo.focus {
 .btn.btn-youtube:focus,
 .btn.btn-youtube.focus {
     color: #fff;
-    background-color: darken($youtube, 15%);
-    border-color: darken($youtube, 15%);
+    background-color: color.adjust($youtube, $lightness: -15%);
+    border-color: color.adjust($youtube, $lightness: -15%);
 }
 .btn.btn-youtube:hover {
     color: #fff;
-    background-color: darken($youtube, 15%);
-    border-color: darken($youtube, 15%);
+    background-color: color.adjust($youtube, $lightness: -15%);
+    border-color: color.adjust($youtube, $lightness: -15%);
 }
 
 .btn.btn-twitch {
@@ -1347,13 +1349,13 @@ fieldset[disabled] .btn.btn-yahoo.focus {
 .btn.btn-twitch:focus,
 .btn.btn-twitch.focus {
     color: #fff;
-    background-color: darken($twitch, 15%);
-    border-color: darken($twitch, 15%);
+    background-color: color.adjust($twitch, $lightness: -15%);
+    border-color: color.adjust($twitch, $lightness: -15%);
 }
 .btn.btn-twitch:hover {
     color: #fff;
-    background-color: darken($twitch, 15%);
-    border-color: darken($twitch, 15%);
+    background-color: color.adjust($twitch, $lightness: -15%);
+    border-color: color.adjust($twitch, $lightness: -15%);
 }
 
 .btn.btn-basecamp {
@@ -1364,11 +1366,11 @@ fieldset[disabled] .btn.btn-yahoo.focus {
 .btn.btn-basecamp:focus,
 .btn.btn-basecamp.focus {
     color: #fff;
-    background-color: darken($basecamp, 15%);
-    border-color: darken($basecamp, 15%);
+    background-color: color.adjust($basecamp, $lightness: -15%);
+    border-color: color.adjust($basecamp, $lightness: -15%);
 }
 .btn.btn-basecamp:hover {
     color: #fff;
-    background-color: darken($basecamp, 15%);
-    border-color: darken($basecamp, 15%);
+    background-color: color.adjust($basecamp, $lightness: -15%);
+    border-color: color.adjust($basecamp, $lightness: -15%);
 }

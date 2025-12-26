@@ -11,8 +11,7 @@
     "lint": "eslint --fix resources/assets/js/",
     "clean": "prettier . --write",
     "preprod": "[ ! -e public/build/manifest.json ] || rm public/build/manifest.json",
-    "prod-NEW": "npm run lint && npm run clean && node --max-old-space-size=16384 ./node_modules/vite/bin/vite.js build",
-    "prod": "eslint --fix resources/assets/js/ && prettier . --write && node --max_old_space_size=16384 ./node_modules/vite/bin/vite.js optimize && ./node_modules/vite/bin/vite.js build",
+    "prod": "npm run lint && npm run clean && node --max-old-space-size=16384 ./node_modules/vite/bin/vite.js build",
     "postprod": "cp public/build/.vite/manifest.json public/build/manifest.json"
   },
   "devDependencies": {
