@@ -29,7 +29,9 @@ More images in the [images folder](images).
 ## Original Source
 
 Forked from [jeremykenedy/laravel-auth](https://github.com/jeremykenedy/laravel-auth) from Nov 17, 2024.
-Updated (sync fork) on Dec 26, 2025.
+
+Updated (sync fork) on Dec 26, 2025; note that this project is upgraded to Bootstrap 5.3 while the original project is still on Boostrap 4.
+
 
 Please check the original [README.md](README-laravel-auth.md).
 

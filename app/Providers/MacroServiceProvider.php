@@ -19,6 +19,9 @@ class MacroServiceProvider extends HtmlServiceProvider
         // register method is called. Otherwise, csrf tokens
         // will not be generated
         parent::register();
+
+        // Load HTML Macros
+        require base_path().'/app/Html/HtmlMacros.php';
     }
 
     /**
@@ -33,8 +36,5 @@ class MacroServiceProvider extends HtmlServiceProvider
 
         // Load form() helper alias
         require base_path().'/app/Html/FormHelper.php';
-
-        // Load HTML Macros
-        require base_path().'/app/Html/HtmlMacros.php';
     }
 }
