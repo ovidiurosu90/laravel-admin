@@ -14,7 +14,6 @@ import { viteExternalsPlugin } from "vite-plugin-externals";
 
 import laravel from "laravel-vite-plugin";
 import path from "path";
-import { webUpdateNotice } from "@plugin-web-update-notification/vite";
 
 // import eslint from "vite-plugin-eslint"; // not needed
 // import StylelintPlugin from "vite-plugin-stylelint"; // not needed
@@ -71,17 +70,6 @@ export default defineConfig(({ mode }) => {
     }),
     viteCommonjs(),
     // manifestSRI(), // disabled: causing manifest generation error
-    // webUpdateNotice disabled: conflicts with manifest generation
-    // webUpdateNotice({
-    //   logVersion: true,
-    //   logHash: true,
-    //   checkInterval: 0.5 * 60 * 1000,
-    //   notificationProps: {
-    //     title: "system update",
-    //     description: "System update, please refresh the page",
-    //     buttonText: "refresh",
-    //   },
-    // }),
     ...(mode === "build"
       ? [
           viteStaticCopy({

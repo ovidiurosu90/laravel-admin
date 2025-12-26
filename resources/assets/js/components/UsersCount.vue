@@ -3,14 +3,9 @@
     <div class="row">
       <div class="col-md-8 offset-md-2">
         <div class="card">
-          <div class="card-header">
-            Current Users Online
-          </div>
+          <div class="card-header">Current Users Online</div>
           <div class="card-body">
-            <canvas
-              id="myChart"
-              height="100"
-            />
+            <canvas id="myChart" height="100" />
           </div>
         </div>
       </div>
