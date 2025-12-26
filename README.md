@@ -84,7 +84,6 @@ yarn run dev
 yarn run prod
 ```
 
-
 ## Update to PHP 8.2
 
 ```bash
@@ -103,7 +102,6 @@ sudo a2dismod php8.1
 sudo a2enmod php8.2
 systemctl restart apache2
 ```
-
 
 ## Populate sample blockers (if you didn't import a database dump already)
 
