@@ -90,7 +90,8 @@ yarn run prod
 ## Update to PHP 8.2
 
 ```bash
-sudo apt-get install php8.1
+sudo apt update
+sudo apt-get install software-properties-common
 sudo add-apt-repository ppa:ondrej/apache2
 sudo add-apt-repository ppa:ondrej/php
 sudo apt update
