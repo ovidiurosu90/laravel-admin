@@ -65,6 +65,8 @@ chown -R :www-data framework
 cd ..
 php artisan cache:clear
 
+sudo chown :www-data bootstrap/cache
+
 sudo apt-get install php8.1-bcmath
 
 # Check below how to get the bitbucket oauth keys
@@ -131,7 +133,8 @@ composer dump-autoload
 php artisan view:clear
 php artisan optimize:clear
 
-#php artisan test --filter test_users_can_authenticate_using_the_login_screen
+# php artisan test --filter test_users_can_authenticate_using_the_login_screen
+# php artisan test --filter MyFinance2
 php artisan test
 
 yarn install
