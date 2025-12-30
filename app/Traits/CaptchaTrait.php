@@ -14,7 +14,9 @@ trait CaptchaTrait
      */
     public function captchaCheck()
     {
-        $response = Request::get('g-recaptcha-response');
+        // MODIFIED: Changed from deprecated Request::get() to request()->input()
+        // WHY: Request::get() is deprecated in Symfony 7.4 in favor of request()->input()
+        $response = request()->input('g-recaptcha-response');
         $remoteip = $_SERVER['REMOTE_ADDR'];
         $secret = config('settings.reCaptchSecret');
 

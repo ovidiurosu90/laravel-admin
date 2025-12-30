@@ -9,6 +9,9 @@ use \jeremykenedy\LaravelLogger\App\Http\Traits\UserAgentDetails;
 class Activity extends Model
 {
     use SoftDeletes;
+    // ADDED: UserAgentDetails trait for parsing browser/OS information from user-agent strings
+    // WHY: Application needs detailed user agent analytics - browser type, OS version, device type
+    // This enables mapAdditionalDetails() in LaravelLoggerController to display rich client information
     use UserAgentDetails;
 
     /**
@@ -57,6 +60,12 @@ class Activity extends Model
         'locale',
         'referer',
         'methodType',
+        // REMOVED FIELDS (from vendor version):
+        // - 'relId': Related model ID for relationship tracking (not used in app schema)
+        // - 'relModel': Related model class name (not needed for activity tracking)
+        // WHY: Application database schema doesn't include these columns. The vendor package
+        // supports optional relationship tracking which this app doesn't utilize.
+        // These fields were removed to prevent mass-assignment errors.
     ];
 
     /**
@@ -84,7 +93,7 @@ class Activity extends Model
      *
      * @return void
      */
-    public function __construct($attributes = [])
+    public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
         $this->table = config('LaravelLogger.loggerDatabaseTable');
@@ -120,11 +129,19 @@ class Activity extends Model
     /**
      * Get a validator for an incoming Request.
      *
+     * MODIFICATION: Added Laravel version compatibility check and dynamic validation rule
+     * VENDOR VERSION: Directly uses 'url' validation without version checking
+     * OVERRIDE VERSION: Checks Laravel version and uses 'active_url' for versions < 5.8, 'url' for others
+     * WHY: Supports older Laravel versions (< 5.8) that use 'active_url' validator instead of 'url'.
+     * This ensures backward compatibility when the Activity model is used with legacy Laravel versions.
+     * The 'active_url' validator checks that the URL is actually active/resolvable.
+     * Modern Laravel (5.8+) uses the 'url' validator which just checks URL format.
+     *
      * @param array $merge (rules to optionally merge)
      *
      * @return array
      */
-    public static function rules($merge = [])
+    public static function rules($merge = []): array
     {
         if (app() instanceof \Illuminate\Foundation\Application) {
             $route_url_check = version_compare(\Illuminate\Foundation\Application::VERSION, '5.8') < 0 ? 'active_url' : 'url';
@@ -154,6 +171,10 @@ class Activity extends Model
      *
      * @return string
      */
+    // MODIFIED IMPLEMENTATION: Uses self::details() from UserAgentDetails trait
+    // VENDOR VERSION: Uses full namespace \jeremykenedy\LaravelLogger\App\Http\Traits\UserAgentDetails::details()
+    // WHY: Since the trait is now used in this class, we can call details() directly via self.
+    // This is cleaner and more maintainable. The trait provides browser/OS/device parsing.
     public function getUserAgentDetailsAttribute()
     {
         return self::details($this->userAgent);

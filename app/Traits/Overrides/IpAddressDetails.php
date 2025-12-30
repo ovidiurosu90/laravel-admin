@@ -27,6 +27,9 @@ trait IpAddressDetails
                 }
             }
         }
+        // FIX: Changed null to empty string in str_replace
+        // VENDOR VERSION: str_replace(..., null, ...) triggers PHP 8.1+ deprecation warning
+        // WHY: str_replace expects array|string as replacement, not null. Using empty string is equivalent.
         $purpose = str_replace(['name', "\n", "\t", ' ', '-', '_'], '', strtolower(trim($purpose)));
         $support = ['country', 'countrycode', 'state', 'region', 'city', 'location', 'address'];
         $continents = [
@@ -40,6 +43,12 @@ trait IpAddressDetails
         ];
         if (filter_var($ip, FILTER_VALIDATE_IP) && in_array($purpose, $support)) {
             $ipdat = @json_decode(file_get_contents('http://www.geoplugin.net/json.gp?ip='.$ip));
+            // CRITICAL FIX: Added NULL-safety check !empty($ipdat->geoplugin_countryCode)
+            // VENDOR VERSION: Only checked @strlen(trim($ipdat->geoplugin_countryCode)) == 2
+            // WHY: GeoPlugin API occasionally returns incomplete responses with missing fields.
+            // Without this check, strlen() on NULL/undefined property throws PHP warnings.
+            // This override prevents: "Warning: strlen() expects parameter 1 to be string, null given"
+            // The !empty() check ensures the property exists and has content before processing.
             if (!empty($ipdat->geoplugin_countryCode)
                 && @strlen(trim($ipdat->geoplugin_countryCode)) == 2
             ) {

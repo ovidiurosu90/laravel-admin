@@ -19,6 +19,9 @@ trait LaravelCheckBlockedTrait
         $all = Request::all();
         $method = Request::method();
         $route = Request::route();
+        // MODIFIED: Changed from IpAddressDetails::checkIP($requestIp) to self::checkIP($requestIp)
+        // VENDOR VERSION: Calls trait method by trait name (deprecated in PHP 8.1+)
+        // WHY: PHP 8.1+ deprecation - static trait methods should be called through class using the trait
         $ipAddressDetails = self::checkIP($requestIp);
         $blocked = false;
         $type = null;

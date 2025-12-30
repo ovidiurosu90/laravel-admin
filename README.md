@@ -142,6 +142,10 @@ yarn install
 yarn run dev
 yarn run prod
 >storage/logs/laravel.log
+
+# Clear cache
+sudo chown :www-data -R storage/framework/cache/data
+php artisan config:clear && php artisan cache:clear && sudo systemctl restart apache2
 ```
 
 ## Check README.md from ovidiuro/myfinance2 and follow the installation instructions

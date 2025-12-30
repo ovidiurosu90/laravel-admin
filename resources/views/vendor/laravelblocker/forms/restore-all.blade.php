@@ -1,17 +1,17 @@
-{!! form()->open([
-    'route' => 'laravelblocker::blocker-deleted-restore-all',
-    'method' => 'POST',
-    'accept-charset' => 'UTF-8'
-]) !!}
-    {!! csrf_field() !!}
-    {!! form()->button('
-        <i class="fa fa-fw fa-history" aria-hidden="true"></i> ' . trans_choice('laravelblocker::laravelblocker.buttons.restore-all-blocked', 1, ['count' => $blocked->count()]),
-        [
-            'type' => 'button',
-            'class' => 'btn dropdown-item',
-            'data-bs-toggle' => 'modal',
-            'data-bs-target' => '#confirm-restore-modal',
-            'data-title' => trans('laravelblocker::laravelblocker.modals.resotreAllBlockedTitle'),
-            'data-message' => trans('laravelblocker::laravelblocker.modals.resotreAllBlockedMessage')
-        ]) !!}
-{!! form()->close() !!}
+{{ html()->form('POST', route('laravelblocker::blocker-deleted-restore-all'))
+    ->attribute('accept-charset', 'UTF-8')
+    ->open() }}
+    @csrf
+    {{ html()->button()->type('button')
+        ->class('btn dropdown-item')
+        ->attribute('data-bs-toggle', 'modal')
+        ->attribute('data-bs-target', '#confirm-restore-modal')
+        ->attribute('data-title', trans('laravelblocker::laravelblocker.modals.'
+                                        . 'restoreAllBlockedTitle'))
+        ->attribute('data-message', trans('laravelblocker::laravelblocker.modals.'
+                                          . 'restoreAllBlockedMessage'))
+        ->html('<i class="fa fa-fw fa-history" aria-hidden="true"></i> ' .
+               trans_choice('laravelblocker::laravelblocker.buttons.restore-all-blocked', 1,
+                            ['count' => $blocked->count()])) }}
+{{ html()->form()->close() }}
+

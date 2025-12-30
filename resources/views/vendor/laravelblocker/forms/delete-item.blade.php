@@ -1,13 +1,16 @@
-{!! form()->open([
-    'route' => ['laravelblocker::blocker.destroy', $item->id],
-    'method' => 'DELETE',
-    'accept-charset' => 'UTF-8',
-    'data-bs-toggle' => 'tooltip',
-    'title' => trans('laravelblocker::laravelblocker.tooltips.delete')
-]) !!}
-    {!! form()->hidden("_method", "DELETE") !!}
-    {!! csrf_field() !!}
-    <button class="btn btn-danger btn-sm" type="button" style="width: 100%;" data-bs-toggle="modal" data-bs-target="#confirm-delete-modal" data-title="Delete Blocked Item" data-message="{!! trans("laravelblocker::laravelblocker.modals.delete_blocked_message", ["blocked" => $item->value]) !!}">
-        {!! trans("laravelblocker::laravelblocker.buttons.delete-larger") !!}
+{{ html()->form('POST', route('laravelblocker::blocker.destroy', $item->id))
+    ->attribute('accept-charset', 'UTF-8')
+    ->attribute('data-bs-toggle', 'tooltip')
+    ->attribute('title', trans('laravelblocker::laravelblocker.tooltips.delete'))
+    ->open() }}
+    @csrf
+    @method('DELETE')
+    <button class="btn btn-danger btn-sm" type="button" style="width: 100%;"
+        data-bs-toggle="modal" data-bs-target="#confirm-delete-modal"
+        data-title="Delete Blocked Item"
+        data-message="{!! trans('laravelblocker::laravelblocker.modals.'
+                            . 'delete_blocked_message', ['blocked' => $item->value]) !!}">
+        {!! trans('laravelblocker::laravelblocker.buttons.delete-larger') !!}
     </button>
-{!! form()->close() !!}
+{{ html()->form()->close() }}
+

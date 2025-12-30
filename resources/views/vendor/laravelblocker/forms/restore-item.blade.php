@@ -3,7 +3,7 @@
         $itemId = $item->id;
         $itemValue = $item->value;
         $itemClasses = 'btn btn-success btn-block';
-        $itemText = trans('laravelblocker::laravelblocker.buttons.restore-blocked-item-full');
+        $itemText =trans('laravelblocker::laravelblocker.buttons.restore-blocked-item-full');
     @endphp
 @endif
 @if($restoreType == 'small')
@@ -15,21 +15,21 @@
     @endphp
 @endif
 
-{!! form()->open([
-    'route' => ['laravelblocker::blocker-item-restore', $itemId],
-    'method' => 'PUT',
-    'accept-charset' => 'UTF-8',
-    'data-bs-toggle' => 'tooltip',
-    'title' => trans("laravelblocker::laravelblocker.tooltips.restoreItem")
-]) !!}
-    {!! form()->hidden("_method", "PUT") !!}
-    {!! csrf_field() !!}
-    {!! form()->button($itemText, [
-            'type' => 'button',
-            'class' => $itemClasses,
-            'data-bs-toggle' => 'modal',
-            'data-bs-target' => '#confirm-restore-modal',
-            'data-title' => trans('laravelblocker::laravelblocker.modals.resotreBlockedItemTitle'),
-            'data-message' => trans('laravelblocker::laravelblocker.modals.resotreBlockedItemMessage', ['value' => $itemValue])
-        ]) !!}
-{!! form()->close() !!}
+{{ html()->form('POST', route('laravelblocker::blocker-item-restore', $itemId))
+        ->attribute('accept-charset', 'UTF-8')
+        ->attribute('data-bs-toggle', 'tooltip')
+        ->attribute('title', trans('laravelblocker::laravelblocker.tooltips.restoreItem'))
+        ->open() }}
+    @csrf
+    @method('PUT')
+    {{ html()->button($itemText)
+        ->type('button')
+        ->class($itemClasses)
+        ->attribute('data-bs-toggle', 'modal')
+        ->attribute('data-bs-target', '#confirm-restore-modal')
+        ->attribute('data-title', trans('laravelblocker::laravelblocker.modals.'
+                                        . 'restoreBlockedItemTitle'))
+        ->attribute('data-message', trans('laravelblocker::laravelblocker.modals.'
+                                    restoreBlockedItemMessage', ['value' => $itemValue])) }}
+{{ html()->form()->close() }}
+

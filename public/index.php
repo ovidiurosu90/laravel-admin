@@ -5,6 +5,11 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+// Suppress Symfony deprecation warnings from third-party packages
+if (!getenv('SYMFONY_DEPRECATIONS_HELPER')) {
+    putenv('SYMFONY_DEPRECATIONS_HELPER=disabled');
+}
+
 /*
 |--------------------------------------------------------------------------
 | Check If The Application Is Under Maintenance

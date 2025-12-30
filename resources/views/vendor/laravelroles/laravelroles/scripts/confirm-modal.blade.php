@@ -1,7 +1,8 @@
 <script type="module">
 $(document).ready(function()
 {
-    document.getElementById('{{ $formTrigger }}').addEventListener('shown.bs.modal', (e) =>
+    // Confirm Form Submit Modal
+    $('{{$formTrigger}}').on('shown.bs.modal', function (e)
     {
         var message = $(e.relatedTarget).attr('data-message');
         var title = $(e.relatedTarget).attr('data-title');
@@ -10,7 +11,9 @@ $(document).ready(function()
         $(this).find('.modal-title').text(title);
         $(this).find('.modal-footer #confirm').data('form', form);
     });
-    $('#{{ $formTrigger }}').find('.modal-footer #confirm').on('click', function(){
+
+    $('{{$formTrigger}}').find('.modal-footer #confirm').on('click', function()
+    {
         $(this).data('form').submit();
     });
 });

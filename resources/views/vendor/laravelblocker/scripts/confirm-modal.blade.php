@@ -2,9 +2,9 @@
 
 $(document).ready(function()
 {
-    document.getElementById('{{$formTrigger}}').addEventListener('shown.bs.modal', (e) =>
+    // Confirm Form Submit Modal
+    $('{{$formTrigger}}').on('shown.bs.modal', function (e)
     {
-        // Confirm Form Submit Modal
         var message = $(e.relatedTarget).attr('data-message');
         var title = $(e.relatedTarget).attr('data-title');
         var form = $(e.relatedTarget).closest('form');
@@ -13,7 +13,7 @@ $(document).ready(function()
         $(this).find('.modal-footer #confirm').data('form', form);
     });
 
-    $('#{{$formTrigger}}').find('.modal-footer #confirm').on('click', function()
+    $('{{$formTrigger}}').find('.modal-footer #confirm').on('click', function()
     {
         $(this).data('form').submit();
     });

@@ -21,6 +21,9 @@ class LaravelBlocker
     public function handle($request, Closure $next)
     {
         if (config('laravelblocker.laravelBlockerEnabled')) {
+            // MODIFIED: Changed from LaravelCheckBlockedTrait::checkBlocked() to self::checkBlocked()
+            // VENDOR VERSION: Calls trait method by trait name (deprecated in PHP 8.1+)
+            // WHY: PHP 8.1+ deprecation - static trait methods should be called through class using the trait
             self::checkBlocked();
         }
 

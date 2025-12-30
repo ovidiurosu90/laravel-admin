@@ -60,7 +60,7 @@
                                 var deleteCellHtml = '<form method="POST" action="/blocker/'+ val.id +'" accept-charset="UTF-8" data-bs-toggle="tooltip" title="Delete Blocked Item">' +
                                         '{!! form()->hidden("_method", "DELETE") !!}' +
                                         '{!! csrf_field() !!}' +
-                                        '<button class="btn btn-danger btn-sm" type="button" style="width: 100%;" data-bs-toggle="modal" data-bs-target="#confirmDelete" data-title="Delete Blocked Item" data-message="{!! trans("laravelblocker::laravelblocker.modals.delete_blocked_message", ["blocked" => "'+val.name+'"]) !!}">' +
+                                        '<button class="btn btn-danger btn-sm" type="button" style="width: 100%;" data-bs-toggle="modal" data-bs-target="#confirm-delete-modal" data-title="Delete Blocked Item" data-message="{!! trans("laravelblocker::laravelblocker.modals.delete_blocked_message", ["blocked" => "'+val.name+'"]) !!}">' +
                                             '{!! trans("laravelblocker::laravelblocker.buttons.delete") !!}' +
                                         '</button>' +
                                     '</form>';

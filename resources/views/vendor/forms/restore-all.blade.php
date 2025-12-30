@@ -11,7 +11,7 @@
             'class' => 'btn dropdown-item',
             'data-bs-toggle' => 'modal',
             'data-bs-target' => '#confirmRestore',
-            'data-title' => trans('laravelblocker::laravelblocker.modals.resotreAllBlockedTitle'),
-            'data-message' => trans('laravelblocker::laravelblocker.modals.resotreAllBlockedMessage')
+            'data-title' => trans('laravelblocker::laravelblocker.modals.restoreAllBlockedTitle'),
+            'data-message' => trans('laravelblocker::laravelblocker.modals.restoreAllBlockedMessage')
         ]) !!}
 {!! form()->close() !!}

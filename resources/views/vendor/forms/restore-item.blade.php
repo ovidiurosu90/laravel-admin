@@ -29,7 +29,7 @@
             'class' => $itemClasses,
             'data-bs-toggle' => 'modal',
             'data-bs-target' => '#confirmRestore',
-            'data-title' => trans('laravelblocker::laravelblocker.modals.resotreBlockedItemTitle'),
-            'data-message' => trans('laravelblocker::laravelblocker.modals.resotreBlockedItemMessage', ['value' => $itemValue])
+            'data-title' => trans('laravelblocker::laravelblocker.modals.restoreBlockedItemTitle'),
+            'data-message' => trans('laravelblocker::laravelblocker.modals.restoreBlockedItemMessage', ['value' => $itemValue])
         ]) !!}
 {!! form()->close() !!}

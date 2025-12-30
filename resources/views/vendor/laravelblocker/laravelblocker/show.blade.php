@@ -70,62 +70,60 @@
                         <ul class="list-group">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 ID
-                                <span class="badge rounded-pill">
+                                <span class="badge rounded-pill text-bg-secondary">
                                     {{ $item->id }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 TypeId
-                                <span class="badge rounded-pill">
+                                <span class="badge rounded-pill text-bg-secondary">
                                     {{ $item->typeId }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Slug
-                                <span class="badge rounded-pill">
+                                <span class="badge rounded-pill text-bg-secondary">
                                     {!! $item->blockedType->slug !!}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Value
-                                <span class="badge rounded-pill">
+                                <span class="badge rounded-pill text-bg-secondary">
                                     {{ $item->value }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Note
-                                <span class="badge rounded-pill">
+                                <span class="badge rounded-pill text-bg-secondary">
                                     {{ $item->note }}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 UserId
-                                <span class="badge rounded-pill">
+                                <span class="badge rounded-pill text-bg-secondary">
                                     @if ($item->userId)
                                         {!! $item->userId !!}
                                     @else
-                                        <span class="text-bg-light">
-                                            {!! trans('laravelblocker::laravelblocker.none') !!}
-                                        </span>
+                                        {!! trans('laravelblocker::laravelblocker.none') !!}
                                     @endif
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Created At
-                                <span class="badge rounded-pill">
+                                <span class="badge rounded-pill text-bg-secondary">
                                     {!! $item->created_at->format('m/d/Y H:ia') !!}
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Updated At
-                                <span class="badge rounded-pill">
+                                <span class="badge rounded-pill text-bg-secondary">
                                     {!! $item->updated_at->format('m/d/Y H:ia') !!}
                                 </span>
                             </li>
                             @if ($item->deleted_at)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     Deleted At
-                                    <span class="badge rounded-pill">
+                                    <span class="badge rounded-pill text-bg-secondary">
                                         {!! $item->deleted_at->format('m/d/Y H:ia') !!}
                                     </span>
                                 </li>
