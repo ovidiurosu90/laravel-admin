@@ -53,19 +53,19 @@ vim .env # update the settings
 
 mkdir -p storage/framework/cache/data/
 mkdir -p storage/app/
-sudo chown -R :www-data storage/
-sudo chown -R :www-data storage/framework/cache/data/
-sudo chown -R :www-data storage/app/
+sudo chown -R $USER:www-data storage/
+sudo chown -R $USER:www-data storage/framework/cache/data/
+sudo chown -R $USER:www-data storage/app/
 sudo chmod -R 775 storage/app/
 
 cd storage/
 mkdir -p framework/{sessions,views,cache}
 chmod -R 775 framework
-chown -R :www-data framework
+chown -R $USER:www-data framework
 cd ..
 php artisan cache:clear
 
-sudo chown :www-data bootstrap/cache
+sudo chown $USER:www-data bootstrap/cache
 
 sudo apt-get install php8.1-bcmath
 
@@ -138,13 +138,16 @@ php artisan optimize:clear
 # php artisan test --filter MyFinance2
 php artisan test
 
+sudo chown $USER:www-data -R storage/app/
+sudo chmod 775 -R storage/app/charts/
+
 yarn install
 yarn run dev
 yarn run prod
 >storage/logs/laravel.log
 
 # Clear cache
-sudo chown :www-data -R storage/framework/cache/data
+sudo chown $USER:www-data -R storage/framework/cache/data
 php artisan config:clear && php artisan cache:clear && sudo systemctl restart apache2
 ```
 
