@@ -25,6 +25,17 @@ use App\Models\User;
  * - The calculation logic was inadvertently modified
  *
  * Test data and test year are configured in the private admin-mydata package.
+ *
+ * CACHE BEHAVIOR:
+ * PHPUnit uses an isolated 'array' cache driver (configured in phpunit.xml),
+ * separate from the production cache (file/redis). This means:
+ * - Tests always start with an empty cache (deterministic behavior)
+ * - The clear-cache call clears the test's array cache, not production cache
+ * - Tests verify the full data flow without relying on cached data
+ * - Expected runtime: ~30 seconds (fetches fresh data from Yahoo Finance API)
+ *
+ * This isolation is intentional for regression testing - tests should not
+ * depend on or affect production cache state.
  */
 class ReturnsEndpointRegressionTest extends TestCase
 {
@@ -185,7 +196,11 @@ class ReturnsEndpointRegressionTest extends TestCase
 
     /**
      * Fetch returns data once before any tests run
-     * Clear cache once before first fetch
+     *
+     * NOTE: PHPUnit uses an isolated 'array' cache driver, so the clear-cache
+     * call only affects the test's in-memory cache (which starts empty anyway).
+     * This is intentional - tests should verify the full data flow without
+     * relying on production cache. Expect ~30 seconds for fresh data fetch.
      */
     protected function setUp(): void
     {
@@ -200,18 +215,19 @@ class ReturnsEndpointRegressionTest extends TestCase
             );
         }
 
-        // Fetch returns data only once
+        // Fetch returns data only once (cached in static variable for all test methods)
         if (self::$returnsData === null) {
             $user = User::first();
 
-            // Clear cache only once before first fetch
-            // Use the same clear-cache endpoint as the browser for consistency
+            // Clear the test's isolated array cache (not production cache)
+            // This ensures consistent test behavior regardless of test order
+            // Note: PHPUnit uses CACHE_DRIVER=array, so this clears an empty in-memory cache
             if (!self::$cacheCleared) {
                 $response = $this->actingAs($user)
                     ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
                     ->post(route('myfinance2::returns.clear-cache', ['year' => self::getDefaultTestYear()]));
 
-                // Verify the cache clear succeeded
+                // Verify the endpoint works (even though it clears an empty array cache)
                 $response->assertRedirect();
                 $response->assertSessionHas('success');
 

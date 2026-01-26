@@ -7,6 +7,7 @@ namespace Tests\Packages\MyFinance2\Feature;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use ovidiuro\myfinance2\App\Models\Trade;
+use ovidiuro\myfinance2\App\Models\Scopes\AssignedToUserScope;
 use ovidiuro\myfinance2\App\Services\Positions;
 
 /**
@@ -21,6 +22,20 @@ use ovidiuro\myfinance2\App\Services\Positions;
 class PositionsTradeFilteringMinimalTest extends TestCase
 {
     use DatabaseTransactions;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Disable user scope for CLI-like test context
+        AssignedToUserScope::disable();
+    }
+
+    protected function tearDown(): void
+    {
+        // Re-enable user scope for test isolation
+        AssignedToUserScope::enable();
+        parent::tearDown();
+    }
 
     /**
      * MUST-HAVE TEST 1: Historical queries exclude CLOSED trades by default
@@ -40,7 +55,6 @@ class PositionsTradeFilteringMinimalTest extends TestCase
 
         // Act: Get historical trades with default behavior
         $positions = new Positions();
-        $positions->setWithUser(false);
         $trades = $positions->getTrades(new \DateTime('2099-12-31')); // Far future date to include all
 
         // Assert: Should NOT include any CLOSED trades
@@ -66,7 +80,6 @@ class PositionsTradeFilteringMinimalTest extends TestCase
 
         // Act: Get historical trades WITH includeClosedTrades flag
         $positions = new Positions();
-        $positions->setWithUser(false);
         $positions->setIncludeClosedTrades(true);
         $trades = $positions->getTrades(new \DateTime('2099-12-31'));
 
@@ -84,7 +97,6 @@ class PositionsTradeFilteringMinimalTest extends TestCase
     {
         // Act: Get current trades (no date)
         $positions = new Positions();
-        $positions->setWithUser(false);
         $trades = $positions->getTrades();
 
         // Assert: Should NOT include any CLOSED trades
