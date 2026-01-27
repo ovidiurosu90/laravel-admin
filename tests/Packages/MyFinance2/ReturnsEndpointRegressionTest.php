@@ -32,7 +32,8 @@ use App\Models\User;
  * - Tests always start with an empty cache (deterministic behavior)
  * - The clear-cache call clears the test's array cache, not production cache
  * - Tests verify the full data flow without relying on cached data
- * - Expected runtime: ~30 seconds (fetches fresh data from Yahoo Finance API)
+ * - Tests use skip_overview=1 to skip the expensive all-years overview calculation
+ * - Expected runtime: ~30 seconds (fetches fresh data from Yahoo Finance API for one year)
  *
  * This isolation is intentional for regression testing - tests should not
  * depend on or affect production cache state.
@@ -235,8 +236,12 @@ class ReturnsEndpointRegressionTest extends TestCase
             }
 
             // Single request to get data for all accounts
+            // Use skip_overview=1 to avoid expensive all-years overview calculation (not tested here)
             $response = $this->actingAs($user)
-                ->get(route('myfinance2::returns.index', ['year' => self::getDefaultTestYear()]));
+                ->get(route('myfinance2::returns.index', [
+                    'year' => self::getDefaultTestYear(),
+                    'skip_overview' => 1,
+                ]));
 
             $response->assertStatus(200);
             $response->assertViewIs('myfinance2::returns.dashboard');
