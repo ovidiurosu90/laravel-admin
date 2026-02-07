@@ -149,6 +149,9 @@ yarn run prod
 # Clear cache
 sudo chown $USER:www-data -R storage/framework/cache/data
 php artisan config:clear && php artisan cache:clear && sudo systemctl restart apache2
+
+# Populate the returns cache
+sudo su - www-data -s /bin/bash -c "export LOG_CHANNEL=stdout; cd [USER_HOME]/Repositories/laravel-admin/ && php artisan app:finance-api-cron --refresh-returns"
 ```
 
 ## Check README.md from ovidiuro/myfinance2 and follow the installation instructions
