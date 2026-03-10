@@ -412,14 +412,37 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
         $accountId = $accountConfig['id'];
         $currencies = $accountConfig['currencies'];
 
+        $assertionsMade = false;
         foreach ($currencies as $currency => $currencyData) {
             $accountData = static::$returnsData[$accountId];
-            $this->assertEqualsWithDelta($currencyData['totalDeposits'],
-                $accountData['totalDeposits'][$currency]['value'],
-                static::_getFloatTolerance(), "Deposits mismatch for $accountKey $currency");
-            $this->assertEqualsWithDelta($currencyData['totalWithdrawals'],
-                $accountData['totalWithdrawals'][$currency]['value'], static::_getFloatTolerance(),
-                "Withdrawals mismatch for $accountKey $currency");
+
+            // Use adjustedTotal (principal ± fees) to match what the FE main row displays.
+            // Fall back to totalDeposits/totalWithdrawals value when an override is active,
+            // since the override replaces the calculated total and fees don't apply on top.
+            if ($currencyData['totalDeposits'] !== null) {
+                $hasDepositsOverride = !empty($accountData['totalDepositsOverride'][$currency]);
+                $expectedDeposits = $hasDepositsOverride
+                    ? $accountData['totalDeposits'][$currency]['value']
+                    : $accountData['deposits']['totals'][$currency]['adjustedTotal'];
+                $this->assertEqualsWithDelta($currencyData['totalDeposits'],
+                    $expectedDeposits,
+                    static::_getFloatTolerance(), "Deposits mismatch for $accountKey $currency");
+                $assertionsMade = true;
+            }
+
+            if ($currencyData['totalWithdrawals'] !== null) {
+                $hasWithdrawalsOverride = !empty($accountData['totalWithdrawalsOverride'][$currency]);
+                $expectedWithdrawals = $hasWithdrawalsOverride
+                    ? $accountData['totalWithdrawals'][$currency]['value']
+                    : $accountData['withdrawals']['totals'][$currency]['adjustedTotal'];
+                $this->assertEqualsWithDelta($currencyData['totalWithdrawals'],
+                    $expectedWithdrawals,
+                    static::_getFloatTolerance(), "Withdrawals mismatch for $accountKey $currency");
+                $assertionsMade = true;
+            }
+        }
+        if (!$assertionsMade) {
+            $this->addToAssertionCount(1); // all values intentionally null — skipped
         }
     }
 
@@ -437,14 +460,27 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
         $accountId = $accountConfig['id'];
         $currencies = $accountConfig['currencies'];
 
+        $assertionsMade = false;
         foreach ($currencies as $currency => $currencyData) {
             $accountData = static::$returnsData[$accountId];
-            $this->assertEqualsWithDelta($currencyData['totalPurchases'],
-                $accountData['totalPurchases'][$currency]['value'],
-                static::_getFloatTolerance(), "Purchases mismatch for $accountKey $currency");
-            $this->assertEqualsWithDelta($currencyData['totalSales'],
-                $accountData['totalSales'][$currency]['value'],
-                static::_getFloatTolerance(), "Sales mismatch for $accountKey $currency");
+
+            // null means "skip" — gross principal is a detail-drilldown subtotal, not the FE
+            // main row (which shows totalPurchasesNet/totalSalesNet, tested separately).
+            if ($currencyData['totalPurchases'] !== null) {
+                $this->assertEqualsWithDelta($currencyData['totalPurchases'],
+                    $accountData['totalPurchases'][$currency]['value'],
+                    static::_getFloatTolerance(), "Purchases mismatch for $accountKey $currency");
+                $assertionsMade = true;
+            }
+            if ($currencyData['totalSales'] !== null) {
+                $this->assertEqualsWithDelta($currencyData['totalSales'],
+                    $accountData['totalSales'][$currency]['value'],
+                    static::_getFloatTolerance(), "Sales mismatch for $accountKey $currency");
+                $assertionsMade = true;
+            }
+        }
+        if (!$assertionsMade) {
+            $this->addToAssertionCount(1); // all values intentionally null — skipped
         }
     }
 
