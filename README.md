@@ -240,6 +240,23 @@ yarn run prod
 ######################
 ```
 
+## Scripts
+
+### sync-prod-db.sh
+
+Dumps a configurable list of tables from one or more production databases and imports them to localhost.
+Run from localhost. Requires `sshpass` on localhost (`sudo apt-get install sshpass`) and the `PROD_*` / `PROD_SYNC_*` keys set in the local `.env`.
+
+Optionally reimports full database schema(s) from `laravel-package-admin-mydata` (with a git pull) before importing the synced tables.
+
+```bash
+# First, set in .env:
+# PROD_SSH_HOST, PROD_SSH_USER, PROD_SYNC_TABLES, and optionally PROD_SYNC_SCHEMAS
+# (see .env.example for format details)
+
+bash scripts/sync-prod-db.sh
+```
+
 ## Other Utilities
 
 ```bash
