@@ -437,5 +437,32 @@ class OrdersFeatureTest extends TestCase
         $order->refresh();
         $this->assertNull($order->trade_id);
     }
+
+    // =========================================================================
+    // PRICE ALERT PREFILL
+    // =========================================================================
+
+    /**
+     * Covers: OrdersController@create — when ?action=SELL&alert_id=42 is passed,
+     * the create form receives action_prefill='SELL' and description='Price Alert #42'.
+     *
+     * View-data test only — no alert record or DB changes needed.
+     */
+    public function test_create_order_prefills_description_and_action_from_alert_id(): void
+    {
+        // No withoutMiddleware() here: this is a GET request so no CSRF check is needed,
+        // and actingAs() handles auth. Keeping session middleware ensures $errors is
+        // properly bound to the view (required by symbol-select.blade.php).
+        $response = $this->actingAs($this->user)
+            ->get(route('myfinance2::orders.create', [
+                'symbol'   => 'TEST.AS',
+                'action'   => 'SELL',
+                'alert_id' => '42',
+            ]));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('action_prefill', 'SELL');
+        $response->assertViewHas('description', 'Price Alert #42');
+    }
 }
 
