@@ -10,15 +10,28 @@
 #       DB           → DB_HOST / DB_DATABASE / etc.).
 #
 # Optionally reimports one or more full database schemas beforehand (defined in
-# PROD_SYNC_SCHEMAS as DB_KEY:path pairs, paths relative to laravel-admin dir),
-# with an optional git pull of the schema repo first.
+# PROD_SYNC_SCHEMAS as DB_KEY:path pairs, paths relative to laravel-admin dir).
+# Two schema-source modes are available:
+#   default          — git pull of the schema repo, then import local .sql files
+#   --fresh-schemas  — run artisan schema:dump on production, scp files back,
+#                      then import; artisan connection is derived from filename
+#                      (e.g. myfinance2_mysql-schema.sql → --database myfinance2_mysql)
 #
-# Usage:    bash scripts/sync-prod-db.sh
+# Usage:    bash scripts/sync-prod-db.sh [--fresh-schemas]
 # Run from: ~/Repositories/laravel-admin/
 # Requires: sshpass  (sudo apt-get install sshpass)
 # Config:   see PROD_* and PROD_SYNC_* keys in .env / .env.example
 
 set -euo pipefail
+
+# ── Args ───────────────────────────────────────────────────────────────────────
+FRESH_SCHEMAS=false
+for arg in "$@"; do
+    case "$arg" in
+        --fresh-schemas) FRESH_SCHEMAS=true ;;
+        *) echo "Unknown argument: $arg" >&2; exit 1 ;;
+    esac
+done
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 LARAVEL_ADMIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -28,7 +41,7 @@ TMP_DIR="/tmp/db_sync"
 # ── Helpers ────────────────────────────────────────────────────────────────────
 env_var()
 {
-    grep "^${1}=" "$ENV_FILE" | head -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r'
+    grep "^${1}=" "$ENV_FILE" | head -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r' || true
 }
 
 die()
@@ -72,6 +85,8 @@ PROD_SSH_USER=$(env_var "PROD_SSH_USER")
 SYNC_TABLES_RAW=$(env_var "PROD_SYNC_TABLES")
 SYNC_SCHEMAS_RAW=$(env_var "PROD_SYNC_SCHEMAS")        # optional
 SCHEMA_GIT_DIR=$(env_var "PROD_SYNC_SCHEMA_GIT_DIR")   # optional; relative to laravel-admin dir
+PROD_LARAVEL_DIR=$(env_var "PROD_LARAVEL_DIR")
+PROD_LARAVEL_DIR="${PROD_LARAVEL_DIR:-~/Repositories/laravel-admin}"
 
 [[ -n "$PROD_SSH_HOST"   ]] || die "PROD_SSH_HOST is not set in .env"
 PROD_SSH_USER="${PROD_SSH_USER:-$USER}"
@@ -112,7 +127,7 @@ ENV_FILE=~/Repositories/laravel-admin/.env
 
 env_var()
 {
-    grep "^${1}=" "$ENV_FILE" | head -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r'
+    grep "^${1}=" "$ENV_FILE" | head -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r' || true
 }
 
 declare -A DB_TABLES
@@ -168,21 +183,62 @@ for DB_KEY in "${!DB_TABLES[@]}"; do
         "rm -f /tmp/db_sync_${DB_KEY}.sql"
 done
 
-unset SSHPASS
-
 # ── Step 4: Optional full-schema reimports ────────────────────────────────────
 if [[ "${#DB_SCHEMAS[@]}" -gt 0 ]]; then
     echo ""
-    read -r -p "Reimport full schema(s) from laravel-package-admin-mydata before importing tables? [y/N] " REIMPORT
+    if [[ "$FRESH_SCHEMAS" == true ]]; then
+        read -r -p "Reimport full schema(s) (dumped fresh from production) before importing tables? [y/N] " REIMPORT
+    else
+        read -r -p "Reimport full schema(s) from laravel-package-admin-mydata before importing tables? [y/N] " REIMPORT
+    fi
 
     if [[ "$REIMPORT" =~ ^[Yy]$ ]]; then
-        if [[ -n "$SCHEMA_GIT_DIR" && -d "$LARAVEL_ADMIN_DIR/$SCHEMA_GIT_DIR" ]]; then
+
+        # ── Step 4a: Obtain schema files ──────────────────────────────────────
+        if [[ "$FRESH_SCHEMAS" == true ]]; then
+            # Dump fresh schemas from production via artisan schema:dump.
+            # Artisan connection name is derived from the filename:
+            # e.g. myfinance2_mysql-schema.sql → --database myfinance2_mysql
             echo ""
-            echo "Updating schema repo (git checkout main && git pull)..."
-            git -C "$LARAVEL_ADMIN_DIR/$SCHEMA_GIT_DIR" checkout main
-            git -C "$LARAVEL_ADMIN_DIR/$SCHEMA_GIT_DIR" pull
+            echo "Dumping schemas on production (artisan schema:dump)..."
+
+            for DB_KEY in "${!DB_SCHEMAS[@]}"; do
+                REMOTE_PATH="${DB_SCHEMAS[$DB_KEY]}"
+                ARTISAN_CONN="$(basename "$REMOTE_PATH" | sed 's/-schema\.sql$//')"
+
+                sshpass -e ssh -o StrictHostKeyChecking=no \
+                    "$PROD_SSH_USER@$PROD_SSH_HOST" \
+                    "cd $PROD_LARAVEL_DIR && mkdir -p \"\$(dirname '$REMOTE_PATH')\" && php artisan schema:dump --database $ARTISAN_CONN --path $REMOTE_PATH"
+
+                echo "  [$DB_KEY] Dumped (connection: $ARTISAN_CONN): $PROD_LARAVEL_DIR/$REMOTE_PATH"
+            done
+
+            echo ""
+            echo "Copying schema files to localhost..."
+
+            for DB_KEY in "${!DB_SCHEMAS[@]}"; do
+                REMOTE_PATH="${DB_SCHEMAS[$DB_KEY]}"
+                LOCAL_PATH="$LARAVEL_ADMIN_DIR/$REMOTE_PATH"
+                mkdir -p "$(dirname "$LOCAL_PATH")"
+
+                sshpass -e scp -o StrictHostKeyChecking=no \
+                    "$PROD_SSH_USER@$PROD_SSH_HOST:$PROD_LARAVEL_DIR/$REMOTE_PATH" \
+                    "$LOCAL_PATH"
+
+                echo "  [$DB_KEY] Saved: $LOCAL_PATH ($(du -h "$LOCAL_PATH" | cut -f1))"
+            done
+
+        else
+            # Pull latest schema files from the git repo
+            if [[ -n "$SCHEMA_GIT_DIR" && -d "$LARAVEL_ADMIN_DIR/$SCHEMA_GIT_DIR" ]]; then
+                echo ""
+                echo "Updating schema repo (git checkout main && git pull)..."
+                git -C "$LARAVEL_ADMIN_DIR/$SCHEMA_GIT_DIR" checkout main
+                git -C "$LARAVEL_ADMIN_DIR/$SCHEMA_GIT_DIR" pull
+            fi
         fi
 
+        # ── Step 4b: Import schema files locally ──────────────────────────────
         for DB_KEY in "${!DB_SCHEMAS[@]}"; do
             SCHEMA_FILE="$LARAVEL_ADMIN_DIR/${DB_SCHEMAS[$DB_KEY]}"
 
@@ -212,6 +268,8 @@ if [[ "${#DB_SCHEMAS[@]}" -gt 0 ]]; then
         done
     fi
 fi
+
+unset SSHPASS
 
 # ── Step 5: Import tables locally ──────────────────────────────────────────────
 echo ""
