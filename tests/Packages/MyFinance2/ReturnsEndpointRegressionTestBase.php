@@ -570,21 +570,26 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
         foreach ($currencies as $currency => $currencyData) {
             $accountData = static::$returnsData[$accountId];
 
-            // Use fee-adjusted deposits/withdrawals (matching the BE formula and FE display):
-            // BE formula: deposits - depositFees, withdrawals + withdrawalFees
-            // totalDeposits/totalWithdrawals include overrides; fees come from transaction totals
             $depositFees = $accountData['deposits']['totals'][$currency]['fees'] ?? 0;
             $withdrawalFees = $accountData['withdrawals']['totals'][$currency]['fees'] ?? 0;
+            $depositsForFormula = isset($accountData['totalDepositsOverride'][$currency])
+                ? $accountData['totalDeposits'][$currency]['value']
+                : $accountData['totalDeposits'][$currency]['value'] - $depositFees;
+            $withdrawalsForFormula = isset($accountData['totalWithdrawalsOverride'][$currency])
+                ? $accountData['totalWithdrawals'][$currency]['value']
+                : $accountData['totalWithdrawals'][$currency]['value'] + $withdrawalFees;
 
             $calculatedReturn = $accountData['totalGrossDividends'][$currency]['value']
                 + $accountData['dec31Value'][$currency]['value']
                 - $accountData['jan1Value'][$currency]['value']
-                - ($accountData['totalDeposits'][$currency]['value'] - $depositFees)
-                + ($accountData['totalWithdrawals'][$currency]['value'] + $withdrawalFees)
+                - $depositsForFormula
+                + $withdrawalsForFormula
                 - ($accountData['totalPurchasesNet'][$currency]['value']
                     ?? $accountData['totalPurchases'][$currency]['value'])
+                - ($accountData['totalTransferDeposits'][$currency]['value'] ?? 0)
                 + ($accountData['totalSalesNet'][$currency]['value']
-                    ?? $accountData['totalSales'][$currency]['value']);
+                    ?? $accountData['totalSales'][$currency]['value'])
+                + ($accountData['totalTransferWithdrawals'][$currency]['value'] ?? 0);
 
             // For accounts with overrides (e.g., in-kind transfers), check against the expected
             // calculated return instead of the actual return (which has been overridden to 0)
