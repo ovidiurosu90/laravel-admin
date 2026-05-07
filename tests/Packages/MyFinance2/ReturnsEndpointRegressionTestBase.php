@@ -43,8 +43,13 @@ use App\Models\User;
  */
 abstract class ReturnsEndpointRegressionTestBase extends TestCase
 {
-    // Subclasses MUST redeclare these 5 static properties for isolation:
+    // Subclasses MUST redeclare these 10 static properties for isolation:
     protected static ?array $returnsData = null;
+    protected static ?string $responseHtml = null;
+    protected static ?array $returnsDataDwOff = null;
+    protected static ?string $responseHtmlDwOff = null;
+    protected static ?array $returnsDataCashOff = null;
+    protected static ?string $responseHtmlCashOff = null;
     protected static ?float $testStartTime = null;
     protected static ?string $cachedTestDataProviderClass = null;
     protected static bool $classLoaded = false;
@@ -218,40 +223,73 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
 
         $year = static::_getTestYear();
 
-        // Fetch returns data only once (cached in static variable for all test methods)
-        if (static::$returnsData === null) {
+        // Fetch all response variants once — cached in static variables for all test methods.
+        // The first (default) request hits Yahoo Finance (~30s). Subsequent toggle variants
+        // use the populated array cache and complete in milliseconds.
+        $needsFetch = static::$returnsData === null
+            || static::$returnsDataDwOff === null
+            || static::$returnsDataCashOff === null;
+
+        if ($needsFetch) {
             $user = User::first();
 
-            // Clear the test's isolated array cache (not production cache)
-            // This ensures consistent test behavior regardless of test order
-            // Note: PHPUnit uses CACHE_DRIVER=array, so this clears an empty in-memory cache
-            if (!static::$cacheCleared) {
+            if (static::$returnsData === null) {
+                // Clear the test's isolated array cache (not production cache)
+                // This ensures consistent test behavior regardless of test order
+                // Note: PHPUnit uses CACHE_DRIVER=array, so this clears an empty in-memory cache
+                if (!static::$cacheCleared) {
+                    $response = $this->actingAs($user)
+                        ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+                        ->post(route('myfinance2::returns.clear-cache', ['year' => $year]));
+
+                    // Verify the endpoint works (even though it clears an empty array cache)
+                    $response->assertRedirect();
+                    $response->assertSessionHas('success');
+
+                    static::$cacheCleared = true;
+                }
+
+                // Single request to get data for all accounts
+                // Use skip_overview=1 to avoid expensive all-years overview calculation (not tested here)
                 $response = $this->actingAs($user)
-                    ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
-                    ->post(route('myfinance2::returns.clear-cache', ['year' => $year]));
+                    ->get(route('myfinance2::returns.index', [
+                        'year' => $year,
+                        'skip_overview' => 1,
+                    ]));
 
-                // Verify the endpoint works (even though it clears an empty array cache)
-                $response->assertRedirect();
-                $response->assertSessionHas('success');
+                $response->assertStatus(200);
+                $response->assertViewIs('myfinance2::returns.dashboard');
+                $response->assertViewHas('returnsData');
+                $response->assertViewHas('selectedYear', $year);
+                $response->assertViewHas('availableYears');
 
-                static::$cacheCleared = true;
+                static::$returnsData = $response->viewData('returnsData');
+                static::$responseHtml = $response->getContent();
             }
 
-            // Single request to get data for all accounts
-            // Use skip_overview=1 to avoid expensive all-years overview calculation (not tested here)
-            $response = $this->actingAs($user)
-                ->get(route('myfinance2::returns.index', [
-                    'year' => $year,
-                    'skip_overview' => 1,
-                ]));
+            if (static::$returnsDataDwOff === null) {
+                $response = $this->actingAs($user)
+                    ->get(route('myfinance2::returns.index', [
+                        'year' => $year,
+                        'skip_overview' => 1,
+                        'exclude_deposits_withdrawals' => 1,
+                    ]));
+                $response->assertStatus(200);
+                static::$returnsDataDwOff = $response->viewData('returnsData');
+                static::$responseHtmlDwOff = $response->getContent();
+            }
 
-            $response->assertStatus(200);
-            $response->assertViewIs('myfinance2::returns.dashboard');
-            $response->assertViewHas('returnsData');
-            $response->assertViewHas('selectedYear', $year);
-            $response->assertViewHas('availableYears');
-
-            static::$returnsData = $response->viewData('returnsData');
+            if (static::$returnsDataCashOff === null) {
+                $response = $this->actingAs($user)
+                    ->get(route('myfinance2::returns.index', [
+                        'year' => $year,
+                        'skip_overview' => 1,
+                        'exclude_cash' => 1,
+                    ]));
+                $response->assertStatus(200);
+                static::$returnsDataCashOff = $response->viewData('returnsData');
+                static::$responseHtmlCashOff = $response->getContent();
+            }
         }
     }
 
@@ -509,6 +547,185 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
         }
     }
 
+    // ========== Purchases and Sales Display Tests ==========
+
+    /**
+     * Verify the rendered HTML uses totalPurchasesNet/totalSalesNet (not the gross totals)
+     * for the summary row data-eur attribute.
+     *
+     * This catches blade template bugs where the wrong data key is used for display
+     * (e.g., totalPurchases instead of totalPurchasesNet), which are invisible to
+     * tests that only check view data values.
+     */
+    #[DataProvider('realAccountDataProvider')]
+    public function test_purchases_and_sales_display_uses_net_values(string $accountKey): void
+    {
+        if ($accountKey === 'placeholder') {
+            $this->markTestSkipped('Private test data package not available');
+        }
+
+        if (static::$responseHtml === null) {
+            $this->markTestSkipped('HTML response not available');
+        }
+
+        $testData = static::_getAccountTestData();
+        $accountConfig = $testData[$accountKey];
+        $accountId = $accountConfig['id'];
+        $accountData = static::$returnsData[$accountId];
+        $html = static::$responseHtml;
+
+        $assertionsMade = false;
+
+        $purchasesNet = $accountData['totalPurchasesNet']['EUR']['value'];
+        $purchasesGross = $accountData['totalPurchases']['EUR']['value'];
+        if (abs($purchasesNet - $purchasesGross) > static::_getFloatTolerance()) {
+            $netFormatted = static::_encodeForAttr($accountData['totalPurchasesNet']['EUR']['formatted']);
+            $this->assertStringContainsString(
+                'data-eur="' . $netFormatted . '"',
+                $html,
+                "Purchases summary row for $accountKey must display totalPurchasesNet in data-eur"
+            );
+            $assertionsMade = true;
+        }
+
+        $salesNet = $accountData['totalSalesNet']['EUR']['value'];
+        $salesGross = $accountData['totalSales']['EUR']['value'];
+        if (abs($salesNet - $salesGross) > static::_getFloatTolerance()) {
+            $netFormatted = static::_encodeForAttr($accountData['totalSalesNet']['EUR']['formatted']);
+            $this->assertStringContainsString(
+                'data-eur="' . $netFormatted . '"',
+                $html,
+                "Sales summary row for $accountKey must display totalSalesNet in data-eur"
+            );
+            $assertionsMade = true;
+        }
+
+        if (!$assertionsMade) {
+            $this->addToAssertionCount(1); // gross == net (no fees), no display difference to verify
+        }
+    }
+
+    #[DataProvider('realAccountDataProvider')]
+    public function test_deposits_and_withdrawals_display_uses_adjusted_totals(string $accountKey): void
+    {
+        if ($accountKey === 'placeholder') {
+            $this->markTestSkipped('Private test data package not available');
+        }
+
+        if (static::$responseHtml === null) {
+            $this->markTestSkipped('HTML response not available');
+        }
+
+        $testData = static::_getAccountTestData();
+        $accountId = $testData[$accountKey]['id'];
+        $accountData = static::$returnsData[$accountId];
+        $html = static::$responseHtml;
+
+        $hasDepositFees = ($accountData['deposits']['totals']['EUR']['fees'] ?? 0) > 0;
+        $expectedDepositsEur = static::_encodeForAttr(isset($accountData['totalDepositsOverride']['EUR'])
+            ? $accountData['totalDepositsOverride']['EUR']['overrideFormatted']
+            : ($hasDepositFees
+                ? $accountData['deposits']['totals']['EUR']['adjustedFormatted']
+                : $accountData['deposits']['totals']['EUR']['formatted']));
+        $this->assertStringContainsString(
+            'data-eur="' . $expectedDepositsEur . '"',
+            $html,
+            "Deposits summary row for $accountKey must display adjusted total in data-eur"
+        );
+
+        $hasWithdrawalFees = ($accountData['withdrawals']['totals']['EUR']['fees'] ?? 0) > 0;
+        $expectedWithdrawalsEur = static::_encodeForAttr(isset($accountData['totalWithdrawalsOverride']['EUR'])
+            ? $accountData['totalWithdrawalsOverride']['EUR']['overrideFormatted']
+            : ($hasWithdrawalFees
+                ? $accountData['withdrawals']['totals']['EUR']['adjustedFormatted']
+                : $accountData['withdrawals']['totals']['EUR']['formatted']));
+        $this->assertStringContainsString(
+            'data-eur="' . $expectedWithdrawalsEur . '"',
+            $html,
+            "Withdrawals summary row for $accountKey must display adjusted total in data-eur"
+        );
+    }
+
+    #[DataProvider('realAccountDataProvider')]
+    public function test_start_end_value_display_uses_correct_values(string $accountKey): void
+    {
+        if ($accountKey === 'placeholder') {
+            $this->markTestSkipped('Private test data package not available');
+        }
+
+        if (static::$responseHtml === null) {
+            $this->markTestSkipped('HTML response not available');
+        }
+
+        $testData = static::_getAccountTestData();
+        $accountId = $testData[$accountKey]['id'];
+        $accountData = static::$returnsData[$accountId];
+        $html = static::$responseHtml;
+
+        $this->assertStringContainsString(
+            'data-eur="' . static::_encodeForAttr($accountData['dec31Value']['EUR']['formatted']) . '"',
+            $html,
+            "End value row for $accountKey must display dec31Value in data-eur"
+        );
+        $this->assertStringContainsString(
+            'data-eur="' . static::_encodeForAttr($accountData['jan1Value']['EUR']['formatted']) . '"',
+            $html,
+            "Start value row for $accountKey must display jan1Value in data-eur"
+        );
+    }
+
+    #[DataProvider('realAccountDataProvider')]
+    public function test_dividends_display_uses_correct_value(string $accountKey): void
+    {
+        if ($accountKey === 'placeholder') {
+            $this->markTestSkipped('Private test data package not available');
+        }
+
+        if (static::$responseHtml === null) {
+            $this->markTestSkipped('HTML response not available');
+        }
+
+        $testData = static::_getAccountTestData();
+        $accountId = $testData[$accountKey]['id'];
+        $accountData = static::$returnsData[$accountId];
+        $html = static::$responseHtml;
+
+        if (($accountData['totalGrossDividends']['EUR']['value'] ?? 0) < static::_getFloatTolerance()) {
+            $this->addToAssertionCount(1); // no dividends — no meaningful display value to check
+            return;
+        }
+
+        $this->assertStringContainsString(
+            'data-eur="' . static::_encodeForAttr($accountData['dividends']['totals']['EUR']['formatted']) . '"',
+            $html,
+            "Dividends row for $accountKey must display dividends totals formatted in data-eur"
+        );
+    }
+
+    #[DataProvider('realAccountDataProvider')]
+    public function test_return_value_display_uses_correct_value(string $accountKey): void
+    {
+        if ($accountKey === 'placeholder') {
+            $this->markTestSkipped('Private test data package not available');
+        }
+
+        if (static::$responseHtml === null) {
+            $this->markTestSkipped('HTML response not available');
+        }
+
+        $testData = static::_getAccountTestData();
+        $accountId = $testData[$accountKey]['id'];
+        $accountData = static::$returnsData[$accountId];
+        $html = static::$responseHtml;
+
+        // Return row uses ['plain'] (absolute value + symbol, no sign/color HTML)
+        $this->assertStringContainsString(
+            'data-eur="' . $accountData['actualReturn']['EUR']['plain'] . '"',
+            $html,
+            "Return row for $accountKey must display actualReturn plain value in data-eur"
+        );
+    }
+
     // ========== Gross Dividends Tests ==========
 
     #[DataProvider('realAccountDataProvider')]
@@ -600,5 +817,205 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
             $this->assertEqualsWithDelta($expectedReturn, $calculatedReturn,
                 static::_getFloatTolerance(), "Return formula mismatch for $accountKey $currency");
         }
+    }
+
+    // ========== Toggle Tests (D&W Off) ==========
+
+    /**
+     * Verify the return formula when Deposits & Withdrawals are toggled off.
+     * D&W are excluded entirely — only end/start values, trades, and dividends count.
+     */
+    #[DataProvider('realAccountDataProvider')]
+    public function test_dw_off_return_formula(string $accountKey): void
+    {
+        if ($accountKey === 'placeholder') {
+            $this->markTestSkipped('Private test data package not available');
+        }
+
+        if (static::$returnsDataDwOff === null) {
+            $this->markTestSkipped('D&W-off response not available');
+        }
+
+        $testData = static::_getAccountTestData();
+        $accountId = $testData[$accountKey]['id'];
+        $defaultData = static::$returnsData[$accountId];
+        $dwOffData = static::$returnsDataDwOff[$accountId];
+
+        foreach (['EUR', 'USD'] as $currency) {
+            $calculatedReturn = $defaultData['totalGrossDividends'][$currency]['value']
+                + $defaultData['dec31Value'][$currency]['value']
+                - $defaultData['jan1Value'][$currency]['value']
+                - ($defaultData['totalPurchasesNet'][$currency]['value']
+                    ?? $defaultData['totalPurchases'][$currency]['value'])
+                - ($defaultData['totalTransferDeposits'][$currency]['value'] ?? 0)
+                + ($defaultData['totalSalesNet'][$currency]['value']
+                    ?? $defaultData['totalSales'][$currency]['value'])
+                + ($defaultData['totalTransferWithdrawals'][$currency]['value'] ?? 0);
+
+            $this->assertEqualsWithDelta($calculatedReturn,
+                $dwOffData['actualReturn'][$currency]['value'],
+                static::_getFloatTolerance(),
+                "D&W-off return formula mismatch for $accountKey $currency");
+        }
+    }
+
+    /**
+     * Verify the rendered HTML for D&W-off shows the correct return total in data-eur,
+     * and that D&W amounts are still displayed (values unchanged, just excluded from formula).
+     */
+    #[DataProvider('realAccountDataProvider')]
+    public function test_dw_off_display(string $accountKey): void
+    {
+        if ($accountKey === 'placeholder') {
+            $this->markTestSkipped('Private test data package not available');
+        }
+
+        if (static::$returnsDataDwOff === null || static::$responseHtmlDwOff === null) {
+            $this->markTestSkipped('D&W-off response not available');
+        }
+
+        $testData = static::_getAccountTestData();
+        $accountId = $testData[$accountKey]['id'];
+        $defaultData = static::$returnsData[$accountId];
+        $dwOffData = static::$returnsDataDwOff[$accountId];
+        $html = static::$responseHtmlDwOff;
+
+        // Return row must reflect the D&W-off calculation
+        $this->assertStringContainsString(
+            'data-eur="' . $dwOffData['actualReturn']['EUR']['plain'] . '"',
+            $html,
+            "Return row for $accountKey must display D&W-off actualReturn in data-eur"
+        );
+
+        // D&W amounts must still be rendered (toggling only affects the formula, not visibility)
+        $hasDepositFees = ($defaultData['deposits']['totals']['EUR']['fees'] ?? 0) > 0;
+        $expectedDepositsEur = static::_encodeForAttr(isset($defaultData['totalDepositsOverride']['EUR'])
+            ? $defaultData['totalDepositsOverride']['EUR']['overrideFormatted']
+            : ($hasDepositFees
+                ? $defaultData['deposits']['totals']['EUR']['adjustedFormatted']
+                : $defaultData['deposits']['totals']['EUR']['formatted']));
+        $this->assertStringContainsString(
+            'data-eur="' . $expectedDepositsEur . '"',
+            $html,
+            "Deposits row for $accountKey must still be rendered when D&W is off"
+        );
+
+        $hasWithdrawalFees = ($defaultData['withdrawals']['totals']['EUR']['fees'] ?? 0) > 0;
+        $expectedWithdrawalsEur = static::_encodeForAttr(isset($defaultData['totalWithdrawalsOverride']['EUR'])
+            ? $defaultData['totalWithdrawalsOverride']['EUR']['overrideFormatted']
+            : ($hasWithdrawalFees
+                ? $defaultData['withdrawals']['totals']['EUR']['adjustedFormatted']
+                : $defaultData['withdrawals']['totals']['EUR']['formatted']));
+        $this->assertStringContainsString(
+            'data-eur="' . $expectedWithdrawalsEur . '"',
+            $html,
+            "Withdrawals row for $accountKey must still be rendered when D&W is off"
+        );
+    }
+
+    // ========== Toggle Tests (Cash Off) ==========
+
+    /**
+     * Verify the rendered HTML for Cash-off shows positions-only values in
+     * the start/end value data-eur attributes (cash excluded).
+     */
+    #[DataProvider('realAccountDataProvider')]
+    public function test_cash_off_display_uses_positions_values(string $accountKey): void
+    {
+        if ($accountKey === 'placeholder') {
+            $this->markTestSkipped('Private test data package not available');
+        }
+
+        if (static::$returnsDataCashOff === null || static::$responseHtmlCashOff === null) {
+            $this->markTestSkipped('Cash-off response not available');
+        }
+
+        $testData = static::_getAccountTestData();
+        $accountId = $testData[$accountKey]['id'];
+        $defaultData = static::$returnsData[$accountId];
+        $cashOffData = static::$returnsDataCashOff[$accountId];
+        $html = static::$responseHtmlCashOff;
+
+        // End value row must display positions-only value (not total incl. cash)
+        $this->assertStringContainsString(
+            'data-eur="' . static::_encodeForAttr($defaultData['dec31PositionsValue']['EUR']['formatted']) . '"',
+            $html,
+            "End value row for $accountKey must display dec31PositionsValue in data-eur when cash is off"
+        );
+
+        // Start value row must display positions-only value
+        $this->assertStringContainsString(
+            'data-eur="' . static::_encodeForAttr($defaultData['jan1PositionsValue']['EUR']['formatted']) . '"',
+            $html,
+            "Start value row for $accountKey must display jan1PositionsValue in data-eur when cash is off"
+        );
+
+        // Return row must reflect the cash-off calculation
+        $this->assertStringContainsString(
+            'data-eur="' . $cashOffData['actualReturn']['EUR']['plain'] . '"',
+            $html,
+            "Return row for $accountKey must display cash-off actualReturn in data-eur"
+        );
+    }
+
+    /**
+     * Verify the return formula when Cash is toggled off.
+     * Positions-only values replace the full start/end portfolio values.
+     */
+    #[DataProvider('realAccountDataProvider')]
+    public function test_cash_off_return_formula(string $accountKey): void
+    {
+        if ($accountKey === 'placeholder') {
+            $this->markTestSkipped('Private test data package not available');
+        }
+
+        if (static::$returnsDataCashOff === null) {
+            $this->markTestSkipped('Cash-off response not available');
+        }
+
+        $testData = static::_getAccountTestData();
+        $accountId = $testData[$accountKey]['id'];
+        $defaultData = static::$returnsData[$accountId];
+        $cashOffData = static::$returnsDataCashOff[$accountId];
+
+        foreach (['EUR', 'USD'] as $currency) {
+            $depositFees = $defaultData['deposits']['totals'][$currency]['fees'] ?? 0;
+            $withdrawalFees = $defaultData['withdrawals']['totals'][$currency]['fees'] ?? 0;
+            $depositsForFormula = isset($defaultData['totalDepositsOverride'][$currency])
+                ? $defaultData['totalDeposits'][$currency]['value']
+                : $defaultData['totalDeposits'][$currency]['value'] - $depositFees;
+            $withdrawalsForFormula = isset($defaultData['totalWithdrawalsOverride'][$currency])
+                ? $defaultData['totalWithdrawals'][$currency]['value']
+                : $defaultData['totalWithdrawals'][$currency]['value'] + $withdrawalFees;
+
+            $calculatedReturn = $defaultData['totalGrossDividends'][$currency]['value']
+                + $defaultData['dec31PositionsValue'][$currency]['value']
+                - $defaultData['jan1PositionsValue'][$currency]['value']
+                - $depositsForFormula
+                + $withdrawalsForFormula
+                - ($defaultData['totalPurchasesNet'][$currency]['value']
+                    ?? $defaultData['totalPurchases'][$currency]['value'])
+                - ($defaultData['totalTransferDeposits'][$currency]['value'] ?? 0)
+                + ($defaultData['totalSalesNet'][$currency]['value']
+                    ?? $defaultData['totalSales'][$currency]['value'])
+                + ($defaultData['totalTransferWithdrawals'][$currency]['value'] ?? 0);
+
+            $this->assertEqualsWithDelta($calculatedReturn,
+                $cashOffData['actualReturn'][$currency]['value'],
+                static::_getFloatTolerance(),
+                "Cash-off return formula mismatch for $accountKey $currency");
+        }
+    }
+
+    // ========== Helpers ==========
+
+    /**
+     * Encode a formatted value the same way Blade's {{ }} does, so it can be
+     * searched inside an HTML attribute (e.g. data-eur="...").
+     * Formatted values from MoneyFormat contain HTML tags that Blade escapes.
+     */
+    protected static function _encodeForAttr(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 }

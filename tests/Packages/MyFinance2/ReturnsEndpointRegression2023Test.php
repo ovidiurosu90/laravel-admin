@@ -15,6 +15,11 @@ class ReturnsEndpointRegression2023Test extends ReturnsEndpointRegressionTestBas
 {
     // Redeclare static properties for per-class isolation (PHP static property caveat)
     protected static ?array $returnsData = null;
+    protected static ?string $responseHtml = null;
+    protected static ?array $returnsDataDwOff = null;
+    protected static ?string $responseHtmlDwOff = null;
+    protected static ?array $returnsDataCashOff = null;
+    protected static ?string $responseHtmlCashOff = null;
     protected static ?float $testStartTime = null;
     protected static ?string $cachedTestDataProviderClass = null;
     protected static bool $classLoaded = false;
