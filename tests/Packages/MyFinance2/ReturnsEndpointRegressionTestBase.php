@@ -803,10 +803,8 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
                 + $withdrawalsForFormula
                 - ($accountData['totalPurchasesNet'][$currency]['value']
                     ?? $accountData['totalPurchases'][$currency]['value'])
-                - ($accountData['totalTransferDeposits'][$currency]['value'] ?? 0)
                 + ($accountData['totalSalesNet'][$currency]['value']
-                    ?? $accountData['totalSales'][$currency]['value'])
-                + ($accountData['totalTransferWithdrawals'][$currency]['value'] ?? 0);
+                    ?? $accountData['totalSales'][$currency]['value']);
 
             // For accounts with overrides (e.g., in-kind transfers), check against the expected
             // calculated return instead of the actual return (which has been overridden to 0)
@@ -847,10 +845,8 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
                 - $defaultData['jan1Value'][$currency]['value']
                 - ($defaultData['totalPurchasesNet'][$currency]['value']
                     ?? $defaultData['totalPurchases'][$currency]['value'])
-                - ($defaultData['totalTransferDeposits'][$currency]['value'] ?? 0)
                 + ($defaultData['totalSalesNet'][$currency]['value']
-                    ?? $defaultData['totalSales'][$currency]['value'])
-                + ($defaultData['totalTransferWithdrawals'][$currency]['value'] ?? 0);
+                    ?? $defaultData['totalSales'][$currency]['value']);
 
             $this->assertEqualsWithDelta($calculatedReturn,
                 $dwOffData['actualReturn'][$currency]['value'],
@@ -995,10 +991,8 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
                 + $withdrawalsForFormula
                 - ($defaultData['totalPurchasesNet'][$currency]['value']
                     ?? $defaultData['totalPurchases'][$currency]['value'])
-                - ($defaultData['totalTransferDeposits'][$currency]['value'] ?? 0)
                 + ($defaultData['totalSalesNet'][$currency]['value']
-                    ?? $defaultData['totalSales'][$currency]['value'])
-                + ($defaultData['totalTransferWithdrawals'][$currency]['value'] ?? 0);
+                    ?? $defaultData['totalSales'][$currency]['value']);
 
             $this->assertEqualsWithDelta($calculatedReturn,
                 $cashOffData['actualReturn'][$currency]['value'],
