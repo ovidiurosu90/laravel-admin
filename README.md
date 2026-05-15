@@ -65,6 +65,13 @@ chown -R $USER:www-data framework
 cd ..
 php artisan cache:clear
 
+# Set default ACLs on storage/framework so any new file created there (by www-data
+# or your user) automatically inherits read/write access for both — this is a
+# one-time setup that prevents "Permission denied" cache errors without needing
+# to re-run chown/chmod after every cache clear or deployment.
+sudo setfacl -R -m u:$USER:rwX,u:www-data:rwX storage/framework/
+sudo setfacl -R -d -m u:$USER:rwX,u:www-data:rwX storage/framework/
+
 sudo chown $USER:www-data bootstrap/cache
 
 sudo apt-get install php8.1-bcmath
@@ -151,7 +158,7 @@ sudo chown $USER:www-data -R storage/framework/cache/data
 php artisan config:clear && php artisan cache:clear && sudo systemctl restart apache2
 
 # Populate the returns cache
-sudo su - www-data -s /bin/bash -c "export LOG_CHANNEL=stdout; cd /home/$USER/Repositories/laravel-admin/ && php artisan app:finance-api-cron --refresh-returns"
+sudo su - www-data -s /bin/bash -c "export LOG_CHANNEL=stdout; cd /home/$USER/Repositories/laravel-admin/ && php artisan app:finance-api-cron --refresh-returns --force"
 ```
 
 ## Check README.md from ovidiuro/myfinance2 and follow the installation instructions
