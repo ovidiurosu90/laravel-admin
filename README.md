@@ -259,6 +259,50 @@ bash scripts/sync-prod-db.sh                  # schemas from git repo
 bash scripts/sync-prod-db.sh --fresh-schemas  # schemas dumped live from production
 ```
 
+## Artisan Commands
+
+### activations:clean
+
+Deletes activation records older than 72 hours. Runs daily at midnight.
+
+```bash
+sudo su
+crontab -e
+
+#############
+# Purpose: Deletes stale activation records older than 72 hours
+
+00 00 * * * su - www-data -s /bin/bash -c "export LOG_CHANNEL=stdout; cd [USER_HOME]/Repositories/laravel-admin/ && php artisan activations:clean >> /dev/null 2>&1"
+#############
+```
+
+### logs:email-daily-errors
+
+Emails a summary of all WARNING / ERROR / CRITICAL / ALERT / EMERGENCY entries from the previous day across all three log files (`laravel.log`, `finance-api-cron.log`, `stats-cron.log`). Each matching entry includes 5 lines of context before and after. Email subject includes the environment prefix (e.g. `[LOCAL]`, `[PRODUCTION]`) sourced from `APP_ENV`.
+
+```bash
+sudo su
+crontab -e
+
+#############
+# Purpose: Daily email digest of WARNING and above log entries from the previous day
+# Runs at 07:00 daily
+
+00 07 * * * su - www-data -s /bin/bash -c "export LOG_CHANNEL=stdout; cd [USER_HOME]/Repositories/laravel-admin/ && php artisan logs:email-daily-errors >> /dev/null 2>&1"
+
+# Run the job 450s after reboot
+@reboot sleep 450 && su - www-data -s /bin/bash -c "export LOG_CHANNEL=stdout; cd [USER_HOME]/Repositories/laravel-admin/ && php artisan logs:email-daily-errors >> /dev/null 2>&1"
+#############
+```
+
+```bash
+# Run manually for yesterday
+php artisan logs:email-daily-errors
+
+# Run manually for a specific date
+php artisan logs:email-daily-errors --date=2026-05-16
+```
+
 ## Other Utilities
 
 ```bash
