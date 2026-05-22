@@ -10,6 +10,7 @@ use App\Traits\ActivationTrait;
 use App\Traits\CaptureIpTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use App\Models\Role;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -36,7 +37,14 @@ class SocialController extends Controller
                 ->with('error', trans('socials.noProvider'));
         }
 
-        return Socialite::driver($provider)->redirect();
+        try {
+            return Socialite::driver($provider)->redirect();
+        } catch (\Exception $e) {
+            Log::error("Social login redirect failed for provider [$provider]: " . $e->getMessage());
+
+            return view('pages.status')
+                ->with('error', trans('socials.providerError'));
+        }
     }
 
     /**
