@@ -306,10 +306,10 @@ class PriceAlertsFeatureTest extends TestCase
     }
 
     /**
-     * Covers: _getNotifiedTodaySymbols() throttle — daily per-symbol deduplication
-     * fires before quote lookup, so already-notified symbols are skipped.
+     * Covers: _getNotifiedTodayAlertIds() throttle, daily per-alert deduplication
+     * fires before quote lookup, so an alert already notified today is skipped.
      */
-    public function test_evaluate_alerts_skips_symbol_already_notified_today(): void
+    public function test_evaluate_alerts_skips_alert_already_notified_today(): void
     {
         $symbol = 'THROTTLE.TST';
 
@@ -340,7 +340,59 @@ class PriceAlertsFeatureTest extends TestCase
         $countAfter = PriceAlertNotification::where('user_id', $this->_user->id)
             ->where('symbol', $symbol)
             ->count();
-        $this->assertEquals($countBefore, $countAfter, 'No new notification should be created for throttled symbol');
+        $this->assertEquals($countBefore, $countAfter, 'No new notification should be created for throttled alert');
+    }
+
+    /**
+     * Covers: _getNotifiedTodayAlertIds() throttle is per alert, not per symbol.
+     * A notification sent today for one alert must NOT throttle a sibling alert on
+     * the same symbol; the sibling is eligible to fire (not skipped by the throttle).
+     */
+    public function test_evaluate_alerts_does_not_throttle_sibling_alert_on_same_symbol(): void
+    {
+        $symbol = 'SIBLING.TST';
+
+        $notifiedAlert = $this->_createAlert(['symbol' => $symbol, 'status' => 'ACTIVE']);
+        $siblingAlert  = $this->_createAlert(['symbol' => $symbol, 'status' => 'ACTIVE']);
+
+        // Mark only the first alert as notified today.
+        PriceAlertNotification::create([
+            'price_alert_id'       => $notifiedAlert->id,
+            'user_id'              => $this->_user->id,
+            'symbol'               => $symbol,
+            'notification_channel' => 'email',
+            'current_price'        => '100.00',
+            'target_price'         => '220.00',
+            'alert_type'           => 'PRICE_ABOVE',
+            'status'               => 'SENT',
+            'sent_at'              => now(),
+        ]);
+
+        $service = new AlertService();
+        $stats   = $service->evaluateAlerts($this->_user->id);
+
+        // The notified alert is skipped by the throttle; the sibling is not, so at most
+        // one alert can be skipped for the throttle reason. (The sibling may still be
+        // skipped for an unrelated reason, e.g. no quote for a fake symbol, but it is
+        // never skipped by the per-alert daily throttle.)
+        $notifiedThrottled = $this->_alertNotifiedTodayThrottleApplies($notifiedAlert->id);
+        $siblingThrottled  = $this->_alertNotifiedTodayThrottleApplies($siblingAlert->id);
+
+        $this->assertTrue($notifiedThrottled, 'The already-notified alert must be throttled');
+        $this->assertFalse($siblingThrottled, 'A sibling alert on the same symbol must NOT be throttled');
+    }
+
+    /**
+     * Whether the per-alert daily throttle would skip the given alert, i.e. a SENT
+     * notification for that exact alert id exists since the start of today.
+     */
+    private function _alertNotifiedTodayThrottleApplies(int $alertId): bool
+    {
+        return PriceAlertNotification::where('user_id', $this->_user->id)
+            ->where('price_alert_id', $alertId)
+            ->where('status', 'SENT')
+            ->where('sent_at', '>=', now()->startOfDay())
+            ->exists();
     }
 
     /**
@@ -536,14 +588,14 @@ class PriceAlertsFeatureTest extends TestCase
         // Hard delete — no soft-delete on PriceAlertNotification
         $this->assertNull(PriceAlertNotification::find($notifId));
 
-        // Throttle cleared: symbol no longer in today's notified list
+        // Throttle cleared: alert id no longer in today's notified list
         $service = new AlertService();
         $reflection = new ReflectionClass(AlertService::class);
-        $getNotifiedToday = $reflection->getMethod('_getNotifiedTodaySymbols');
+        $getNotifiedToday = $reflection->getMethod('_getNotifiedTodayAlertIds');
         $getNotifiedToday->setAccessible(true);
-        $notifiedSymbols = $getNotifiedToday->invokeArgs($service, [$this->_user->id]);
+        $notifiedAlertIds = $getNotifiedToday->invokeArgs($service, [$this->_user->id]);
 
-        $this->assertNotContains($symbol, $notifiedSymbols);
+        $this->assertNotContains($alert->id, $notifiedAlertIds);
     }
 
     // =========================================================================
