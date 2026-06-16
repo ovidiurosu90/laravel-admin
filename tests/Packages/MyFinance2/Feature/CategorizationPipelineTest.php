@@ -124,7 +124,7 @@ class CategorizationPipelineTest extends TestCase
      * database already holds (never written here). Everything is for the synthetic symbol under
      * the unused user_id, so no real row is touched.
      */
-    private function _seedOpenWinner(): void
+    private function _seedOpenWinner(float $latestPrice = 160.0): void
     {
         $now = now();
 
@@ -150,7 +150,7 @@ class CategorizationPipelineTest extends TestCase
             ]);
         });
 
-        foreach ([[$this->_entryDate, 100.0], [$this->_today, 160.0]] as [$date, $price]) {
+        foreach ([[$this->_entryDate, 100.0], [$this->_today, $latestPrice]] as [$date, $price]) {
             $this->_insert('stats_historical', [
                 'date'              => $date,
                 'symbol'            => self::SYMBOL,
@@ -228,6 +228,7 @@ class CategorizationPipelineTest extends TestCase
             'effective_tier', 'basis', 'basis_label', 'basis_value', 'confidence', 'is_owned',
             'quadrant', 'action', 'annualized_pct', 'relative_drawdown', 'periods',
             'vusa_same_window_pct', 'alpha_vs_vusa_pct', 'alpha_is_short_period', 'xirr_pct',
+            'is_benchmark', 'is_borderline',
         ] as $key) {
             $this->assertArrayHasKey($key, $entry, "Missing pipeline key: {$key}");
         }
@@ -246,5 +247,35 @@ class CategorizationPipelineTest extends TestCase
 
         // Top-level quadrant/action obey the same coupling.
         $this->assertSame($entry['quadrant'] === null, $entry['action'] === null);
+    }
+
+    public function test_previous_tier_state_keeps_a_near_boundary_position_sticky(): void
+    {
+        // A holding entered two years ago at 100, now ~120.6: ~9.8%/yr CAGR, which buckets as
+        // Silver on the plain threshold but sits inside the Gold/Silver dead-band.
+        $this->_seedOpenWinner(120.56);
+
+        // No prior state recorded: the plain bucket applies and it lands Silver.
+        $fresh = $this->_entryFor(self::SYMBOL);
+        $this->assertEqualsWithDelta(9.8, $fresh['basis_value'], 0.5);
+        $this->assertSame(TierCalculationService::SILVER, $fresh['effective_tier']);
+
+        // Record that it last settled at Gold, then rebuild: hysteresis keeps it Gold rather than
+        // flipping on a sub-band wiggle. The synthetic state row is rolled back with the test.
+        $now = now();
+        DB::connection($this->_conn)->table('symbol_tier_states')->insert([
+            'user_id'    => $this->_userId,
+            'symbol'     => self::SYMBOL,
+            'tier'       => TierCalculationService::GOLD,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $sticky = $this->_entryFor(self::SYMBOL);
+        $this->assertSame(TierCalculationService::GOLD, $sticky['effective_tier']);
+        // The read path must not have overwritten the recorded state (the cron is the only writer).
+        $persisted = DB::connection($this->_conn)->table('symbol_tier_states')
+            ->where('user_id', $this->_userId)->where('symbol', self::SYMBOL)->value('tier');
+        $this->assertSame(TierCalculationService::GOLD, $persisted);
     }
 }

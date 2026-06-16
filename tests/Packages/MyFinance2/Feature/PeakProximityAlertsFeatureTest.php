@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use ovidiuro\myfinance2\App\Models\PeakProximityAlertEvent;
 use ovidiuro\myfinance2\App\Models\PeakProximityAlertSetting;
 use ovidiuro\myfinance2\App\Models\PeakProximityNotification;
 use ovidiuro\myfinance2\App\Models\Scopes\AssignedToUserScope;
@@ -17,24 +18,27 @@ use ovidiuro\myfinance2\App\Services\PeakProximityAlertService;
 use ovidiuro\myfinance2\Mail\PeakProximityAlert;
 
 /**
- * Feature tests for the peak-proximity exit-hint alerts.
+ * Feature tests for the (exit-focused) peak-proximity exit-hint alerts.
  *
  * Scope and isolation: the full WatchlistSymbolsDashboard makes live Yahoo Finance quote calls and
- * returns nothing for a synthetic symbol offline, so it cannot run deterministically in a test. The
- * dashboard build is covered by CategorizationPipelineTest and the DrawdownService unit tests. Here
- * we exercise the service's own contract, the part this feature adds, via evaluateItems(), which is
- * the same loop evaluateForUser() runs once the dashboard items are built. We feed it synthetic
- * dashboard items (symbol TST.AAA, which cannot exist in production) and assert the opt-in gate, the
- * trigger threshold, the email dispatch, the audit row, and the once-per-day-per-symbol throttle.
+ * returns nothing for a synthetic symbol offline, so it cannot run deterministically in a test. Here
+ * we exercise the service's own contract via evaluateItems(), the same loop evaluateForUser() runs
+ * once the dashboard items are built. We feed it synthetic dashboard items (symbol TST.AAA, which
+ * cannot exist in production).
  *
- * These alerts are OFF by default: a symbol fires only when the user has an ENABLED
- * PeakProximityAlertSetting row, so each triggering test seeds one first.
+ * The refined rules under test:
+ *  - the email gate is the gain-based tier (RUST / BRONZE), not the HOLD/EXIT action;
+ *  - a 3M-only near-peak is context (INFO), never an email; an email needs a 6M/1Y/2Y window;
+ *  - every near-peak symbol (actionable or info) becomes an OPEN inbox event;
+ *  - cadence escalates: a new long window crossing into near-peak emails immediately, otherwise the
+ *    reminder interval shrinks as confluence grows;
+ *  - dismissing ends the episode; a later re-trigger opens a fresh one.
  *
- * Production-database safety: tests here run against the real database (the base TestCase does not
- * refresh it). This test never saves a User, never inserts a real row: it writes only
- * peak_proximity_notifications and peak_proximity_alert_settings rows under an unused user_id (those
- * tables have no FK to users), and Mail::fake() means no email leaves the process.
- * DatabaseTransactions rolls back both connections.
+ * Alerts are OFF by default: a symbol fires only with an ENABLED setting, so each test seeds one.
+ *
+ * Production-database safety: these run against the real database. They never save a User and write
+ * only to peak_proximity_* tables under an unused user_id (no FK to users). Mail::fake() keeps mail
+ * in-process; DatabaseTransactions rolls back both connections.
  */
 class PeakProximityAlertsFeatureTest extends TestCase
 {
@@ -57,22 +61,19 @@ class PeakProximityAlertsFeatureTest extends TestCase
 
         $this->_conn = config('myfinance2.db_connection', 'myfinance2_mysql');
 
-        // Act as a real user (read-only) so any incidental auth() call resolves, but never write to
-        // the User model; forgetGuards on teardown avoids a stray save (per CategorizationPipelineTest).
         $user = User::first();
         if (!$user) {
             $this->markTestSkipped('Requires at least 1 user in database');
         }
         $this->actingAs($user);
 
-        // A user_id that owns no real notifications, so the throttle query sees only our rows.
         $this->_userId = (int) DB::connection($this->_conn)
             ->table((new PeakProximityNotification())->getTable())
             ->max('user_id') + 1;
 
-        // Deterministic recipient so the send does not depend on the synthetic user's email.
         config(['alerts.peak_proximity.email_to' => 'peak-proximity-test@example.test']);
-        config(['alerts.peak_proximity.threshold_pct' => 5]);
+        config(['alerts.peak_proximity.exit_focused' => true]);
+        config(['alerts.peak_proximity.exit_tiers' => ['RUST', 'BRONZE']]);
 
         Mail::fake();
     }
@@ -85,233 +86,242 @@ class PeakProximityAlertsFeatureTest extends TestCase
     }
 
     /**
-     * Build one synthetic dashboard item whose 3M window is within 5% of its peak (so it triggers)
-     * while the other windows are far below (so they do not). open_positions is non-empty so the
-     * symbol is treated as owned. Mail::fake() does not render the view, so a marker entry suffices.
+     * Exit-zone map for the four windows; pass a proximity per window (null windows are omitted).
+     * Far-from-peak default keeps a window from triggering unless explicitly raised.
      *
-     * @param float $proximity3m the 3M proximity_pct (>= -5 triggers)
+     * @param array $proximities window => proximity_pct
      *
      * @return array
      */
-    private function _items(float $proximity3m = -2.0): array
+    private function _zones(array $proximities): array
+    {
+        $defaults = ['3m' => -30.0, '6m' => -30.0, '1y' => -30.0, '2y' => -30.0];
+        $dates    = ['3m' => '2026-05-20', '6m' => '2026-02-01', '1y' => '2025-09-01', '2y' => '2024-12-01'];
+
+        $zones = [];
+        foreach (array_merge($defaults, $proximities) as $window => $prox) {
+            $zones[$window] = [
+                'peak_price_date' => $dates[$window] ?? '2026-01-01',
+                'proximity_pct'   => $prox,
+                'in_zone'         => $prox >= -15.0,
+            ];
+        }
+
+        return $zones;
+    }
+
+    /**
+     * One synthetic dashboard item: owned, with the given tier/action and exit-zone proximities.
+     *
+     * @param array       $proximities window => proximity_pct
+     * @param string|null $tier        effective_tier (e.g. BRONZE, PLATINUM)
+     * @param string|null $action      head action (HOLD / EXIT); informational only
+     * @param float       $rsi
+     *
+     * @return array
+     */
+    private function _items(
+        array $proximities = ['6m' => -2.0],
+        ?string $tier = 'BRONZE',
+        ?string $action = 'EXIT',
+        float $rsi = 50.0
+    ): array
     {
         return [
             self::SYMBOL => [
-                'price'          => 100.0,
-                'open_positions' => [['marker' => true]],
-                'categorization' => [
-                    'exit_zones' => [
-                        '3m' => [
-                            'peak_price_eur'  => 102.0,
-                            'peak_price_date' => '2026-05-01',
-                            'proximity_pct'   => $proximity3m,
-                            'in_zone'         => true,
-                        ],
-                        '6m' => [
-                            'peak_price_eur'  => 140.0,
-                            'peak_price_date' => '2026-02-01',
-                            'proximity_pct'   => -28.57,
-                            'in_zone'         => false,
-                        ],
-                        '1y' => [
-                            'peak_price_eur'  => 160.0,
-                            'peak_price_date' => '2025-09-01',
-                            'proximity_pct'   => -37.5,
-                            'in_zone'         => false,
-                        ],
-                        '2y' => null,
-                    ],
+                'price'                 => 100.0,
+                'open_positions'        => [['marker' => true]],
+                'technical_indicators'  => ['rsi' => $rsi],
+                'categorization'        => [
+                    'effective_tier' => $tier,
+                    'action'         => $action,
+                    'exit_zones'     => $this->_zones($proximities),
                 ],
             ],
         ];
     }
 
-    /**
-     * Seed a per-symbol opt-in setting for the synthetic user.
-     *
-     * @param string      $status ENABLED | DISABLED
-     * @param string|null $until  auto-revert date (Y-m-d) or null for permanent
-     * @param string      $symbol
-     *
-     * @return PeakProximityAlertSetting
-     */
     private function _seedSetting(
         string $status = PeakProximityAlertSetting::ENABLED,
-        ?string $until = null,
-        string $symbol = self::SYMBOL
+        ?string $until = null
     ): PeakProximityAlertSetting
     {
         return PeakProximityAlertSetting::updateOrCreate(
-            ['user_id' => $this->_userId, 'symbol' => $symbol],
+            ['user_id' => $this->_userId, 'symbol' => self::SYMBOL],
             ['status' => $status, 'until' => $until]
         );
     }
 
+    private function _openEvent(): ?PeakProximityAlertEvent
+    {
+        return PeakProximityAlertEvent::where('user_id', $this->_userId)
+            ->where('symbol', self::SYMBOL)
+            ->where('status', PeakProximityAlertEvent::STATUS_OPEN)
+            ->first();
+    }
+
     public function test_default_disabled_does_not_fire(): void
     {
-        // No setting row at all: the symbol is opted out by default.
-        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items(-2.0));
+        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items());
 
         $this->assertSame(0, $stats['triggered']);
         $this->assertSame(0, $stats['processed']);
         Mail::assertNothingSent();
-        $this->assertSame(
-            0,
-            PeakProximityNotification::where('user_id', $this->_userId)->count()
-        );
+        $this->assertSame(0, PeakProximityNotification::where('user_id', $this->_userId)->count());
+        $this->assertNull($this->_openEvent());
     }
 
     public function test_disabled_symbol_does_not_fire(): void
     {
         $this->_seedSetting(PeakProximityAlertSetting::DISABLED);
 
-        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items(-2.0));
+        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items());
 
         $this->assertSame(0, $stats['triggered']);
         $this->assertSame(0, $stats['processed']);
         Mail::assertNothingSent();
     }
 
-    public function test_enabled_symbol_fires_then_throttles_same_day(): void
+    public function test_weak_tier_near_meaningful_peak_fires_then_throttles_same_day(): void
     {
-        $this->_seedSetting(PeakProximityAlertSetting::ENABLED);
+        $this->_seedSetting();
         $service = new PeakProximityAlertService();
 
-        $first = $service->evaluateItems($this->_userId, $this->_items(-2.0));
+        $first = $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
         $this->assertSame(1, $first['triggered']);
         $this->assertContains(self::SYMBOL, $first['symbols']);
 
-        Mail::assertSent(PeakProximityAlert::class, function (PeakProximityAlert $mail) {
-            return $mail->hasTo('peak-proximity-test@example.test');
-        });
+        Mail::assertSent(PeakProximityAlert::class, fn (PeakProximityAlert $m) => $m->hasTo('peak-proximity-test@example.test'));
 
         $row = PeakProximityNotification::where('user_id', $this->_userId)
-            ->where('symbol', self::SYMBOL)
-            ->where('status', 'SENT')
-            ->first();
-        $this->assertNotNull($row, 'A SENT audit row must exist for the triggered symbol');
-        $this->assertSame('3m', $row->triggered_windows);
-        $this->assertEqualsWithDelta(-2.0, (float) $row->closest_proximity_pct, 0.001);
-        $this->assertSame('3m:2026-05-01', $row->peak_dates);
+            ->where('symbol', self::SYMBOL)->where('status', 'SENT')->first();
+        $this->assertNotNull($row);
+        $this->assertSame('6m', $row->triggered_windows);
 
-        // Second same-day run is throttled.
-        $second = $service->evaluateItems($this->_userId, $this->_items(-2.0));
+        $event = $this->_openEvent();
+        $this->assertNotNull($event);
+        $this->assertSame(PeakProximityAlertEvent::CLASS_ACTIONABLE, $event->classification);
+        $this->assertSame(1, (int) $event->email_count);
+
+        // Second same-day run is throttled (daily double-send guard).
+        $second = $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
         $this->assertSame(0, $second['triggered']);
         $this->assertSame(1, $second['skipped']);
         Mail::assertSent(PeakProximityAlert::class, 1);
-        $this->assertSame(
-            1,
-            PeakProximityNotification::where('user_id', $this->_userId)
-                ->where('symbol', self::SYMBOL)
-                ->count()
-        );
+        $this->assertSame(1, (int) $this->_openEvent()->email_count);
     }
 
-    public function test_does_not_trigger_when_outside_threshold(): void
+    public function test_strong_tier_near_peak_does_not_email_but_creates_info_event(): void
     {
-        $this->_seedSetting(PeakProximityAlertSetting::ENABLED);
+        $this->_seedSetting();
 
-        // 3M now 8% from peak, beyond the tight 2% near-term threshold; no window qualifies.
-        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items(-8.0));
+        $stats = (new PeakProximityAlertService())
+            ->evaluateItems($this->_userId, $this->_items(['6m' => -2.0], 'PLATINUM', 'HOLD'));
 
         $this->assertSame(0, $stats['triggered']);
-        $this->assertSame(1, $stats['skipped']);
+        $this->assertSame(1, $stats['info']);
         Mail::assertNothingSent();
-        $this->assertSame(
-            0,
-            PeakProximityNotification::where('user_id', $this->_userId)->count()
-        );
+        $this->assertSame(0, PeakProximityNotification::where('user_id', $this->_userId)->count());
+
+        $event = $this->_openEvent();
+        $this->assertNotNull($event);
+        $this->assertSame(PeakProximityAlertEvent::CLASS_INFO, $event->classification);
+    }
+
+    public function test_exit_action_does_not_gate_a_strong_tier(): void
+    {
+        $this->_seedSetting();
+
+        // Strong tier but head action EXIT: action is informational, so this is still INFO.
+        $stats = (new PeakProximityAlertService())
+            ->evaluateItems($this->_userId, $this->_items(['6m' => -2.0], 'PLATINUM', 'EXIT'));
+
+        $this->assertSame(0, $stats['triggered']);
+        $this->assertSame(1, $stats['info']);
+        Mail::assertNothingSent();
+    }
+
+    public function test_3m_only_near_peak_is_info_not_actionable(): void
+    {
+        $this->_seedSetting();
+
+        // Weak tier, but only the 3M context window is near peak: not actionable, no email.
+        $stats = (new PeakProximityAlertService())
+            ->evaluateItems($this->_userId, $this->_items(['3m' => -1.0], 'RUST', 'EXIT'));
+
+        $this->assertSame(0, $stats['triggered']);
+        $this->assertSame(1, $stats['info']);
+        Mail::assertNothingSent();
+        $this->assertSame(PeakProximityAlertEvent::CLASS_INFO, $this->_openEvent()->classification);
+    }
+
+    public function test_does_not_record_when_outside_threshold(): void
+    {
+        $this->_seedSetting();
+
+        // 6M now 8% from peak, beyond its 5% threshold; nothing is near peak.
+        $stats = (new PeakProximityAlertService())
+            ->evaluateItems($this->_userId, $this->_items(['6m' => -8.0]));
+
+        $this->assertSame(0, $stats['triggered']);
+        $this->assertSame(0, $stats['processed']);
+        Mail::assertNothingSent();
+        $this->assertNull($this->_openEvent());
     }
 
     public function test_per_window_thresholds_allow_looser_long_term_peaks(): void
     {
-        $this->_seedSetting(PeakProximityAlertSetting::ENABLED);
+        $this->_seedSetting();
 
-        // 3M is 6% from peak (beyond the 2% near-term limit, so it does NOT fire), but 2Y is 9%
-        // from peak (within the looser 10% long-term limit, so it DOES fire). This proves the
-        // thresholds are applied per window rather than uniformly.
-        $items = [
-            self::SYMBOL => [
-                'price'          => 100.0,
-                'open_positions' => [['marker' => true]],
-                'categorization' => [
-                    'exit_zones' => [
-                        '3m' => ['peak_price_date' => '2026-05-20', 'proximity_pct' => -6.0, 'in_zone' => true],
-                        '6m' => ['peak_price_date' => '2026-03-01', 'proximity_pct' => -15.0, 'in_zone' => false],
-                        '1y' => ['peak_price_date' => '2025-10-01', 'proximity_pct' => -20.0, 'in_zone' => false],
-                        '2y' => ['peak_price_date' => '2024-12-01', 'proximity_pct' => -9.0, 'in_zone' => false],
-                    ],
-                ],
-            ],
-        ];
-
-        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $items);
+        // 2Y is 9% from peak (within the looser 10% long-term limit), so it fires.
+        $stats = (new PeakProximityAlertService())
+            ->evaluateItems($this->_userId, $this->_items(['3m' => -6.0, '6m' => -15.0, '1y' => -20.0, '2y' => -9.0]));
 
         $this->assertSame(1, $stats['triggered']);
-
         $row = PeakProximityNotification::where('user_id', $this->_userId)
-            ->where('symbol', self::SYMBOL)
-            ->where('status', 'SENT')
-            ->first();
-
+            ->where('symbol', self::SYMBOL)->where('status', 'SENT')->first();
         $this->assertNotNull($row);
         $this->assertSame('2y', $row->triggered_windows);
-        $this->assertEqualsWithDelta(-9.0, (float) $row->closest_proximity_pct, 0.001);
     }
 
     public function test_threshold_override_applies_uniformly_to_all_windows(): void
     {
-        $this->_seedSetting(PeakProximityAlertSetting::ENABLED);
+        $this->_seedSetting();
 
-        // The --threshold override (passed as $thresholdPct) replaces every window's threshold.
-        // At 7% uniform, the 3M at -6% now qualifies even though its per-window limit is 2%.
-        $items = [
-            self::SYMBOL => [
-                'price'          => 100.0,
-                'open_positions' => [['marker' => true]],
-                'categorization' => [
-                    'exit_zones' => [
-                        '3m' => ['peak_price_date' => '2026-05-20', 'proximity_pct' => -6.0, 'in_zone' => true],
-                        '6m' => ['peak_price_date' => '2026-03-01', 'proximity_pct' => -15.0, 'in_zone' => false],
-                        '1y' => null,
-                        '2y' => null,
-                    ],
-                ],
-            ],
-        ];
-
-        $stats = (new PeakProximityAlertService())
-            ->evaluateItems($this->_userId, $items, dryRun: false, thresholdPct: 7.0);
+        // The override replaces every window threshold. At 7%, 6M at -6 now qualifies (default 5%).
+        $stats = (new PeakProximityAlertService())->evaluateItems(
+            $this->_userId,
+            $this->_items(['3m' => -15.0, '6m' => -6.0]),
+            dryRun: false,
+            thresholdPct: 7.0
+        );
 
         $this->assertSame(1, $stats['triggered']);
         $row = PeakProximityNotification::where('user_id', $this->_userId)
-            ->where('symbol', self::SYMBOL)
-            ->first();
-        $this->assertSame('3m', $row->triggered_windows);
+            ->where('symbol', self::SYMBOL)->first();
+        $this->assertSame('6m', $row->triggered_windows);
     }
 
     public function test_dry_run_sends_nothing_and_records_nothing(): void
     {
-        $this->_seedSetting(PeakProximityAlertSetting::ENABLED);
+        $this->_seedSetting();
 
         $stats = (new PeakProximityAlertService())
-            ->evaluateItems($this->_userId, $this->_items(-2.0), dryRun: true);
+            ->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]), dryRun: true);
 
         $this->assertSame(1, $stats['triggered']);
         Mail::assertNothingSent();
-        $this->assertSame(
-            0,
-            PeakProximityNotification::where('user_id', $this->_userId)->count()
-        );
+        $this->assertSame(0, PeakProximityNotification::where('user_id', $this->_userId)->count());
+        $this->assertNull($this->_openEvent());
     }
 
     public function test_symbol_filter_limits_evaluation(): void
     {
-        $this->_seedSetting(PeakProximityAlertSetting::ENABLED);
+        $this->_seedSetting();
 
         $stats = (new PeakProximityAlertService())->evaluateItems(
             $this->_userId,
-            $this->_items(-2.0),
+            $this->_items(['6m' => -2.0]),
             dryRun: false,
             filterSymbols: ['SOME.OTHER']
         );
@@ -321,20 +331,90 @@ class PeakProximityAlertsFeatureTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    public function test_new_window_crossing_emails_immediately(): void
+    {
+        $this->_seedSetting();
+        $service = new PeakProximityAlertService();
+
+        // Episode opens with one long window near peak.
+        $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
+        Mail::assertSent(PeakProximityAlert::class, 1);
+
+        // Make it look like the open email went out yesterday, and clear today's throttle row, so
+        // only the cadence logic decides the next send. One day < the 7-day single-window interval.
+        $event = $this->_openEvent();
+        $event->update(['last_emailed_at' => now()->subDay()]);
+        PeakProximityNotification::where('user_id', $this->_userId)
+            ->update(['sent_at' => now()->subDay()]);
+
+        // A new long window (1Y) now also reaches peak: confluence 1 -> 2 emails immediately.
+        $second = $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0, '1y' => -3.0]));
+
+        $this->assertSame(1, $second['triggered']);
+        Mail::assertSent(PeakProximityAlert::class, 2);
+        $this->assertSame(2, (int) $this->_openEvent()->email_count);
+        $this->assertSame(2, (int) $this->_openEvent()->last_emailed_meaningful_count);
+    }
+
+    public function test_same_confluence_within_interval_does_not_re_email(): void
+    {
+        $this->_seedSetting();
+        $service = new PeakProximityAlertService();
+
+        $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
+
+        // Emailed two days ago; clear today's throttle. One window near peak -> 7-day interval, so
+        // two days is not enough and there is no new window to escalate.
+        $this->_openEvent()->update(['last_emailed_at' => now()->subDays(2)]);
+        PeakProximityNotification::where('user_id', $this->_userId)
+            ->update(['sent_at' => now()->subDays(2)]);
+
+        $second = $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
+
+        $this->assertSame(0, $second['triggered']);
+        $this->assertSame(1, $second['skipped']);
+        Mail::assertSent(PeakProximityAlert::class, 1);
+    }
+
+    public function test_dismiss_then_retrigger_opens_a_new_episode(): void
+    {
+        $this->_seedSetting();
+        $service = new PeakProximityAlertService();
+
+        $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
+        Mail::assertSent(PeakProximityAlert::class, 1);
+
+        // Dismiss the open event and clear today's throttle.
+        $this->_openEvent()->update([
+            'status'       => PeakProximityAlertEvent::STATUS_DISMISSED,
+            'dismissed_at' => now(),
+        ]);
+        PeakProximityNotification::where('user_id', $this->_userId)
+            ->update(['sent_at' => now()->subDay()]);
+
+        // Re-trigger: no OPEN event remains, so a fresh episode opens and emails again.
+        $second = $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
+
+        $this->assertSame(1, $second['triggered']);
+        Mail::assertSent(PeakProximityAlert::class, 2);
+        $this->assertSame(1, (int) $this->_openEvent()->email_count);
+        $this->assertSame(
+            2,
+            PeakProximityAlertEvent::where('user_id', $this->_userId)->where('symbol', self::SYMBOL)->count()
+        );
+    }
+
     public function test_enable_until_past_date_reverts_to_disabled(): void
     {
-        // Enabled but the "enable until" window has passed: normalization flips it to permanently
-        // disabled and clears the date, so it must not fire.
         $this->_seedSetting(PeakProximityAlertSetting::ENABLED, now()->subDay()->format('Y-m-d'));
 
-        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items(-2.0));
+        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items());
 
         $this->assertSame(0, $stats['triggered']);
         Mail::assertNothingSent();
 
         $setting = PeakProximityAlertSetting::where('user_id', $this->_userId)
-            ->where('symbol', self::SYMBOL)
-            ->first();
+            ->where('symbol', self::SYMBOL)->first();
         $this->assertSame(PeakProximityAlertSetting::DISABLED, $setting->status);
         $this->assertNull($setting->until);
     }
@@ -343,7 +423,7 @@ class PeakProximityAlertsFeatureTest extends TestCase
     {
         $this->_seedSetting(PeakProximityAlertSetting::ENABLED, now()->addDay()->format('Y-m-d'));
 
-        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items(-2.0));
+        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items());
 
         $this->assertSame(1, $stats['triggered']);
         Mail::assertSent(PeakProximityAlert::class, 1);
@@ -351,18 +431,15 @@ class PeakProximityAlertsFeatureTest extends TestCase
 
     public function test_pause_until_past_date_reverts_to_enabled(): void
     {
-        // Disabled with a "pause until" date in the past: normalization flips it back to permanently
-        // enabled, so it fires.
         $this->_seedSetting(PeakProximityAlertSetting::DISABLED, now()->subDay()->format('Y-m-d'));
 
-        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items(-2.0));
+        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items());
 
         $this->assertSame(1, $stats['triggered']);
         Mail::assertSent(PeakProximityAlert::class, 1);
 
         $setting = PeakProximityAlertSetting::where('user_id', $this->_userId)
-            ->where('symbol', self::SYMBOL)
-            ->first();
+            ->where('symbol', self::SYMBOL)->first();
         $this->assertSame(PeakProximityAlertSetting::ENABLED, $setting->status);
         $this->assertNull($setting->until);
     }
@@ -371,7 +448,7 @@ class PeakProximityAlertsFeatureTest extends TestCase
     {
         $this->_seedSetting(PeakProximityAlertSetting::DISABLED, now()->addDay()->format('Y-m-d'));
 
-        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items(-2.0));
+        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $this->_items());
 
         $this->assertSame(0, $stats['triggered']);
         Mail::assertNothingSent();
@@ -381,13 +458,8 @@ class PeakProximityAlertsFeatureTest extends TestCase
     {
         $service = new PeakProximityAlertService();
 
-        // A user id one past the highest trade owner: it has no open positions by construction.
-        $noPositionUserId = (int) DB::connection($this->_conn)
-            ->table('trades')
-            ->max('user_id') + 1;
+        $noPositionUserId = (int) DB::connection($this->_conn)->table('trades')->max('user_id') + 1;
 
-        // Even with an ENABLED setting, a user holding no positions is excluded by the intersection
-        // with getUserIdsWithOpenPositions().
         PeakProximityAlertSetting::updateOrCreate(
             ['user_id' => $noPositionUserId, 'symbol' => self::SYMBOL],
             ['status' => PeakProximityAlertSetting::ENABLED, 'until' => null]
@@ -397,8 +469,6 @@ class PeakProximityAlertsFeatureTest extends TestCase
         $openUserIds = $service->getUserIdsWithOpenPositions();
 
         $this->assertNotContains($noPositionUserId, $result);
-
-        // The intersection contract: every returned id holds positions AND enabled at least one symbol.
         foreach ($result as $id) {
             $this->assertContains($id, $openUserIds);
         }

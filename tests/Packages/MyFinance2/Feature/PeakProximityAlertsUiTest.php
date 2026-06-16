@@ -8,6 +8,7 @@ use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
+use ovidiuro\myfinance2\App\Models\PeakProximityAlertEvent;
 use ovidiuro\myfinance2\App\Models\PeakProximityAlertSetting;
 use ovidiuro\myfinance2\App\Models\PeakProximityNotification;
 use ovidiuro\myfinance2\App\Models\Scopes\AssignedToUserScope;
@@ -221,6 +222,22 @@ class PeakProximityAlertsUiTest extends TestCase
             ->assertSee(self::SYMBOL);
     }
 
+    public function test_clear_today_removes_only_todays_records_for_the_user(): void
+    {
+        $today = $this->_seedNotification(self::SYMBOL);
+        $older = $this->_seedNotification(self::SYMBOL2);
+        $older->update(['sent_at' => now()->subDays(3)]);
+
+        $this->withoutMiddleware()
+            ->actingAs($this->_user)
+            ->post(route('myfinance2::peak-proximity-alerts.history.clear-today'))
+            ->assertRedirect(route('myfinance2::peak-proximity-alerts.history'))
+            ->assertSessionHas('success');
+
+        $this->assertNull(PeakProximityNotification::find($today->id));
+        $this->assertNotNull(PeakProximityNotification::find($older->id));
+    }
+
     public function test_history_destroy_removes_record(): void
     {
         $notif = $this->_seedNotification(self::SYMBOL);
@@ -245,5 +262,76 @@ class PeakProximityAlertsUiTest extends TestCase
             'sent_at'               => now(),
             'status'                => 'SENT',
         ]);
+    }
+
+    /**
+     * Seed an OPEN inbox event for the acting user.
+     *
+     * @param string $symbol
+     * @param string $classification ACTIONABLE | INFO
+     *
+     * @return PeakProximityAlertEvent
+     */
+    private function _seedEvent(
+        string $symbol,
+        string $classification = PeakProximityAlertEvent::CLASS_ACTIONABLE
+    ): PeakProximityAlertEvent
+    {
+        return PeakProximityAlertEvent::create([
+            'user_id'           => $this->_user->id,
+            'symbol'            => $symbol,
+            'classification'    => $classification,
+            'severity'          => $classification === PeakProximityAlertEvent::CLASS_ACTIONABLE
+                ? PeakProximityAlertEvent::SEVERITY_HIGH
+                : PeakProximityAlertEvent::SEVERITY_LOW,
+            'status'            => PeakProximityAlertEvent::STATUS_OPEN,
+            'effective_tier'    => 'BRONZE',
+            'head_action'       => 'EXIT',
+            'triggered_windows' => '6m',
+            'opened_at'         => now(),
+            'last_seen_at'      => now(),
+        ]);
+    }
+
+    public function test_inbox_route_renders_open_events(): void
+    {
+        $this->_seedEvent(self::SYMBOL);
+
+        $this->withoutMiddleware()
+            ->actingAs($this->_user)
+            ->get(route('myfinance2::peak-proximity-alerts.inbox'))
+            ->assertOk()
+            ->assertSee(self::SYMBOL);
+    }
+
+    public function test_dismiss_route_marks_event_dismissed(): void
+    {
+        $event = $this->_seedEvent(self::SYMBOL);
+
+        $this->withoutMiddleware()
+            ->actingAs($this->_user)
+            ->post(route('myfinance2::peak-proximity-alerts.dismiss'), ['ids' => [$event->id]])
+            ->assertRedirect(route('myfinance2::peak-proximity-alerts.inbox'))
+            ->assertSessionHas('success');
+
+        $this->assertSame(
+            PeakProximityAlertEvent::STATUS_DISMISSED,
+            $event->fresh()->status
+        );
+    }
+
+    public function test_dismiss_all_informational_keeps_actionable(): void
+    {
+        $actionable = $this->_seedEvent(self::SYMBOL, PeakProximityAlertEvent::CLASS_ACTIONABLE);
+        $info       = $this->_seedEvent(self::SYMBOL2, PeakProximityAlertEvent::CLASS_INFO);
+
+        $this->withoutMiddleware()
+            ->actingAs($this->_user)
+            ->post(route('myfinance2::peak-proximity-alerts.dismiss-all'), ['scope' => 'info'])
+            ->assertRedirect(route('myfinance2::peak-proximity-alerts.inbox'))
+            ->assertSessionHas('success');
+
+        $this->assertSame(PeakProximityAlertEvent::STATUS_OPEN, $actionable->fresh()->status);
+        $this->assertSame(PeakProximityAlertEvent::STATUS_DISMISSED, $info->fresh()->status);
     }
 }
