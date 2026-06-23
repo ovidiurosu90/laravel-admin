@@ -32,7 +32,8 @@ use ovidiuro\myfinance2\Mail\PeakProximityAlert;
  *  - every near-peak symbol (actionable or info) becomes an OPEN inbox event;
  *  - cadence escalates: a new long window crossing into near-peak emails immediately, otherwise the
  *    reminder interval shrinks as confluence grows;
- *  - dismissing ends the episode; a later re-trigger opens a fresh one.
+ *  - dismissing ends the episode; a same-day re-trigger of the identical condition stays suppressed,
+ *    while a next-day re-trigger (or a changed condition) opens a fresh one.
  *
  * Alerts are OFF by default: a symbol fires only with an ENABLED setting, so each test seeds one.
  *
@@ -376,7 +377,7 @@ class PeakProximityAlertsFeatureTest extends TestCase
         Mail::assertSent(PeakProximityAlert::class, 1);
     }
 
-    public function test_dismiss_then_retrigger_opens_a_new_episode(): void
+    public function test_dismiss_then_same_day_retrigger_is_suppressed(): void
     {
         $this->_seedSetting();
         $service = new PeakProximityAlertService();
@@ -384,7 +385,7 @@ class PeakProximityAlertsFeatureTest extends TestCase
         $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
         Mail::assertSent(PeakProximityAlert::class, 1);
 
-        // Dismiss the open event and clear today's throttle.
+        // Dismiss the open event today and clear today's throttle.
         $this->_openEvent()->update([
             'status'       => PeakProximityAlertEvent::STATUS_DISMISSED,
             'dismissed_at' => now(),
@@ -392,7 +393,37 @@ class PeakProximityAlertsFeatureTest extends TestCase
         PeakProximityNotification::where('user_id', $this->_userId)
             ->update(['sent_at' => now()->subDay()]);
 
-        // Re-trigger: no OPEN event remains, so a fresh episode opens and emails again.
+        // Same-day re-trigger of the identical condition: suppressed, so nothing pops back into the
+        // inbox and no new email goes out. The dismissed row is left as-is (no new event).
+        $second = $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
+
+        $this->assertSame(0, $second['triggered']);
+        $this->assertSame(1, $second['skipped']);
+        Mail::assertSent(PeakProximityAlert::class, 1);
+        $this->assertNull($this->_openEvent());
+        $this->assertSame(
+            1,
+            PeakProximityAlertEvent::where('user_id', $this->_userId)->where('symbol', self::SYMBOL)->count()
+        );
+    }
+
+    public function test_dismiss_then_next_day_retrigger_opens_a_new_episode(): void
+    {
+        $this->_seedSetting();
+        $service = new PeakProximityAlertService();
+
+        $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
+        Mail::assertSent(PeakProximityAlert::class, 1);
+
+        // Dismissed yesterday; clear yesterday's throttle.
+        $this->_openEvent()->update([
+            'status'       => PeakProximityAlertEvent::STATUS_DISMISSED,
+            'dismissed_at' => now()->subDay(),
+        ]);
+        PeakProximityNotification::where('user_id', $this->_userId)
+            ->update(['sent_at' => now()->subDay()]);
+
+        // A new day: no same-day dismissal to suppress, so a fresh episode opens and emails again.
         $second = $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
 
         $this->assertSame(1, $second['triggered']);
@@ -402,6 +433,32 @@ class PeakProximityAlertsFeatureTest extends TestCase
             2,
             PeakProximityAlertEvent::where('user_id', $this->_userId)->where('symbol', self::SYMBOL)->count()
         );
+    }
+
+    public function test_same_day_retrigger_with_new_window_opens_despite_dismissal(): void
+    {
+        $this->_seedSetting();
+        $service = new PeakProximityAlertService();
+
+        $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0]));
+        Mail::assertSent(PeakProximityAlert::class, 1);
+
+        $this->_openEvent()->update([
+            'status'       => PeakProximityAlertEvent::STATUS_DISMISSED,
+            'dismissed_at' => now(),
+        ]);
+        PeakProximityNotification::where('user_id', $this->_userId)
+            ->update(['sent_at' => now()->subDay()]);
+
+        // Same day, but a new long window (1Y) is now also near peak: the condition changed, so the
+        // dismissal does not match and a fresh episode opens (and emails) on the new confluence.
+        $second = $service->evaluateItems($this->_userId, $this->_items(['6m' => -2.0, '1y' => -3.0]));
+
+        $this->assertSame(1, $second['triggered']);
+        Mail::assertSent(PeakProximityAlert::class, 2);
+        $event = $this->_openEvent();
+        $this->assertNotNull($event);
+        $this->assertSame('6m,1y', $event->triggered_windows);
     }
 
     public function test_enable_until_past_date_reverts_to_disabled(): void
