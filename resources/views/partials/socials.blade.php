@@ -3,9 +3,6 @@
         {!! html()->icon_link(route('social.redirect',['provider' => 'facebook']), 'fa-brands fa-facebook', 'Facebook', array('class' => 'btn w-100 btn-social btn-facebook')) !!}
     </div>
     <div class="col-sm-6 mb-2">
-        {!! html()->icon_link(route('social.redirect',['provider' => 'twitter']), 'fa-brands fa-twitter', 'Twitter', array('class' => 'btn w-100 btn-social btn-twitter')) !!}
-    </div>
-    <div class="col-sm-6 mb-2">
         {!! html()->icon_link(route('social.redirect',['provider' => 'google']), 'fa-brands fa-google-plus', 'Google +', array('class' => 'btn w-100 btn-social btn-google')) !!}
     </div>
     <div class="col-sm-6 mb-2">

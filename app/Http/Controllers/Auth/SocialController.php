@@ -28,8 +28,14 @@ class SocialController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    private const DISABLED_PROVIDERS = ['twitter'];
+
     public function getSocialRedirect($provider, Request $request)
     {
+        if (in_array($provider, self::DISABLED_PROVIDERS)) {
+            abort(404);
+        }
+
         $providerKey = Config::get('services.'.$provider);
 
         if (empty($providerKey)) {
