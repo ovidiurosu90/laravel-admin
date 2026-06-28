@@ -104,7 +104,36 @@ class DipBuyingPlanFeatureTest extends TestCase
         $this->withoutMiddleware()->actingAs($this->_user)
             ->get(route('myfinance2::dip-buying-alerts.history'))
             ->assertOk()
-            ->assertSee('crossed_behind');
+            ->assertSee('Crossed behind');
+    }
+
+    public function test_history_page_renders_new_episode_badge(): void
+    {
+        DipBuyingNotification::create(array_merge($this->_notificationRow(), [
+            'trigger'     => 'new_episode',
+            'anchor_date' => '2025-06-15',
+        ]));
+
+        $this->withoutMiddleware()->actingAs($this->_user)
+            ->get(route('myfinance2::dip-buying-alerts.history'))
+            ->assertOk()
+            ->assertSee('New episode');
+    }
+
+    public function test_notification_persists_and_retrieves_anchor_date(): void
+    {
+        $anchorDate = '2025-06-15';
+
+        DipBuyingNotification::create(array_merge($this->_notificationRow(), [
+            'anchor_date' => $anchorDate,
+        ]));
+
+        $saved = DipBuyingNotification::where('user_id', $this->_user->id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $this->assertNotNull($saved->anchor_date);
+        $this->assertSame($anchorDate, $saved->anchor_date->format('Y-m-d'));
     }
 
     public function test_backtest_page_renders(): void
