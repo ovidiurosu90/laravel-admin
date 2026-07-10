@@ -23,8 +23,11 @@ class DailyLogErrors extends Mailable
         $dateLabel = $this->date->toDateString();
 
         $highlighted = [];
-        foreach ($this->results as $filename => $blocks) {
-            $highlighted[$filename] = array_map([$this, 'highlightBlock'], $blocks);
+        foreach ($this->results as $filename => $entries) {
+            $highlighted[$filename] = array_map(
+                fn (array $entry): string => $this->highlightBlock($entry['block']),
+                $entries
+            );
         }
 
         return $this->subject("[{$env}] Daily Log Errors - {$dateLabel}")

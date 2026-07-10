@@ -23,6 +23,11 @@
         .section { margin-bottom: 12px; padding: 14px 16px; background: #f8f9fa; border-radius: 4px;
                    border-left: 4px solid #dc3545; }
         .section.warning { border-left-color: #ffc107; }
+        .entry-meta { font: 12px/1.4 Helvetica, Arial, sans-serif; color: #6c757d; margin-bottom: 8px; }
+        .entry-count { display: inline-block; background: #dc3545; color: #fff; font-weight: 700;
+                       border-radius: 3px; padding: 1px 7px; margin-right: 8px; }
+        .section.warning .entry-count { background: #856404; }
+        .entry-range { font-family: Consolas, Monaco, monospace; }
         .log-block { font: 12px/1.6 Consolas, Monaco, Menlo, monospace; white-space: pre-wrap;
                      word-break: break-all; margin: 0; color: #212529; }
         .line-error, .line-critical, .line-alert, .line-emergency { color: #dc3545; font-weight: 700; }
@@ -35,26 +40,45 @@
 <div class="container">
     <div class="header">
         <h1><span class="env-badge">{{ strtoupper(config('app.env')) }}</span> Daily Log Errors</h1>
+        @php
+            $issueCount = array_sum(array_map('count', $results));
+            $occurrenceCount = array_sum(array_map(
+                fn ($entries) => array_sum(array_column($entries, 'count')),
+                $results
+            ));
+        @endphp
         <div class="meta">
             {{ $date->format('l, F j Y') }}
-            &middot; {{ array_sum(array_map('count', $results)) }} block(s)
+            &middot; {{ $issueCount }} distinct issue(s), {{ $occurrenceCount }} occurrence(s)
             across {{ count($results) }} file(s)
         </div>
     </div>
 
     <div class="body">
-        @foreach ($results as $filename => $blocks)
+        @foreach ($results as $filename => $entries)
             <div class="file-section">
                 <div class="file-heading">
                     <span class="filename">{{ $filename }}</span>
-                    <span class="count">{{ count($blocks) }} block(s)</span>
+                    <span class="count">{{ count($entries) }} distinct issue(s)</span>
                 </div>
 
-                @foreach ($blocks as $index => $block)
+                @foreach ($entries as $index => $entry)
                     @php
-                        $onlyWarnings = !preg_match('/\] \w+\.(?:ERROR|CRITICAL|ALERT|EMERGENCY):/', $block);
+                        $isWarning = $entry['level'] === 'WARNING';
+                        $range = $entry['first'] === $entry['last']
+                            ? $entry['first']
+                            : $entry['first'] . ' to ' . $entry['last'];
                     @endphp
-                    <div class="section {{ $onlyWarnings ? 'warning' : '' }}">
+                    <div class="section {{ $isWarning ? 'warning' : '' }}">
+                        <div class="entry-meta">
+                            <span class="entry-count">&times;{{ $entry['count'] }}</span>
+                            @if ($entry['count'] > 1)
+                                {{ $entry['count'] }} occurrences,
+                                <span class="entry-range">{{ $range }}</span>
+                            @else
+                                <span class="entry-range">{{ $entry['first'] }}</span>
+                            @endif
+                        </div>
                         <pre class="log-block">{!! $highlighted[$filename][$index] !!}</pre>
                     </div>
                 @endforeach

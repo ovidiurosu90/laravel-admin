@@ -29,6 +29,7 @@ class PeakProximityAlertsUiTest extends TestCase
 
     private const SYMBOL  = 'TST.AAA';
     private const SYMBOL2 = 'TST.BBB';
+    private const SYMBOL3 = 'TST.CCC';
 
     public function connectionsToTransact(): array
     {
@@ -238,6 +239,32 @@ class PeakProximityAlertsUiTest extends TestCase
         $this->assertNotNull(PeakProximityNotification::find($older->id));
     }
 
+    public function test_clear_today_also_clears_todays_dismissals_only(): void
+    {
+        $dismissedToday = $this->_seedEvent(self::SYMBOL);
+        $dismissedToday->update(['status' => PeakProximityAlertEvent::STATUS_DISMISSED, 'dismissed_at' => now()]);
+
+        $dismissedOlder = $this->_seedEvent(self::SYMBOL2);
+        $dismissedOlder->update([
+            'status'       => PeakProximityAlertEvent::STATUS_DISMISSED,
+            'dismissed_at' => now()->subDays(3),
+        ]);
+
+        $stillOpen = $this->_seedEvent(self::SYMBOL3);
+
+        $this->withoutMiddleware()
+            ->actingAs($this->_user)
+            ->post(route('myfinance2::peak-proximity-alerts.history.clear-today'))
+            ->assertRedirect(route('myfinance2::peak-proximity-alerts.history'))
+            ->assertSessionHas('success');
+
+        // Today's dismissal is cleared so the symbol can reopen and re-alert today; an older
+        // dismissal and any still-open event are left untouched.
+        $this->assertNull(PeakProximityAlertEvent::find($dismissedToday->id));
+        $this->assertNotNull(PeakProximityAlertEvent::find($dismissedOlder->id));
+        $this->assertNotNull(PeakProximityAlertEvent::find($stillOpen->id));
+    }
+
     public function test_history_destroy_removes_record(): void
     {
         $notif = $this->_seedNotification(self::SYMBOL);
@@ -302,6 +329,27 @@ class PeakProximityAlertsUiTest extends TestCase
             ->get(route('myfinance2::peak-proximity-alerts.inbox'))
             ->assertOk()
             ->assertSee(self::SYMBOL);
+    }
+
+    public function test_dismissed_inbox_groups_events_by_day(): void
+    {
+        $today = $this->_seedEvent(self::SYMBOL);
+        $today->update(['status' => PeakProximityAlertEvent::STATUS_DISMISSED, 'dismissed_at' => now()]);
+
+        $older = $this->_seedEvent(self::SYMBOL2);
+        $older->update([
+            'status'       => PeakProximityAlertEvent::STATUS_DISMISSED,
+            'dismissed_at' => now()->subDays(3),
+        ]);
+
+        $this->withoutMiddleware()
+            ->actingAs($this->_user)
+            ->get(route('myfinance2::peak-proximity-alerts.inbox', ['show' => 'dismissed']))
+            ->assertOk()
+            ->assertSee('Today')
+            ->assertSee(now()->subDays(3)->format('D, M j, Y'))
+            ->assertSee(self::SYMBOL)
+            ->assertSee(self::SYMBOL2);
     }
 
     public function test_dismiss_route_marks_event_dismissed(): void
