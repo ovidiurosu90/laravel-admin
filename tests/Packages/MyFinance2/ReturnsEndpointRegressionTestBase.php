@@ -7,6 +7,7 @@ namespace Tests\Packages\MyFinance2;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 /**
  * Abstract base class for returns endpoint regression tests
@@ -43,6 +44,20 @@ use App\Models\User;
  */
 abstract class ReturnsEndpointRegressionTestBase extends TestCase
 {
+    use DatabaseTransactions;
+
+    /**
+     * These tests assert against live data and write nothing themselves, but the
+     * requests they issue run through the full middleware stack, which logs a row
+     * per visit into laravel_logger_activity (plus anything the endpoint persists
+     * on the myfinance2 side). Wrapping both connections keeps a test run from
+     * leaving any trace in the production database.
+     */
+    public function connectionsToTransact(): array
+    {
+        return [null, config('myfinance2.db_connection', 'myfinance2_mysql')];
+    }
+
     // Subclasses MUST redeclare these 10 static properties for isolation:
     protected static ?array $returnsData = null;
     protected static ?string $responseHtml = null;
@@ -158,7 +173,7 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
     {
         $class = static::_getTestDataProviderClass();
         if ($class === null) {
-            return 40;
+            return 45;
         }
         return $class::getMaxDurationSeconds();
     }

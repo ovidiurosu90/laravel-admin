@@ -291,6 +291,28 @@ class PortfolioPeakAlertsFeatureTest extends TestCase
         Mail::assertSent(PortfolioPeakAlert::class);
     }
 
+    /**
+     * Default cadence is daily, and it is measured in calendar days: an alert sent late yesterday
+     * is due again on this morning's first run, even though only a few hours have elapsed.
+     */
+    public function test_reminder_sent_next_day_with_default_interval(): void
+    {
+        Mail::fake();
+
+        $this->_setting();
+        PortfolioPeakNotification::create([
+            'user_id' => $this->_syntheticUserId,
+            'status'  => 'SENT',
+            'sent_at' => now()->subDay()->setTime(23, 30),
+        ]);
+        $this->_writeSeries($this->_syntheticUserId, 'changePercentage_EUR',
+            $this->_recentSeries([4, 7, 9, 10]));
+
+        $this->assertSame(1, (int) config('alerts.portfolio_peak.reminder_days'));
+        $this->assertSame('sent', $this->_evaluate());
+        Mail::assertSent(PortfolioPeakAlert::class);
+    }
+
     public function test_dry_run_does_not_write(): void
     {
         Mail::fake();

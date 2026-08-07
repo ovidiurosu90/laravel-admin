@@ -5,12 +5,18 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 // use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use App\Http\Middleware\VerifyCsrfToken;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
     // use RefreshDatabase; //NOTE You need a test database here
+
+    // Logging in writes to the live database (activity log row, last-login fields
+    // on the test user), so wrap each test in a rolled-back transaction. The
+    // default connection is enough: nothing here touches the myfinance2 one.
+    use DatabaseTransactions;
 
     public function test_login_screen_can_be_rendered(): void
     {

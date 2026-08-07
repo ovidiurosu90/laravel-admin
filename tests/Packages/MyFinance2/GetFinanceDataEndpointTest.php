@@ -6,6 +6,7 @@ namespace Tests\Packages\MyFinance2;
 
 use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 /**
  * Integration test for the /get-finance-data endpoint
@@ -18,6 +19,18 @@ use App\Models\User;
  */
 class GetFinanceDataEndpointTest extends TestCase
 {
+    use DatabaseTransactions;
+
+    /**
+     * The endpoint persists the quote it fetches (stats_today) and the request
+     * goes through the activity-logging middleware, so both connections are
+     * transacted to keep a test run out of the production database.
+     */
+    public function connectionsToTransact(): array
+    {
+        return [null, config('myfinance2.db_connection', 'myfinance2_mysql')];
+    }
+
     /**
      * Test get-finance-data endpoint with symbol and timestamp
      *
