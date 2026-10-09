@@ -58,8 +58,9 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
         return [null, config('myfinance2.db_connection', 'myfinance2_mysql')];
     }
 
-    // Subclasses MUST redeclare these 10 static properties for isolation:
+    // Subclasses MUST redeclare these 11 static properties for isolation:
     protected static ?array $returnsData = null;
+    protected static ?array $alerts = null;
     protected static ?string $responseHtml = null;
     protected static ?array $returnsDataDwOff = null;
     protected static ?string $responseHtmlDwOff = null;
@@ -279,6 +280,7 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
                 $response->assertViewHas('availableYears');
 
                 static::$returnsData = $response->viewData('returnsData');
+                static::$alerts = $response->viewData('alerts');
                 static::$responseHtml = $response->getContent();
             }
 
@@ -379,6 +381,57 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
         $this->assertEquals($accountName, $accountData['account']->name);
     }
 
+    // ========== Missing Price Tests ==========
+
+    /**
+     * Every position held on Jan 1 / Dec 31 must have a price. A position without one is valued at 0,
+     * which shows up below as a value mismatch that looks like an FX or calculation bug. The usual cause
+     * is a delisted symbol whose history the finance API dropped: add it to delisted_symbols and give it
+     * price_overrides for the year-end dates.
+     */
+    public function test_all_held_positions_have_a_price(): void
+    {
+        $missing = [];
+        foreach (static::$alerts ?? [] as $alert) {
+            if (!str_starts_with($alert['type'], 'missing_quote')) {
+                continue;
+            }
+            foreach ($alert['positions'] as $position) {
+                $missing[] = static::_describeMissingQuote($position);
+            }
+        }
+
+        $this->assertSame([], $missing,
+            "Positions valued at 0 because no price was found (delisted symbol? add price_overrides):\n  "
+            . implode("\n  ", $missing));
+    }
+
+    /**
+     * Suffix for value assertion messages naming the account's positions that had no price
+     */
+    protected static function _missingQuotesNote(int|string $accountId): string
+    {
+        $notes = [];
+        foreach (static::$alerts ?? [] as $alert) {
+            if (!str_starts_with($alert['type'], 'missing_quote')) {
+                continue;
+            }
+            foreach ($alert['positions'] as $position) {
+                if ((string) $position['account_id'] === (string) $accountId) {
+                    $notes[] = static::_describeMissingQuote($position);
+                }
+            }
+        }
+
+        return empty($notes) ? '' : ' (positions without a price, valued at 0: ' . implode('; ', $notes) . ')';
+    }
+
+    protected static function _describeMissingQuote(array $position): string
+    {
+        return sprintf('%s x%s in %s on %s', $position['symbol'], $position['quantity'],
+            $position['account_name'], $position['date']);
+    }
+
     // ========== Jan1 Values Tests ==========
 
     #[DataProvider('realAccountDataProvider')]
@@ -397,10 +450,11 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
             $accountData = static::$returnsData[$accountId];
             $this->assertEqualsWithDelta($currencyData['jan1Value'],
                 $accountData['jan1Value'][$currency]['value'],
-                static::_getFloatTolerance(), "Jan1 value mismatch for $accountKey $currency");
+                static::_getFloatTolerance(),
+                "Jan1 value mismatch for $accountKey $currency" . static::_missingQuotesNote($accountId));
             $this->assertEqualsWithDelta($currencyData['jan1PositionsValue'],
                 $accountData['jan1PositionsValue'][$currency]['value'], static::_getFloatTolerance(),
-                "Jan1 positions value mismatch for $accountKey $currency");
+                "Jan1 positions value mismatch for $accountKey $currency" . static::_missingQuotesNote($accountId));
             $this->assertEqualsWithDelta($currencyData['jan1CashValue'],
                 $accountData['jan1CashValue'][$currency]['value'],
                 static::_getFloatTolerance(), "Jan1 cash value mismatch for $accountKey $currency");
@@ -433,10 +487,11 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
             $accountData = static::$returnsData[$accountId];
             $this->assertEqualsWithDelta($currencyData['dec31Value'],
                 $accountData['dec31Value'][$currency]['value'],
-                static::_getFloatTolerance(), "Dec31 value mismatch for $accountKey $currency");
+                static::_getFloatTolerance(),
+                "Dec31 value mismatch for $accountKey $currency" . static::_missingQuotesNote($accountId));
             $this->assertEqualsWithDelta($currencyData['dec31PositionsValue'],
                 $accountData['dec31PositionsValue'][$currency]['value'], static::_getFloatTolerance(),
-                "Dec31 positions value mismatch for $accountKey $currency");
+                "Dec31 positions value mismatch for $accountKey $currency" . static::_missingQuotesNote($accountId));
             $this->assertEqualsWithDelta($currencyData['dec31CashValue'],
                 $accountData['dec31CashValue'][$currency]['value'],
                 static::_getFloatTolerance(), "Dec31 cash value mismatch for $accountKey $currency");
@@ -781,7 +836,8 @@ abstract class ReturnsEndpointRegressionTestBase extends TestCase
             $accountData = static::$returnsData[$accountId];
             $this->assertEqualsWithDelta($currencyData['actualReturn'],
                 $accountData['actualReturn'][$currency]['value'],
-                static::_getFloatTolerance(), "Return value mismatch for $accountKey $currency");
+                static::_getFloatTolerance(),
+                "Return value mismatch for $accountKey $currency" . static::_missingQuotesNote($accountId));
         }
     }
 
