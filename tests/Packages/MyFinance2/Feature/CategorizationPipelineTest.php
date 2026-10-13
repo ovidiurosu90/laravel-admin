@@ -229,6 +229,8 @@ class CategorizationPipelineTest extends TestCase
             'quadrant', 'action', 'annualized_pct', 'relative_drawdown', 'periods',
             'vusa_same_window_pct', 'alpha_vs_vusa_pct', 'alpha_is_short_period', 'xirr_pct',
             'is_benchmark', 'is_borderline',
+            'today_tier', 'settled_tier', 'tier_tooltip', 'today_chip', 'range_bound', 'take_profit',
+            'tier_signal_chip',
         ] as $key) {
             $this->assertArrayHasKey($key, $entry, "Missing pipeline key: {$key}");
         }
@@ -249,19 +251,17 @@ class CategorizationPipelineTest extends TestCase
         $this->assertSame($entry['quadrant'] === null, $entry['action'] === null);
     }
 
-    public function test_previous_tier_state_keeps_a_near_boundary_position_sticky(): void
+    public function test_today_tier_is_the_plain_reading_whatever_the_stored_state(): void
     {
-        // A holding entered two years ago at 100, now ~120.6: ~9.8%/yr CAGR, which buckets as
-        // Silver on the plain threshold but sits inside the Gold/Silver dead-band.
+        // A holding entered two years ago at 100, now ~120.6: ~9.8%/yr CAGR, just under the 10 % Gold line.
         $this->_seedOpenWinner(120.56);
 
-        // No prior state recorded: the plain bucket applies and it lands Silver.
         $fresh = $this->_entryFor(self::SYMBOL);
         $this->assertEqualsWithDelta(9.8, $fresh['basis_value'], 0.5);
-        $this->assertSame(TierCalculationService::SILVER, $fresh['effective_tier']);
+        $this->assertSame(TierCalculationService::SILVER, $fresh['today_tier']);
 
-        // Record that it last settled at Gold, then rebuild: hysteresis keeps it Gold rather than
-        // flipping on a sub-band wiggle. The synthetic state row is rolled back with the test.
+        // A stored Gold from an earlier run no longer holds the tier near the line (no dead-band; the settled
+        // tier gives the steadiness). The synthetic state row is rolled back with the test.
         $now = now();
         DB::connection($this->_conn)->table('symbol_tier_states')->insert([
             'user_id'    => $this->_userId,
@@ -271,8 +271,8 @@ class CategorizationPipelineTest extends TestCase
             'updated_at' => $now,
         ]);
 
-        $sticky = $this->_entryFor(self::SYMBOL);
-        $this->assertSame(TierCalculationService::GOLD, $sticky['effective_tier']);
+        $again = $this->_entryFor(self::SYMBOL);
+        $this->assertSame(TierCalculationService::SILVER, $again['today_tier']);
         // The read path must not have overwritten the recorded state (the cron is the only writer).
         $persisted = DB::connection($this->_conn)->table('symbol_tier_states')
             ->where('user_id', $this->_userId)->where('symbol', self::SYMBOL)->value('tier');

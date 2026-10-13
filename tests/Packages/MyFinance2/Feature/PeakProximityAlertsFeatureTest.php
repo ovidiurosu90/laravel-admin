@@ -229,6 +229,34 @@ class PeakProximityAlertsFeatureTest extends TestCase
         $this->assertSame(PeakProximityAlertEvent::CLASS_INFO, $event->classification);
     }
 
+    public function test_settled_tier_gates_and_today_tier_is_stored_and_shown(): void
+    {
+        $this->_seedSetting();
+        $items = $this->_items(['6m' => -2.0], 'BRONZE', 'EXIT');
+        // Settled Bronze while today's reading alone is Platinum: the settled tier decides, so it emails.
+        $items[self::SYMBOL]['categorization']['today_tier'] = 'PLATINUM';
+        $items[self::SYMBOL]['categorization']['today_chip'] = [
+            'tier'  => 'PLATINUM',
+            'label' => 'Platinum',
+            'title' => 'Today alone: Platinum',
+        ];
+
+        $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $items);
+
+        $this->assertSame(1, $stats['triggered']);
+        Mail::assertSent(PeakProximityAlert::class, function (PeakProximityAlert $m)
+        {
+            $m->build();
+            return str_contains($m->subject, self::SYMBOL . ' (Bronze, today Platinum, EXIT) near peak');
+        });
+
+        $event = $this->_openEvent();
+        $this->assertNotNull($event);
+        $this->assertSame(PeakProximityAlertEvent::CLASS_ACTIONABLE, $event->classification);
+        $this->assertSame('BRONZE', $event->effective_tier);
+        $this->assertSame('PLATINUM', $event->today_tier);
+    }
+
     public function test_exit_action_does_not_gate_a_strong_tier(): void
     {
         $this->_seedSetting();
@@ -522,12 +550,14 @@ class PeakProximityAlertsFeatureTest extends TestCase
             ['status' => PeakProximityAlertSetting::ENABLED, 'until' => null]
         );
 
-        $result      = $service->getUserIdsWithEnabledAlerts();
-        $openUserIds = $service->getUserIdsWithOpenPositions();
+        $result        = $service->getUserIdsWithEnabledAlerts();
+        $tradedUserIds = DB::connection($this->_conn)->table('trades')->distinct()->pluck('user_id')
+            ->map(fn ($id) => (int) $id)->all();
 
+        // A user with no trades at all is skipped; everyone kept has traded (held now, or exited for a BUY).
         $this->assertNotContains($noPositionUserId, $result);
         foreach ($result as $id) {
-            $this->assertContains($id, $openUserIds);
+            $this->assertContains($id, $tradedUserIds);
         }
     }
 }
