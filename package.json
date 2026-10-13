@@ -103,7 +103,7 @@
     "jquery": "^3.6.3",
     "jquery-datetimepicker": "^2.5.21",
     "jquery-mask-plugin": "^1.14.16",
-    "lightweight-charts": "^5.0.7",
+    "lightweight-charts": "^5.1.0",
     "lodash": "^4.17.21",
     "password-strength-meter": "git+https://github.com/elboletaire/password-strength-meter.git#v2.1.0",
     "vite-plugin-externals": "^0.6.2",
