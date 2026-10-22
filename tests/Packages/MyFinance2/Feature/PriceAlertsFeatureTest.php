@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use ReflectionClass;
 use ovidiuro\myfinance2\App\Console\Commands\FinanceApiCron;
@@ -18,6 +19,7 @@ use ovidiuro\myfinance2\App\Models\PriceAlertNotification;
 use ovidiuro\myfinance2\App\Models\Trade;
 use ovidiuro\myfinance2\App\Models\Scopes\AssignedToUserScope;
 use ovidiuro\myfinance2\App\Services\AlertService;
+use ovidiuro\myfinance2\App\Services\SymbolPositionReturns;
 use ovidiuro\myfinance2\Mail\PriceAlertCreated;
 use ovidiuro\myfinance2\Mail\PriceAlertStateChanged;
 use ovidiuro\myfinance2\Mail\PriceAlertTriggered;
@@ -550,6 +552,123 @@ class PriceAlertsFeatureTest extends TestCase
         $result = $m->invokeArgs($service, [$this->_user->id, $alert, 195.00, 'EUR']);
 
         $this->assertNull($result);
+    }
+
+    // =========================================================================
+    // TRIGGERED EMAIL: TODAY'S MOVE & UNREALIZED GAIN (as the peak-proximity alerts)
+    // =========================================================================
+
+    /**
+     * Covers: the triggered email shows the same "Today's move" and unrealized gain lines as the peak-proximity
+     * alerts, and its Position table no longer carries a projected gain of its own.
+     */
+    public function test_triggered_email_shows_todays_move_and_unrealized_gain_when_held(): void
+    {
+        $alert = $this->_createAlert(['symbol' => 'MOVE.TST', 'target_price' => '39.000000']);
+
+        $html = (new PriceAlertTriggered($alert, 39.12, [
+            'today_gain_eur' => -353.47,
+            'today_gain_pct' => -6.31,
+            'gain_eur'       => 234.80,
+            'gain_pct'       => 4.68,
+            'quantity'       => 128.0,
+            'avg_unit_cost'  => 37.36,
+        ]))->render();
+
+        $this->assertStringContainsString("Today's move:", $html);
+        $this->assertStringContainsString('- 353.47 €', $html);
+        $this->assertStringContainsString('- 6.31 %', $html);
+        $this->assertStringContainsString('which moved the position away from its peak today.', $html);
+        $this->assertStringContainsString("Your position's current unrealized gain is", $html);
+        $this->assertStringContainsString('+ 234.80 €', $html);
+        $this->assertStringContainsString('which is what you would lock in by selling now', $html);
+        $this->assertStringContainsString('<th>Current Price</th>', $html);
+        $this->assertStringNotContainsString('Projected', $html);
+        $this->assertStringNotContainsString('No open position', $html);
+    }
+
+    /**
+     * Covers: a symbol not held still shows today's move, as a % only, reading "the price".
+     */
+    public function test_triggered_email_shows_todays_move_pct_when_not_held(): void
+    {
+        $alert = $this->_createAlert(['symbol' => 'NOPOS.TST', 'target_price' => '39.000000']);
+
+        $html = (new PriceAlertTriggered($alert, 39.12, ['today_gain_pct' => 2.5]))->render();
+
+        $this->assertStringContainsString("Today's move:", $html);
+        $this->assertStringContainsString('+ 2.50 %', $html);
+        $this->assertStringContainsString('which nudged the price toward its peak today.', $html);
+        $this->assertStringNotContainsString('unrealized gain', $html);
+        $this->assertStringContainsString('No open position found for NOPOS.TST.', $html);
+    }
+
+    /**
+     * Covers: the engine hands the email (and the notification history) the shared position figures, fees included,
+     * instead of the fee-less projected gain, and a symbol not held gets today's % from its quote. Runs for an unused
+     * user id so no real alert is evaluated.
+     */
+    public function test_evaluate_alerts_uses_the_shared_position_figures(): void
+    {
+        config(['alerts.email_to' => 'alerts@example.test', 'alerts.market_hours_only' => false]);
+        $conn    = config('myfinance2.db_connection', 'myfinance2_mysql');
+        $userId  = (int) DB::connection($conn)->table('price_alerts')->max('user_id') + 1000;
+        $insert  = fn (string $symbol): int => DB::connection($conn)->table('price_alerts')->insertGetId([
+            'user_id' => $userId, 'symbol' => $symbol, 'alert_type' => 'PRICE_ABOVE', 'target_price' => 100.0,
+            'target_mode' => 'FIXED', 'status' => 'ACTIVE', 'source' => 'manual', 'notification_channel' => 'email',
+            'trigger_count' => 0, 'created_at' => now(), 'updated_at' => now(),
+        ]);
+        $heldId    = $insert('HELD.TST');
+        $notHeldId = $insert('FREE.TST');
+
+        $positionReturns = new class extends SymbolPositionReturns
+        {
+            public function forUser(int $userId): array
+            {
+                return ['HELD.TST' => [
+                    'today_gain_eur' => 12.5, 'today_gain_pct' => 1.1, 'gain_eur' => 80.25, 'raw_pct' => 8.5,
+                    'quantity' => 5.0, 'avg_unit_cost2' => 101.2,
+                ]];
+            }
+        };
+        $engine = new class($positionReturns) extends AlertService
+        {
+            public function __construct(SymbolPositionReturns $positionReturns)
+            {
+                parent::__construct(null, $positionReturns);
+            }
+
+            protected function _getQuotes(array $symbols): array
+            {
+                return [
+                    'HELD.TST' => ['price' => 110.0, 'day_change_percentage' => 9.9],
+                    'FREE.TST' => ['price' => 110.0, 'day_change_percentage' => -3.0],
+                ];
+            }
+        };
+
+        $stats = $engine->evaluateAlerts($userId);
+
+        $this->assertSame(2, $stats['triggered']);
+        Mail::assertSent(PriceAlertTriggered::class, function (PriceAlertTriggered $mail): bool {
+            $html = $mail->render();
+
+            return str_contains($html, 'HELD.TST') && str_contains($html, '+ 12.50 €')
+                && str_contains($html, '+ 1.10 %') && str_contains($html, '+ 80.25 €');
+        });
+        Mail::assertSent(PriceAlertTriggered::class, function (PriceAlertTriggered $mail): bool {
+            $html = $mail->render();
+
+            return str_contains($html, 'FREE.TST') && str_contains($html, '- 3.00 %')
+                && str_contains($html, 'which moved the price away from its peak today.');
+        });
+
+        $notification = PriceAlertNotification::withoutGlobalScope(AssignedToUserScope::class)
+            ->where('price_alert_id', $heldId)->sole();
+        $this->assertEqualsWithDelta(80.25, (float) $notification->projected_gain_eur, 0.001);
+        $this->assertEqualsWithDelta(8.5, (float) $notification->projected_gain_pct, 0.0001);
+        $this->assertNull(PriceAlertNotification::withoutGlobalScope(AssignedToUserScope::class)
+            ->where('price_alert_id', $notHeldId)->sole()->projected_gain_eur);
     }
 
     // =========================================================================

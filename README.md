@@ -278,7 +278,7 @@ crontab -e
 
 ### logs:email-daily-errors
 
-Emails a summary of all WARNING / ERROR / CRITICAL / ALERT / EMERGENCY entries from the previous day across all three log files (`laravel.log`, `finance-api-cron.log`, `stats-cron.log`). Each matching entry includes 5 lines of context before and after. Email subject includes the environment prefix (e.g. `[LOCAL]`, `[PRODUCTION]`) sourced from `APP_ENV`.
+Emails a summary of all WARNING / ERROR / CRITICAL / ALERT / EMERGENCY entries from the previous day across all three log files (`laravel.log`, `finance-api-cron.log`, `stats-cron.log`). Each matching entry includes 5 lines of context before and after. The subject starts with the same prefix as the MyFinance2 emails, `[APP_NAME-APP_ENV]` (e.g. `[Admin-PROD]`, `[Admin-LOCAL]`; just `[Admin]` when `APP_ENV=production`), followed by the counts: `[Admin-PROD] Daily Log Errors 2026-10-21 => 1 issue, 2 occurrences`. It uses the MyFinance2 emails' shared layout when that package is installed, else the main app's fallback (`resources/views/emails/layouts/base.blade.php`).
 
 ```bash
 sudo su
@@ -302,6 +302,27 @@ php artisan logs:email-daily-errors
 # Run manually for a specific date
 php artisan logs:email-daily-errors --date=2026-05-16
 ```
+
+### emails:samples
+
+Sends one sample of every email to check how they look in a mail client: the main app's daily log errors digest
+(from sample figures) and, when MyFinance2 is installed, each of its emails, which the package builds (see "Emails" in
+the myfinance2 README for what each one is, what sends it and which data the sample reads). Persists nothing, so the
+real alert crons are unaffected. A kind with no data today is skipped. The exception email is not included (it is sent
+only on a real exception). Not scheduled; run it on demand.
+
+```bash
+# List what would be sent (subjects only), without sending
+php artisan emails:samples --dry-run
+
+# Send every sample (default recipient: the MyFinance2 alerts address, else the user's email)
+php artisan emails:samples --to=you@example.com
+
+# Only some kinds, from a given user's data (default: the first user)
+php artisan emails:samples --only=price-alert,peak-proximity,daily-log-errors --user-id=1
+```
+
+Kinds: every MyFinance2 kind (listed in its README and by `--dry-run`), then `daily-log-errors` (main app).
 
 ## Other Utilities
 

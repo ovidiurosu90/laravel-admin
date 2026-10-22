@@ -399,6 +399,37 @@ class PriceAlertsRelativeTargetFeatureTest extends TestCase
         $this->assertCount(8, $response->json('references'));
     }
 
+    public function test_edit_form_preview_wording_and_currency_placement(): void
+    {
+        $alert = $this->_insertAlert($this->_user->id, ['alert_type' => 'PRICE_BELOW']);
+
+        // Full middleware stack: the form reads $errors, which ShareErrorsFromSession provides
+        $response = $this->actingAs($this->_user)->get(route('myfinance2::price-alerts.edit', $alert->id));
+
+        // The preview is built client-side, so assert the script that builds it: short enough
+        // for one line, the fire-now warning in an alert box, every price followed by its currency.
+        $response->assertOk()
+            ->assertSee("'at or below' : 'at or above'", false)
+            ->assertSee("return 'Fires ' + crossing + ' ' + withCurrency(formatPrice(target), currency)", false)
+            ->assertSee("withCurrency(ref.price_label, currency) + ' (' + ref.date_label + ').'", false)
+            ->assertSee("cls: 'alert alert-warning py-1 px-2 mt-1 mb-0'", false)
+            ->assertSee("'The current price (' + withCurrency(referenceData.live_price_label, currencyLabel())", false)
+            ->assertSee("') already meets this target; fires on the next check.'", false)
+            ->assertSee("return currency ? price + ' ' + currency : price;", false)
+            ->assertDontSee('Fires when the price', false)
+            ->assertDontSee('so the alert would fire on the next check', false);
+
+        // The notes hint puts the currency after the price too ("239.24 $", not "$239.24")
+        $response->assertSee("' 52W high of '\n            + parseFloat(high52w).toFixed(2) + ' ' + sym", false)
+            ->assertDontSee("' 52W high of ' + sym", false);
+
+        // "Trade Currency" gets the wider column so it stays on one line
+        $this->assertMatchesRegularExpression(
+            '/<label for="trade_currency-select" class="col-7 control-label">/',
+            $response->getContent()
+        );
+    }
+
     // =========================================================================
     // ENGINE
     // =========================================================================

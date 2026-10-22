@@ -321,6 +321,15 @@ class PeakProximityRangeAlertsFeatureTest extends TestCase
         $this->assertStringContainsString('52-week low', $html);
         $this->assertStringNotContainsString('Trigger target', $html);
         $this->assertStringContainsString('which nudged the position toward its 52-week high today.', $html);
+        // The shared frame and buttons (the price alert's too): TRIM prefills a sell order.
+        $this->assertStringContainsString('<strong>MyFinance2</strong> &middot;', $html);
+        $this->assertStringContainsString('→ Create Sell Order', $html);
+        $this->assertStringContainsString('action=SELL', $html);
+        $this->assertStringContainsString('✏️ Manage Alerts', $html);
+        $this->assertStringContainsString('→ Open Watchlist Symbols', $html);
+        $this->assertStringContainsString('Sent at most once per day per symbol.', $html);
+        // One name per value: the Quadrant's per-window market return (not "Gain").
+        $this->assertStringContainsString('Market return</th>', $html);
 
         $card = view('myfinance2::peakproximityalerts.inbox.partials.card', [
             'event'         => $this->_events()->sole(),
@@ -336,6 +345,32 @@ class PeakProximityRangeAlertsFeatureTest extends TestCase
         $this->assertStringContainsString('which nudged the position toward its 52-week high today.', $card);
         $this->assertStringContainsString('This range-bound alert emails whatever the tier', $card);
         $this->assertStringNotContainsString('>EXIT<', $card);
+    }
+
+    public function test_email_and_inbox_card_show_todays_move_pct_when_not_held(): void
+    {
+        // A symbol not held has no EUR move nor unrealized gain, only the day's % from its quote.
+        $item = $this->_items(97.0)[self::SYMBOL];
+        $item['open_positions']      = [];
+        $item['today_gain_eur']      = null;
+        $item['today_gain_pct']      = -6.31;
+        $item['unrealized_gain_eur'] = null;
+        $item['unrealized_gain_pct'] = null;
+        $html = (new PeakProximityAlert(
+            self::SYMBOL, $item, [], false, [], PeakProximityAlertEvent::SIGNAL_RANGE_HIGH
+        ))->render();
+
+        $this->assertStringContainsString("Today's move:", $html);
+        $this->assertStringContainsString('- 6.31 %', $html);
+        $this->assertStringContainsString('which moved the price away from its 52-week high today.', $html);
+        $this->assertStringNotContainsString('unrealized gain', $html);
+
+        $line = view('myfinance2::peakproximityalerts.inbox.partials.today-move', [
+            'todayEur' => null, 'todayPct' => -6.31,
+        ])->render();
+        $this->assertStringContainsString("Today's move:", $line);
+        $this->assertStringContainsString('- 6.31 %', $line);
+        $this->assertStringContainsString('which moved the price away from its peak today.', $line);
     }
 
     public function test_a_superstar_shows_its_star_in_the_email_and_the_inbox_card(): void

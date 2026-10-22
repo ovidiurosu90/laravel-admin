@@ -72,7 +72,9 @@ return [
     */
 
     'emailExceptionSubject'        => env('EMAIL_EXCEPTION_SUBJECT'),
-    'emailExceptionSubjectDefault' => 'Error on '.config('app.env'),
+    // The same prefix as the other emails: "[Admin-PROD] Exception" ("[Admin] Exception" on production).
+    'emailExceptionSubjectDefault' => '['.env('APP_NAME', 'Laravel')
+        .(env('APP_ENV', 'production') === 'production' ? '' : '-'.strtoupper(env('APP_ENV'))).'] Exception',
 
     /*
     |--------------------------------------------------------------------------
