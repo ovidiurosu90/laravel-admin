@@ -294,7 +294,6 @@ class PeakProximityTakeProfitAlertsFeatureTest extends TestCase
 
         $card = view('myfinance2::peakproximityalerts.inbox.partials.card', [
             'event'         => $this->_events(PeakProximityAlertEvent::SIGNAL_TAKE_PROFIT)->sole(),
-            'actionClass'   => [],
             'severityClass' => [],
             'windowsLabel'  => fn (?string $csv) => (string) $csv,
         ])->render();

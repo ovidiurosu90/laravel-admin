@@ -186,7 +186,6 @@ class PeakProximityRangeAlertsFeatureTest extends TestCase
 
         $card = view('myfinance2::peakproximityalerts.inbox.partials.card', [
             'event'         => $trim,
-            'actionClass'   => [],
             'severityClass' => [],
             'windowsLabel'  => fn (?string $csv) => (string) $csv,
         ])->render();
@@ -333,7 +332,6 @@ class PeakProximityRangeAlertsFeatureTest extends TestCase
 
         $card = view('myfinance2::peakproximityalerts.inbox.partials.card', [
             'event'         => $this->_events()->sole(),
-            'actionClass'   => [],
             'severityClass' => [],
             'windowsLabel'  => fn (?string $csv) => (string) $csv,
         ])->render();
@@ -390,7 +388,6 @@ class PeakProximityRangeAlertsFeatureTest extends TestCase
 
         $card = view('myfinance2::peakproximityalerts.inbox.partials.card', [
             'event'         => $this->_events()->sole(),
-            'actionClass'   => [],
             'severityClass' => [],
             'windowsLabel'  => fn (?string $csv) => (string) $csv,
         ])->render();

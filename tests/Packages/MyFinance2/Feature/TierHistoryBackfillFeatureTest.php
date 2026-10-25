@@ -320,9 +320,9 @@ class TierHistoryBackfillFeatureTest extends TestCase
         $this->assertSame('S 100%', $entry['tier_history']['shares_text']);
         $this->assertSame(TierDecision::BASIS_MARKET_MOMENTUM, $entry['basis']);
         $this->assertSame(SettledTierResolver::MEASURE_MARKET, $entry['tier_signal']['measure']);
-        // The settled tier is the effective tier; today's tier is kept and shown as an outlined chip.
+        // The settled tier is the effective tier; today's tier is kept for the tier signals, never shown as a chip.
         $this->assertSame(TierCalculationService::SILVER, $entry['effective_tier']);
-        $this->assertSame(TierCalculationService::PLATINUM, $entry['today_chip']['tier']);
+        $this->assertArrayNotHasKey('today_chip', $entry);
         $this->assertStringStartsWith('Settled Silver:', $entry['tier_tooltip']);
         SymbolPerformanceService::clearCache($this->_userId);
     }

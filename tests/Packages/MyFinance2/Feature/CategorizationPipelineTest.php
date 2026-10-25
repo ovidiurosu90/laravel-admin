@@ -229,7 +229,7 @@ class CategorizationPipelineTest extends TestCase
             'quadrant', 'action', 'annualized_pct', 'relative_drawdown', 'periods',
             'vusa_same_window_pct', 'alpha_vs_vusa_pct', 'alpha_is_short_period', 'xirr_pct',
             'is_benchmark', 'is_borderline',
-            'today_tier', 'settled_tier', 'tier_tooltip', 'today_chip', 'range_bound', 'take_profit',
+            'today_tier', 'settled_tier', 'tier_tooltip', 'range_bound', 'take_profit',
             'tier_signal_chip',
         ] as $key) {
             $this->assertArrayHasKey($key, $entry, "Missing pipeline key: {$key}");

@@ -229,17 +229,12 @@ class PeakProximityAlertsFeatureTest extends TestCase
         $this->assertSame(PeakProximityAlertEvent::CLASS_INFO, $event->classification);
     }
 
-    public function test_settled_tier_gates_and_today_tier_is_stored_and_shown(): void
+    public function test_settled_tier_gates_and_today_tier_is_stored_not_shown(): void
     {
         $this->_seedSetting();
         $items = $this->_items(['6m' => -2.0], 'BRONZE', 'EXIT');
         // Settled Bronze while today's reading alone is Platinum: the settled tier decides, so it emails.
         $items[self::SYMBOL]['categorization']['today_tier'] = 'PLATINUM';
-        $items[self::SYMBOL]['categorization']['today_chip'] = [
-            'tier'  => 'PLATINUM',
-            'label' => 'Platinum',
-            'title' => 'Today alone: Platinum',
-        ];
 
         $stats = (new PeakProximityAlertService())->evaluateItems($this->_userId, $items);
 
@@ -247,7 +242,7 @@ class PeakProximityAlertsFeatureTest extends TestCase
         Mail::assertSent(PeakProximityAlert::class, function (PeakProximityAlert $m)
         {
             $m->build();
-            return str_contains($m->subject, self::SYMBOL . ' (Bronze, today Platinum, EXIT) near peak');
+            return str_contains($m->subject, self::SYMBOL . ' (Bronze, EXIT) near peak');
         });
 
         $event = $this->_openEvent();

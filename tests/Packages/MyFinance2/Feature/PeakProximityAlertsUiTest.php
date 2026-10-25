@@ -331,6 +331,60 @@ class PeakProximityAlertsUiTest extends TestCase
             ->assertSee(self::SYMBOL);
     }
 
+    public function test_rules_are_collapsed_behind_the_how_it_works_toggle(): void
+    {
+        foreach (['myfinance2::peak-proximity-alerts.inbox', 'myfinance2::peak-proximity-alerts.index'] as $route) {
+            $html = $this->withoutMiddleware()
+                ->actingAs($this->_user)
+                ->get(route($route))
+                ->assertOk()
+                ->assertSee('How it works')
+                ->getContent();
+
+            $this->assertStringContainsString('data-bs-target="#peak-alert-rules"', $html, $route);
+            $this->assertStringContainsString('class="card border-info mb-2 collapse" id="peak-alert-rules"', $html,
+                $route . ': closed by default');
+            // Every kind of alert is led by its chip's icon.
+            foreach (['fa-mountain', 'fa-sack-dollar', 'fa-caret-up', 'fa-arrows-up-down'] as $icon) {
+                $this->assertStringContainsString($icon, $html, $route . ': ' . $icon);
+            }
+        }
+    }
+
+    public function test_near_peak_card_shows_the_near_peak_chip(): void
+    {
+        // Stored before the snapshot carried the chip: rebuilt from the event, the action only when it emails.
+        $this->_seedEvent(self::SYMBOL);
+        $this->_seedEvent(self::SYMBOL2, PeakProximityAlertEvent::CLASS_INFO);
+
+        $html = $this->withoutMiddleware()
+            ->actingAs($this->_user)
+            ->get(route('myfinance2::peak-proximity-alerts.inbox'))
+            ->assertOk()
+            ->getContent();
+
+        // The inbox lists the acting user's real alerts too: read each synthetic card alone.
+        $card = function (string $symbol) use ($html): string
+        {
+            $start = strpos($html, 'quote/' . $symbol . '"');
+            $this->assertNotFalse($start, $symbol . ' card');
+            $end = strpos($html, 'finance.yahoo.com/quote/', $start + 1);
+
+            return $end === false ? substr($html, $start) : substr($html, $start, $end - $start);
+        };
+
+        $actionable = $card(self::SYMBOL);
+        $this->assertStringContainsString('fa-mountain', $actionable);
+        $this->assertStringContainsString('Near peak: <span class="fw-semibold">EXIT</span>', $actionable);
+        $this->assertStringNotContainsString('opacity-50', $actionable);
+
+        $info = $card(self::SYMBOL2);
+        $this->assertStringContainsString('fa-mountain', $info);
+        $this->assertStringNotContainsString('EXIT', $info);
+        $this->assertMatchesRegularExpression('/opacity-50"[^>]*title="Near peak: the price is near its 6M peak\./',
+            $info);
+    }
+
     public function test_dismissed_inbox_groups_events_by_day(): void
     {
         $today = $this->_seedEvent(self::SYMBOL);

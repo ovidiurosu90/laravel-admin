@@ -426,7 +426,6 @@ class PeakProximityTierSignalAlertsFeatureTest extends TestCase
 
         $render = fn (string $signal) => view('myfinance2::peakproximityalerts.inbox.partials.card', [
             'event'         => $this->_events($signal)->sole(),
-            'actionClass'   => [],
             'severityClass' => [],
             'windowsLabel'  => fn (?string $csv) => (string) $csv,
         ])->render();
@@ -439,8 +438,11 @@ class PeakProximityTierSignalAlertsFeatureTest extends TestCase
         $this->assertStringContainsString('last signal seen', $card);
         $this->assertStringNotContainsString('>EXIT<', $card);
 
-        // The near-peak card shows the tier signal chip in place of the action badge.
+        // The near-peak card leads with its own chip, on the alert's action (the tier signal's, as the email), then
+        // the tier signal chip as context; never the quadrant's EXIT.
         $nearPeakCard = $render(PeakProximityAlertEvent::SIGNAL_NEAR_PEAK);
+        $this->assertStringContainsString('fa-mountain', $nearPeakCard);
+        $this->assertStringContainsString('Near peak: <span class="fw-semibold">SELL', $nearPeakCard);
         $this->assertStringContainsString('Rare high: <span class="fw-semibold">SELL', $nearPeakCard);
         $this->assertStringContainsString('last near peak', $nearPeakCard);
         $this->assertStringNotContainsString('>EXIT<', $nearPeakCard);

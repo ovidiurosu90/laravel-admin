@@ -156,14 +156,15 @@ class EmailLayoutConsistencyFeatureTest extends TestCase
         ], false, $reading));
 
         $this->assertStringEndsWith(
-            self::SYMBOL . ' (Gold, today Silver) above target 39.00 € => now 39.12 €', $subject
+            self::SYMBOL . ' (Gold) above target 39.00 € => now 39.12 €', $subject
         );
         self::_assertSharedFrame($html, 'Price alert #' . $alert->id . ' for ' . self::SYMBOL);
         $this->assertStringContainsString('max-width: 1024px', $html);
         $this->assertStringContainsString('<span class="badge bg-warning text-dark">Gold</span>', $html);
         $this->assertStringContainsString('Price alert: above target', $html);
         $this->assertStringContainsString('<h2>Summary</h2>', $html);
-        $this->assertStringContainsString('<strong>Gold, today Silver.</strong>', $html);
+        $this->assertStringContainsString('<strong>Gold.</strong>', $html);
+        $this->assertStringNotContainsString('today Silver', $html);
         $this->assertStringContainsString('Source: Manual, fired 3', $html);
         $buttons = ['→ Create Sell Order', '✏️ Manage Alert', '⏸ Pause Alert', '→ Open Watchlist Symbols'];
         foreach ($buttons as $button) {
