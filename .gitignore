@@ -40,6 +40,8 @@ auth.json
 
 ### Assets ###
 /public/build/
+# Published package assets (php artisan vendor:publish, e.g. on composer update)
+/public/vendor/
 /node_modules
 /public/hot
 /public/storage

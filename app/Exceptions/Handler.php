@@ -26,7 +26,10 @@ class Handler extends ExceptionHandler
      * @var array<int, class-string<\Throwable>>
      */
     protected $dontReport = [
-        //
+        // Refusals, rendered as 403 below (like Laravel's own 403s, not errors to log or email)
+        \jeremykenedy\LaravelRoles\App\Exceptions\RoleDeniedException::class,
+        \jeremykenedy\LaravelRoles\App\Exceptions\PermissionDeniedException::class,
+        \jeremykenedy\LaravelRoles\App\Exceptions\LevelDeniedException::class,
     ];
 
     /**

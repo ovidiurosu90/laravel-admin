@@ -198,20 +198,11 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         $: "jQuery",
-        tempusDominus: "TempusDominus",
         "~": path.resolve(__dirname, "node_modules"),
         "~bootstrap": path.resolve(__dirname, "node_modules/bootstrap"),
         "~selectize": path.resolve(
           __dirname,
           "node_modules/@selectize/selectize",
-        ),
-        "~tempus-dominus": path.resolve(
-          __dirname,
-          "node_modules/@eonasdan/tempus-dominus",
-        ),
-        "~jquery-tempus-dominus": path.resolve(
-          __dirname,
-          "resources/assets/js/vendor/jquery-tempus-dominus",
         ),
         "~jquery-mask": path.resolve(
           __dirname,
@@ -220,14 +211,6 @@ export default defineConfig(({ mode }) => {
         "~datatables": path.resolve(
           __dirname,
           "node_modules/datatables.net-bs5",
-        ),
-        "~bootstrap5-toggle": path.resolve(
-          __dirname,
-          "node_modules/bootstrap5-toggle",
-        ),
-        "~jquery-bootstrap5-toggle": path.resolve(
-          __dirname,
-          "resources/assets/js/vendor/jquery-bootstrap5-toggle",
         ),
         "@js": path.resolve(__dirname, "resources/assets/js"),
         "@sass": path.resolve(__dirname, "resources/assets/sass"),
@@ -238,10 +221,6 @@ export default defineConfig(({ mode }) => {
         "~password-strength-meter": path.resolve(
           __dirname,
           "resources/assets/js/vendor/password-strength-meter",
-        ),
-        "~lightweight-charts": path.resolve(
-          __dirname,
-          "node_modules/lightweight-charts",
         ),
         // "~font-awesome": path.resolve(__dirname, "node_modules/font-awesome"),
       },

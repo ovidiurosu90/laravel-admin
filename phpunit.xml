@@ -22,6 +22,15 @@
     <env name="SESSION_DRIVER" value="array"/>
     <env name="TELESCOPE_ENABLED" value="false"/>
   </php>
+  <extensions>
+    <!-- Fails the run when the tests leave rows behind in these databases (the local copy of production);
+         myfinance2_mysql is skipped when the package is not installed. stats_today is rewritten every minute by
+         the finance cron (app:finance-api-cron), so its row count moves on its own -->
+    <bootstrap class="Tests\Support\LeftoverRowsExtension">
+      <parameter name="connections" value="mysql,myfinance2_mysql"/>
+      <parameter name="ignore" value="myfinance2_mysql.stats_today"/>
+    </bootstrap>
+  </extensions>
   <source>
     <include>
       <directory suffix=".php">./app</directory>

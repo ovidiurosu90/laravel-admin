@@ -205,8 +205,9 @@ return [
         ComposerServiceProvider::class,
         MacroServiceProvider::class,
         Lab404\Impersonate\ImpersonateServiceProvider::class,
-        ovidiuro\myfinance2\MyFinance2ServiceProvider::class,
-        ovidiuro\adminmydata\AdminMyDataServiceProvider::class,
+        // ovidiuro/myfinance2 and ovidiuro/laravel-package-admin-mydata are optional and register themselves
+        // through package discovery (in either order: admin-mydata's private config wins regardless); listing them
+        // here would break the app when either is not installed.
     ],
 
     /*

@@ -30,14 +30,26 @@ More images in the [images folder](images).
 
 Forked from [jeremykenedy/laravel-auth](https://github.com/jeremykenedy/laravel-auth) from Nov 17, 2024.
 
-Updated (sync fork) on Dec 26, 2025; note that this project is upgraded to Bootstrap 5.3 while the original project is still on Boostrap 4.
+Updated (sync fork) on Dec 26, 2025; note that this project is upgraded to Bootstrap 5.3 while the original project is still on Bootstrap 4.
 
 Please check the original [README.md](README-laravel-auth.md).
 
 ## Installation instructions
 
 ```bash
-sudo apt-get install php-intl php-dom php-mysql php-mbstring php-gd htop colordiff
+# PHP 8.2 (ondrej PPAs) with Apache
+sudo apt update
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:ondrej/apache2
+sudo add-apt-repository ppa:ondrej/php
+sudo apt update
+sudo apt-get install php8.2 php8.2-cli libapache2-mod-php8.2 php8.2-mysql php8.2-curl php8.2-intl php8.2-mbstring \
+    php8.2-gd php8.2-xml php8.2-bcmath htop colordiff
+sudo update-alternatives --set php /usr/bin/php8.2
+# sudo a2dismod php8.1 # only when upgrading from an older PHP
+sudo a2enmod php8.2
+sudo systemctl restart apache2
+php --version
 
 mysql -uroot -p
     CREATE DATABASE [DB_DATABASE];
@@ -59,99 +71,72 @@ sudo chown -R $USER:www-data storage/app/
 sudo chmod -R 775 storage/app/
 
 cd storage/
-mkdir -p framework/{sessions,views,cache}
+mkdir -p framework/{sessions,views,cache/data,testing}
 chmod -R 775 framework
 chown -R $USER:www-data framework
 cd ..
 php artisan cache:clear
 
 # Set default ACLs on storage/framework so any new file created there (by www-data
-# or your user) automatically inherits read/write access for both — this is a
+# or your user) automatically inherits read/write access for both. This is a
 # one-time setup that prevents "Permission denied" cache errors without needing
 # to re-run chown/chmod after every cache clear or deployment.
 sudo setfacl -R -m u:$USER:rwX,u:www-data:rwX storage/framework/
 sudo setfacl -R -d -m u:$USER:rwX,u:www-data:rwX storage/framework/
 
 sudo chown $USER:www-data bootstrap/cache
+# sudo chmod -R 755 ../laravel-admin # if the web server cannot read the repository
 
-sudo apt-get install php8.1-bcmath
-
-# Check below how to get the bitbucket oauth keys
+# admin-mydata is private: set up the Bitbucket OAuth keys first (see "Setup the private bitbucket repository"),
+# or remove the package (see "Optional packages")
 composer update
 
 # If you have a database dump, use that, otherwise setup the basic things
 php artisan vendor:publish --tag=laravelroles
 php artisan vendor:publish --tag=laravel2step
-php artisan vendor:publish --tag=laravel-email-database-log-migration
-# sudo chmod -R 755 ../laravel-admin
 php artisan key:generate
 php artisan migrate
 composer dump-autoload
-php artisan db:seed
+php artisan db:seed # also seeds the sample blockers (BlockedTypeTableSeeder, BlockedItemsTableSeeder)
+# The blocker migrations and seeders are already in database/; to refresh them from the package (e.g. after
+# upgrading jeremykenedy/laravel-blocker):
+# php artisan vendor:publish --tag=laravelblocker-migrations
+# php artisan vendor:publish --tag=laravelblocker-seeders
 
-yarn install
-yarn run dev
-yarn run prod
-```
-
-## Update to PHP 8.2
-
-```bash
-sudo apt update
-sudo apt-get install software-properties-common
-sudo add-apt-repository ppa:ondrej/apache2
-sudo add-apt-repository ppa:ondrej/php
-sudo apt update
-sudo apt install php8.2
-php --version
-php8.2 --version
-sudo apt-get install php8.2-cli libapache2-mod-php8.2 php8.2-mysql php8.2-curl php8.2-intl php8.2-mbstring php8.2-gd php8.2-simplexml php8.2-bcmath
-sudo update-alternatives --set php /usr/bin/php8.2
-php --version
-
-sudo a2dismod php8.1
-sudo a2enmod php8.2
-systemctl restart apache2
-```
-
-## Populate sample blockers (if you didn't import a database dump already)
-
-```bash
-cd vendor/jeremykenedy/laravel-blocker/src/
-mkdir -p database/
-cd database/
-ln -s ../Database/Seeders/ seeders
-ln -s ../Database/Migrations/ migrations
-
-php artisan vendor:publish --tag=laravelblocker-migrations
-
-chmod 775 database/seeders/*
-ls -la database/seeders/
-
-#NOTE Execute the following the the vendor assets or the Database Seeds were not already run above
-php artisan vendor:publish --tag=laravelblocker-seeds
-php artisan db:seed
+# Front end assets: see "Build the Back End and Front End Assets" below
 ```
 
 ## Build the Back End and Front End Assets
 
 ```bash
+cd ~/Repositories/laravel-admin
+git pull
+
+# PHP dependencies (composer's post-update-cmd also publishes MyFinance2's assets to public/vendor/myfinance2)
 composer update
-composer dump-autoload
-php artisan view:clear
 php artisan optimize:clear
 
-# php artisan test --filter test_users_can_authenticate_using_the_login_screen
-# php artisan test --filter MyFinance2
-php artisan test
+# Database changes: preview them, then apply
+php artisan migrate --pretend
+php artisan migrate
 
 sudo chown $USER:www-data -R storage/app/
 sudo chmod 775 -R storage/app/charts/
 
+# Front end assets
 yarn install
-yarn run dev
 yarn run prod
->storage/logs/laravel.log
+# Local front end work: 'yarn run dev' serves this app's SCSS / JS from the Vite dev server, with hot reload and a
+# page refresh on Blade changes (refresh: true in vite.config.js). It keeps running: stop it with Ctrl+C (that removes
+# public/hot, else the pages keep asking the stopped server for assets), then 'yarn run prod' again. It does not cover
+# MyFinance2's assets: they are prebuilt in its dist/ ("Assets" in its README).
+# yarn run dev
+
+# Tests, on this database: every test rolls back, and a run that leaves rows behind fails.
+# When vendor/ovidiuro/myfinance2/vendor/ is missing (first time, or composer reinstalled the package), install
+# MyFinance2's own test dependencies first: (cd vendor/ovidiuro/myfinance2 && composer update)
+# One test only: php artisan test --filter test_users_can_authenticate_using_the_login_screen
+cd ~/Repositories/laravel-admin && php artisan config:clear && php artisan test && (cd vendor/ovidiuro/myfinance2 && vendor/bin/phpunit)
 
 # Clear cache
 sudo chown $USER:www-data -R storage/framework/cache/data
@@ -159,9 +144,43 @@ php artisan config:clear && php artisan cache:clear && sudo systemctl restart ap
 
 # Populate the returns cache
 sudo su - www-data -s /bin/bash -c "export LOG_CHANNEL=stdout; cd /home/$USER/Repositories/laravel-admin/ && php artisan app:finance-api-cron --refresh-returns --force"
+
+# Start the logs afresh (truncating keeps their owner and permissions) and watch the next cron runs
+>storage/logs/laravel.log >storage/logs/finance-api-cron.log >storage/logs/stats-cron.log
+tail -f storage/logs/*.log
 ```
 
-## Check README.md from ovidiuro/myfinance2 and follow the installation instructions
+## Optional packages
+
+Both packages are optional; the app runs, and its tests pass, without them (their tests skip):
+
+- **ovidiuro/myfinance2** (public): the finance features. Install it by following its README; without it,
+  `composer remove ovidiuro/myfinance2`.
+- **ovidiuro/laravel-package-admin-mydata** (private, Bitbucket, see "Setup the private bitbucket repository"): this
+  deployment's backup table list, schema dumps, private config and test data. Without access to it,
+  `composer remove --dev ovidiuro/laravel-package-admin-mydata`.
+
+### admin-mydata coupling points
+
+admin-mydata writes the table data into `php artisan schema:dump` itself (its own `SchemaDumped` listener), so this
+app's `composer.json` has no entries for it besides the requirement.
+
+The Returns regression tests (`tests/Packages/MyFinance2/ReturnsEndpointRegression*`) compare /returns with this
+deployment's real figures, kept in admin-mydata (`Testing/MyFinance2TestData`). `config/test-data.php` names that
+class: a published copy of admin-mydata's, read directly because PHPUnit's data providers run before the app boots.
+Without admin-mydata the tests skip.
+
+### MyFinance2 coupling points
+
+The app references the package only through these coupling points, all inert without it: the gates in
+`app/Providers/AuthServiceProvider.php`, `config/myfinance2.php` (middleware, navbar registry, this app's layout and
+its section names), the `financeadmin` / `unverifiedfinanceadmin` roles given to registrations with
+`?myfinance2_invite_token=` (`MYFINANCE2_INVITE_TOKEN`, `config/auth.php`), Laravel's `Verified` event fired on
+activation, on which the package seeds the starter currencies, and this app's Vite bundle
+(`resources/assets/js/bootstrap.js`), whose jQuery, Bootstrap, DataTables and selectize the finance pages use; the
+package brings the rest (`public/vendor/myfinance2`, republished on `composer update`). When the package is installed,
+this app's daily log digest uses its email layout (`app/Mail/DailyLogErrors.php`) and `emails:samples` adds its
+samples (`app/Console/Commands/EmailSamples.php`); without it they fall back to this app's own.
 
 ## Cleanup after full install
 
@@ -206,52 +225,11 @@ mkdir -p ~/.composer/; cp auth.json.example ~/.composer/auth.json
 vim ~/.composer/auth.json
 ```
 
-## How I solved some 'yarn run' failures
-
-```bash
-yarn run dev
-######################
-# Error 1: ERROR] "vite-plugin-pages-sitemap" resolved to an ESM file. ESM file cannot be loaded by `require`
-## Added "type": "module" to package.json
-
-
-# Error 2: failed to load config from vite.config.js
-## Removed 'Plugin' from 'import {} from '"vite"' in vite.config.js
-
-
-# Error 3: [Failed to load PostCSS config] Failed to load PostCSS config
-## mv postcss.config.js backup_postcss.config.js
-#######################
-
-yarn run prod
-######################
-# Error 1: npm error Could not resolve dependency:
-           npm error peer eslint@"^8.56.0" from @vue/eslint-config-typescript@13.0.0
-## Change "@vue/eslint-config-typescript": "^13.0.0" TO "@vue/eslint-config-typescript": "^14.1.3" in package.json
-
-# Error 2: npm error Could not resolve dependency:
-           npm error peer eslint@"^7.32.0 || ^8.2.0" from eslint-config-airbnb-base@15.0.0
-## Remove "eslint-config-airbnb-base": "^15.0.0" from package.json
-## Remove "airbnb-base" from .eslintrc.js
-
-# Error 3: npm error Could not resolve dependency:
-           npm error peer stylelint@"^13.0.0 || ^14.0.0 || ^15.0.0" from stylelint-webpack-plugin@4.1.1
-## Change "stylelint-webpack-plugin": "^4.1.0" TO "stylelint-webpack-plugin": "^5.0.1" in package.json
-
-# Error 4: Invalid option '--ext' - perhaps you meant '-c'?
-           You're using eslint.config.js, some command line flags are no longer available.
-## Add ESLINT_USE_FLAT_CONFIG=false before 'eslint' for both 'lint' and 'prod' scripts in package.json
-
-# Error 5: .eslintrc.js is treated as an ES module file as it is a .js file whose nearest parent package.json contains "type": "module" which declares all .js files in that package scope as ES modules.
-## git mv .eslintrc.js .eslintrc.cjs
-######################
-```
-
 ## Scripts
 
 ### sync-prod-db.sh
 
-Dumps production tables to localhost. Optionally reimports full schemas first — either from the local git repo (default) or freshly dumped from production via `artisan schema:dump` (`--fresh-schemas`).
+Dumps production tables to localhost. Optionally reimports full schemas first, either from the local git repo (default) or freshly dumped from production via `artisan schema:dump` (`--fresh-schemas`).
 Requires `sshpass` and `PROD_*` / `PROD_SYNC_*` keys in `.env` (see `.env.example`).
 
 ```bash
@@ -327,7 +305,8 @@ Kinds: every MyFinance2 kind (listed in its README and by `--dry-run`), then `da
 ## Other Utilities
 
 ```bash
-# After migrating to Bootstrap 5, we need to do these changes to keep certain functionality
+# After syncing the fork (upstream jeremykenedy/laravel-auth is still on Bootstrap 4), convert its views to
+# Bootstrap 5's data attributes
 cd resources/views/vendor/
 grep -rl data-target . | xargs sed -i 's/data-target/data-bs-target/g'
 grep -rl data-toggle . | xargs sed -i 's/data-toggle/data-bs-toggle/g'
@@ -337,5 +316,4 @@ grep -rl data-original-title . | xargs sed -i 's/data-original-title/data-bs-ori
 # Check vendor overwrite path (Look for publishFiles and use error_log to see the path)
 vim vendor/jeremykenedy/laravel-logger/src/LaravelLoggerServiceProvider.php
 vim vendor/jeremykenedy/laravel-blocker/src/LaravelBlockerServiceProvider.php
-
 ```

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Traits\ActivationTrait;
 use App\Traits\CaptureIpTrait;
 use Carbon\Carbon;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -172,6 +173,21 @@ class ActivateController extends Controller
     }
 
     /**
+     * The role an account gets on activation: the verified variant of its unverified role (RegisterController), or
+     * null when it has none of them.
+     */
+    public static function activationRole(User $user): ?Role
+    {
+        foreach (array_flip(RegisterController::UNVERIFIED_ROLES) as $unverified => $verified) {
+            if ($user->hasRole($unverified)) {
+                return Role::where('slug', '=', $verified)->first();
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Activate a valid user with a token.
      *
      * @param  string  $token  The token
@@ -182,7 +198,6 @@ class ActivateController extends Controller
         $user = Auth::user();
         $currentRoute = Route::currentRouteName();
         $ipAddress = new CaptureIpTrait();
-        $role;
 
         $rCheck = $this->activeRedirect($user, $currentRoute);
         if ($rCheck) {
@@ -202,24 +217,12 @@ class ActivateController extends Controller
                 ->with('message', trans('auth.invalidToken'));
         }
 
-        if (class_exists('ovidiuro\myfinance2\MyFinance2ServiceProvider')) {
-            $serviceProvider = new \ovidiuro\myfinance2\MyFinance2ServiceProvider(
-                new \Illuminate\Container\Container());
-            if ($serviceProvider->hasUnverifiedRole($user)) {
-                $role = $serviceProvider->getVerifiedRole();
-                $serviceProvider->createInitialSeeds($user);
-            }
-        }
-
+        $role = self::activationRole($user);
         if (empty($role)) {
-            if ($user->hasRole('unverified')) {
-                $role = Role::where('slug', '=', 'user')->first();
-            } else {
-                Log::error('Unexpected role setup', [$user]);
-                return redirect()->route(self::getActivationRoute())
-                    ->with('status', 'danger')
-                    ->with('message', 'Unexpected role setup');
-            }
+            Log::error('Unexpected role setup', [$user]);
+            return redirect()->route(self::getActivationRoute())
+                ->with('status', 'danger')
+                ->with('message', 'Unexpected role setup');
         }
 
         $user->activated = true;
@@ -227,6 +230,10 @@ class ActivateController extends Controller
         $user->attachRole($role);
         $user->signup_confirmation_ip_address = $ipAddress->getClientIp();
         $user->save();
+
+        // Laravel's own event, so packages can set up the new account without this app naming them (MyFinance2 seeds
+        // its starter currencies for users that pass myfinance2.access)
+        event(new Verified($user));
 
         $allActivations = Activation::where('user_id', $user->id)->get();
         foreach ($allActivations as $anActivation) {

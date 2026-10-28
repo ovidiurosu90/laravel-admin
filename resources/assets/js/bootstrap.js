@@ -12,19 +12,12 @@ import "~selectize/dist/css/selectize.bootstrap5.css";
 import "~jquery-mask/dist/jquery.mask.min.js";
 import DataTable from "~datatables/js/dataTables.bootstrap5.min.js";
 import "~datatables/css/dataTables.bootstrap5.min.css";
-import "~jquery-bootstrap5-toggle/bootstrap5-toggle.jquery.js";
-import "~bootstrap5-toggle/css/bootstrap5-toggle.min.css";
-import "~lightweight-charts/dist/lightweight-charts.standalone.production.js";
 
+// The MyFinance2 package brings its own charts, date pickers and toggles (its myfinance2.js, loaded by its pages
+// after this bundle) and uses the jQuery, Bootstrap, DataTables and selectize from here
 window.$ = jQuery;
 window.jQuery = window.$ = jQuery;
 window.DataTable = DataTable;
-
-import { TempusDominus } from "~tempus-dominus/dist/js/tempus-dominus.js";
-import "~jquery-tempus-dominus/jQuery-provider.js";
-import "~tempus-dominus/dist/css/tempus-dominus.css";
-
-window.TempusDominus = TempusDominus;
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests

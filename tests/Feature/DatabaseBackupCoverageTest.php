@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use Dotenv\Dotenv;
 use Illuminate\Support\Facades\Schema;
+use ovidiuro\adminmydata\AdminMyDataServiceProvider;
 use Tests\TestCase;
 
 /**
@@ -13,8 +14,9 @@ use Tests\TestCase;
  * - backed up in git by the laravel-package-admin-mydata export (database.schema.tables, from adminmydata.php);
  * - copied from production by scripts/sync-prod-db.sh (PROD_SYNC_TABLES in .env), for bulky stats and logs.
  *
- * A new migration that creates a table fails here until the table is added to one of them.
- * Read-only: lists the tables of both connections, writes nothing.
+ * A new migration that creates a table fails here until the table is added to one of them. A connection the app
+ * does not define (myfinance2_mysql without that package) is left out. Read-only: lists the tables of both
+ * connections, writes nothing.
  */
 class DatabaseBackupCoverageTest extends TestCase
 {
@@ -28,12 +30,16 @@ class DatabaseBackupCoverageTest extends TestCase
 
     public function test_every_table_is_backed_up_in_git_or_synced_from_prod(): void
     {
+        if (!class_exists(AdminMyDataServiceProvider::class)) {
+            $this->markTestSkipped('The ovidiuro/laravel-package-admin-mydata package (git backup) is not installed.');
+        }
+
         $backedUp = $this->_backedUpTables();
         $synced   = $this->_syncedTables();
         $missing  = [];
         $both     = [];
 
-        foreach (self::SYNC_CONNECTIONS as $dbKey => $connection) {
+        foreach ($this->_connections() as $dbKey => $connection) {
             foreach ($this->_tables($connection) as $table) {
                 $inGit  = in_array($table, $backedUp, true);
                 $inSync = in_array($table, $synced[$dbKey] ?? [], true);
@@ -55,9 +61,12 @@ class DatabaseBackupCoverageTest extends TestCase
     {
         $unknown = [];
         foreach ($this->_syncedTables() as $dbKey => $tables) {
-            $connection = self::SYNC_CONNECTIONS[$dbKey] ?? null;
-            if ($connection === null) {
+            if (!isset(self::SYNC_CONNECTIONS[$dbKey])) {
                 $unknown[] = "{$dbKey} (unknown DB_KEY)";
+                continue;
+            }
+            $connection = $this->_connections()[$dbKey] ?? null;
+            if ($connection === null) {
                 continue;
             }
             foreach (array_diff($tables, $this->_tables($connection)) as $table) {
@@ -67,6 +76,17 @@ class DatabaseBackupCoverageTest extends TestCase
 
         $this->assertSame([], $unknown, 'PROD_SYNC_TABLES entries with no such table (sync-prod-db.sh would fail): '
             . implode(', ', $unknown));
+    }
+
+    /**
+     * SYNC_CONNECTIONS limited to the connections this app defines.
+     *
+     * @return array<string, string> DB_KEY => database connection
+     */
+    private function _connections(): array
+    {
+        return array_filter(self::SYNC_CONNECTIONS, fn (string $connection) => config(
+            "database.connections.{$connection}") !== null);
     }
 
     /**
@@ -85,7 +105,7 @@ class DatabaseBackupCoverageTest extends TestCase
     }
 
     /**
-     * Resolved like DragonCode\LaravelDataDumper\Service\Tables (laravel-package-admin-mydata override):
+     * Resolved like laravel-package-admin-mydata's ovidiuro\adminmydata\Service\Tables:
      * a model class maps to its table, any other string is the table name.
      *
      * @return list<string>

@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Mail\DailyLogErrors;
 use Carbon\Carbon;
+use ovidiuro\myfinance2\MyFinance2ServiceProvider;
 use Tests\TestCase;
 
 /**
@@ -48,6 +49,10 @@ class DailyLogErrorsMailTest extends TestCase
 
     public function test_uses_the_package_layout_when_installed(): void
     {
+        if (!class_exists(MyFinance2ServiceProvider::class)) {
+            $this->markTestSkipped('The ovidiuro/myfinance2 package is not installed.');
+        }
+
         $this->assertSame(DailyLogErrors::PACKAGE_LAYOUT, DailyLogErrors::layout());
         // A rule only the package's stylesheet has.
         $this->assertStringContainsString('.bg-orange', self::_mail()->render());
@@ -55,11 +60,14 @@ class DailyLogErrorsMailTest extends TestCase
 
     public function test_falls_back_to_the_main_app_layout_without_the_package(): void
     {
-        // Hide the package's views (an empty hint path), as if it were not installed; restored below.
+        // Hide the package's views (an empty hint path), as if it were not installed; restored below. Nothing to
+        // hide when it really is not installed.
         $finder = app('view')->getFinder();
-        $hints  = $finder->getHints()['myfinance2'];
-        $finder->replaceNamespace('myfinance2', [sys_get_temp_dir() . '/no-myfinance2-views']);
-        $finder->flush();
+        $hints  = $finder->getHints()['myfinance2'] ?? null;
+        if ($hints !== null) {
+            $finder->replaceNamespace('myfinance2', [sys_get_temp_dir() . '/no-myfinance2-views']);
+            $finder->flush();
+        }
 
         try {
             $this->assertSame(DailyLogErrors::FALLBACK_LAYOUT, DailyLogErrors::layout());
@@ -67,8 +75,10 @@ class DailyLogErrorsMailTest extends TestCase
             $mail = self::_mail();
             $html = $mail->render();
         } finally {
-            $finder->replaceNamespace('myfinance2', $hints);
-            $finder->flush();
+            if ($hints !== null) {
+                $finder->replaceNamespace('myfinance2', $hints);
+                $finder->flush();
+            }
         }
 
         $this->assertStringContainsString('Daily Log Errors 2026-10-21 => 1 issue, 2 occurrences', $mail->subject);
@@ -80,6 +90,15 @@ class DailyLogErrorsMailTest extends TestCase
             '<strong>' . config('app.name') . '</strong> &middot; Daily log errors', $html
         );
         $this->assertStringContainsString('refreshQuotes() unable to fetch: TST', $html);
+    }
+
+    public function test_its_title_leads_with_the_warning_icon_like_the_package_emails(): void
+    {
+        // The colour emoji form (U+FE0F), as the MyFinance2 emails' titles (tested in the package)
+        $source = (string) file_get_contents(resource_path('views/emails/daily-log-errors.blade.php'));
+        $start  = strpos($source, "@section('title'");
+        $this->assertNotFalse($start);
+        $this->assertStringContainsString("\u{26A0}\u{FE0F}", substr($source, $start, 200));
     }
 
     public function test_exception_email_subject_has_the_same_prefix(): void

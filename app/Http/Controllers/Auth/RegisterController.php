@@ -32,6 +32,11 @@ class RegisterController extends Controller
     use RegistersUsers;
 
     /**
+     * Each role's variant for an account awaiting activation (ActivateController::activationRole() reverses it).
+     */
+    public const UNVERIFIED_ROLES = ['user' => 'unverified', 'financeadmin' => 'unverifiedfinanceadmin'];
+
+    /**
      * Where to redirect users after registration.
      *
      * @var string
@@ -41,18 +46,21 @@ class RegisterController extends Controller
     /**
      * Create a new controller instance.
      *
-     * @param Request $request
-     *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct()
     {
-        if (config('auth.require_invite_token')
-            && (empty($request->invite_token)
-                || $request->invite_token != config('auth.invite_token'))
-        ) {
-            abort(403);
-        }
+        // As middleware, not in the constructor: route:list builds every controller with no request to check.
+        $this->middleware(function (Request $request, $next) {
+            if (config('auth.require_invite_token')
+                && (empty($request->invite_token)
+                    || $request->invite_token != config('auth.invite_token'))
+            ) {
+                abort(403);
+            }
+
+            return $next($request);
+        });
         $this->middleware('guest', [
             'except' => 'logout',
         ]);
@@ -102,6 +110,19 @@ class RegisterController extends Controller
     }
 
     /**
+     * The role of a new account: financeadmin for a valid finance invite token, user otherwise; the unverified variant
+     * of either while the account awaits activation.
+     */
+    public static function registrationRole(mixed $financeInviteToken, bool $activated): ?Role
+    {
+        $validToken = is_string($financeInviteToken) && $financeInviteToken !== ''
+            && hash_equals((string) config('auth.finance_invite_token'), $financeInviteToken);
+        $slug = $validToken ? 'financeadmin' : 'user';
+
+        return Role::where('slug', '=', $activated ? $slug : self::UNVERIFIED_ROLES[$slug])->first();
+    }
+
+    /**
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
@@ -110,34 +131,8 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         $ipAddress = new CaptureIpTrait();
-        $role;
-
-        if (class_exists('ovidiuro\myfinance2\MyFinance2ServiceProvider')) {
-            $serviceProvider = new \ovidiuro\myfinance2\MyFinance2ServiceProvider(
-                new \Illuminate\Container\Container());
-            $hasValidInviteToken = $serviceProvider->hasValidInviteToken(
-                    $data['myfinance2_invite_token']);
-
-            if ($hasValidInviteToken) {
-                if (config('settings.activation')) {
-                    $role = $serviceProvider->getUnverifiedRole();
-                } else {
-                    $role = $serviceProvider->getVerifiedRole();
-                }
-            }
-        }
-
-        if (config('settings.activation')) {
-            if (empty($role)) {
-                $role = Role::where('slug', '=', 'unverified')->first();
-            }
-            $activated = false;
-        } else {
-            if (empty($role)) {
-                $role = Role::where('slug', '=', 'user')->first();
-            }
-            $activated = true;
-        }
+        $activated = !config('settings.activation');
+        $role      = self::registrationRole($data['myfinance2_invite_token'] ?? null, $activated);
 
         $user = User::create([
             'name'              => strip_tags($data['name']),

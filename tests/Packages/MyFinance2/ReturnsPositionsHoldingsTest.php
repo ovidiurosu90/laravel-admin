@@ -11,7 +11,6 @@ use ovidiuro\myfinance2\App\Models\Account;
 use ovidiuro\myfinance2\App\Models\Scopes\AssignedToUserScope;
 use ovidiuro\myfinance2\App\Services\Positions;
 use ovidiuro\myfinance2\App\Services\Returns\Returns;
-use Tests\TestCase;
 
 /**
  * On-demand consistency check between /returns (current year) and /positions, on the live data.
@@ -33,7 +32,7 @@ use Tests\TestCase;
  * (Positions with persistStats off; Returns never persists). It fetches today's quotes from
  * Yahoo Finance (the test cache starts empty), so expect it to take a while.
  */
-class ReturnsPositionsHoldingsTest extends TestCase
+class ReturnsPositionsHoldingsTest extends MyFinance2TestCase
 {
     use DatabaseTransactions;
 
@@ -217,7 +216,7 @@ class ReturnsPositionsHoldingsTest extends TestCase
      */
     private function _symbolsOverriddenToday(int $accountId): array
     {
-        $override = config('trades.position_date_overrides', [])[date('Y-m-d')][$accountId] ?? [];
+        $override = config('myfinance2.trades.position_date_overrides', [])[date('Y-m-d')][$accountId] ?? [];
 
         return array_merge($override['exclude_symbols'] ?? [], array_keys($override['manual_positions'] ?? []));
     }

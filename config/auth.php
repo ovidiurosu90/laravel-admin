@@ -122,5 +122,9 @@ return [
 
     'require_invite_token' => env('REQUIRE_INVITE_TOKEN', true),
     'invite_token' => env('INVITE_TOKEN'),
+
+    // Registration links carrying this token (?myfinance2_invite_token=...) get the financeadmin role (unverified
+    // first when activation is on), so the new account can open MyFinance2 (AuthServiceProvider's gates)
+    'finance_invite_token' => env('MYFINANCE2_INVITE_TOKEN'),
 ];
 

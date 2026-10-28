@@ -86,7 +86,9 @@
                     </div>
                 </li>
             @endrole
-            @include('myfinance2::partials.nav')
+            @foreach (config('navigation.menus', []) as $menu)
+                @includeIf($menu)
+            @endforeach
             </ul>
 
             {{-- Right Side Of Navbar --}}

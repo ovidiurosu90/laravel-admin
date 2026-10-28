@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Packages\MyFinance2;
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -42,7 +41,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
  * Subclasses MUST redeclare all static properties to get per-class isolation
  * (PHP static properties are shared per-declaring-class, not per-subclass).
  */
-abstract class ReturnsEndpointRegressionTestBase extends TestCase
+abstract class ReturnsEndpointRegressionTestBase extends MyFinance2TestCase
 {
     use DatabaseTransactions;
 

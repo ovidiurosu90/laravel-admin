@@ -47,6 +47,20 @@ class ProfilesController extends Controller
     }
 
     /**
+     * Only the owner manages a profile and account (an admin acts on someone else's by impersonating them, which makes
+     * them the signed-in user). The username / id in the URL is never trusted on its own.
+     *
+     * @param  User  $user
+     * @return void
+     */
+    private function _abortUnlessOwn(User $user)
+    {
+        if ($user->id !== Auth::id()) {
+            abort(403, trans('profile.notYourProfile'));
+        }
+    }
+
+    /**
      * Display the specified resource.
      *
      * @param  string  $username
@@ -85,6 +99,7 @@ class ProfilesController extends Controller
                 ->with('error', trans('profile.notYourProfile'))
                 ->with('error_title', trans('profile.notYourProfileTitle'));
         }
+        $this->_abortUnlessOwn($user);
 
         $themes = Theme::where('status', 1)
                         ->orderBy('name', 'asc')
@@ -114,6 +129,7 @@ class ProfilesController extends Controller
     public function update(UpdateUserProfile $request, $username)
     {
         $user = $this->getUserByUsername($username);
+        $this->_abortUnlessOwn($user);
 
         $input = $request->only('theme_id', 'location', 'bio', 'twitter_username', 'github_username', 'avatar_status');
 
@@ -142,8 +158,8 @@ class ProfilesController extends Controller
      */
     public function updateUserAccount(Request $request, $id)
     {
-        $currentUser = Auth::user();
         $user = User::findOrFail($id);
+        $this->_abortUnlessOwn($user);
         $emailCheck = ($request->input('email') !== '') && ($request->input('email') !== $user->email);
         $ipAddress = new CaptureIpTrait();
         $rules = [];
@@ -202,8 +218,8 @@ class ProfilesController extends Controller
      */
     public function updateUserPassword(UpdateUserPasswordRequest $request, $id)
     {
-        $currentUser = Auth::user();
         $user = User::findOrFail($id);
+        $this->_abortUnlessOwn($user);
         $ipAddress = new CaptureIpTrait();
 
         if ($request->input('password') !== null) {
@@ -269,13 +285,9 @@ class ProfilesController extends Controller
      */
     public function deleteUserAccount(DeleteUserAccount $request, $id)
     {
-        $currentUser = Auth::user();
         $user = User::findOrFail($id);
+        $this->_abortUnlessOwn($user);
         $ipAddress = new CaptureIpTrait();
-
-        if ($user->id !== $currentUser->id) {
-            return redirect('profile/'.$user->name.'/edit')->with('error', trans('profile.errorDeleteNotYour'));
-        }
 
         // Create and encrypt user account restore token
         $sepKey = $this->getSeperationKey();

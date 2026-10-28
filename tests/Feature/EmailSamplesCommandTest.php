@@ -14,12 +14,13 @@ use ovidiuro\myfinance2\App\Models\PriceAlert;
 use ovidiuro\myfinance2\App\Models\Scopes\AssignedToUserScope;
 use ovidiuro\myfinance2\Mail\PriceAlertCreated;
 use ovidiuro\myfinance2\Mail\ReturnsMissingQuotes;
+use ovidiuro\myfinance2\MyFinance2ServiceProvider;
 use Tests\TestCase;
 
 /**
  * emails:samples sends the main app's own sample (daily log errors) plus each MyFinance2 sample the package builds,
- * read-only. Mail is faked, so nothing reaches an inbox. What each MyFinance2 sample contains is covered by
- * tests/Packages/MyFinance2/Feature/EmailSamplesFeatureTest.
+ * read-only. Mail is faked, so nothing reaches an inbox. What each MyFinance2 sample contains is tested in the
+ * package (its tests/Feature/EmailSamplesFeatureTest). Without the package, only the main app's sample is checked.
  */
 class EmailSamplesCommandTest extends TestCase
 {
@@ -27,6 +28,10 @@ class EmailSamplesCommandTest extends TestCase
 
     public function connectionsToTransact(): array
     {
+        if (!class_exists(MyFinance2ServiceProvider::class)) {
+            return [null];
+        }
+
         return [null, config('myfinance2.db_connection', 'myfinance2_mysql')];
     }
 
@@ -38,6 +43,9 @@ class EmailSamplesCommandTest extends TestCase
 
     public function test_sends_its_own_and_the_myfinance2_samples_to_the_given_address(): void
     {
+        if (!class_exists(MyFinance2ServiceProvider::class)) {
+            $this->markTestSkipped('The ovidiuro/myfinance2 package is not installed.');
+        }
         $user = User::first();
         if ($user === null) {
             $this->markTestSkipped('Requires at least 1 user in database');
