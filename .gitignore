@@ -33,9 +33,7 @@ Homestead.json
 
 ### Master Configs ###
 .env
-composer.lock
 package-lock.json
-yarn.lock
 auth.json
 
 ### Assets ###

@@ -133,10 +133,10 @@ yarn run prod
 # yarn run dev
 
 # Tests, on this database: every test rolls back, and a run that leaves rows behind fails.
-# When vendor/ovidiuro/myfinance2/vendor/ is missing (first time, or composer reinstalled the package), install
-# MyFinance2's own test dependencies first: (cd vendor/ovidiuro/myfinance2 && composer update)
+# MyFinance2's tests run with its own dev dependencies (vendor/ovidiuro/myfinance2/vendor/); 'composer update' there
+# installs them and keeps them in step with each new release of the package (a no-op when nothing changed).
 # One test only: php artisan test --filter test_users_can_authenticate_using_the_login_screen
-cd ~/Repositories/laravel-admin && php artisan config:clear && php artisan test && (cd vendor/ovidiuro/myfinance2 && vendor/bin/phpunit)
+cd ~/Repositories/laravel-admin && php artisan config:clear && php artisan test && (cd vendor/ovidiuro/myfinance2 && composer update && vendor/bin/phpunit)
 
 # Clear cache
 sudo chown $USER:www-data -R storage/framework/cache/data
