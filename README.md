@@ -112,6 +112,9 @@ php artisan db:seed # also seeds the sample blockers (BlockedTypeTableSeeder, Bl
 cd ~/Repositories/laravel-admin
 git pull
 
+# Same Composer version everywhere, else 'composer update' rewrites plugin-api-version in composer.lock
+sudo composer self-update 2.9.2
+
 # PHP dependencies (composer's post-update-cmd also publishes MyFinance2's assets to public/vendor/myfinance2)
 composer update
 php artisan optimize:clear
